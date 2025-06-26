@@ -1,8 +1,8 @@
-import { Controller, Get, Post, Put, Delete, Param, Body, UseGuards, Req, UnauthorizedException } from '@nestjs/common';
-import { AuthGuard } from '../auth/auth.guard';
-import { Category } from '../data-entities/category';
+import { Controller, Get, Post, Put, Delete, Param, Body, UseGuards, Req, UnauthorizedException, NotFoundException } from '@nestjs/common';
+import { AuthGuard } from '../common/auth/auth.guard';
+import { Category } from '../common/data-entities/category';
 import { CategoryService } from './category.service';
-import { HouseholdId } from '../auth/household-id.decorator';
+import { HouseholdId } from '../common/auth/household-id.decorator';
 
 @UseGuards(AuthGuard)
 @Controller('category')
@@ -10,35 +10,46 @@ export class CategoryController {
     constructor(private readonly categoryService: CategoryService) {}
 
     @Post()
-    create(@Body() category: Category, @HouseholdId() householdId: string): Category {
+    async create(@Body() category: Category, @HouseholdId() householdId: string): Promise<Category> {
         if(category.householdId && category.householdId !== householdId) {
             throw new UnauthorizedException('Household ID mismatch');
         }
-        
-        return this.categoryService.create(category);
+        return await this.categoryService.create(category);
     }
 
     @Get()
-    findAll(@HouseholdId() householdId: string): Category[] {
-        return this.categoryService.findAll(householdId);
+    async findAll(@HouseholdId() householdId: string): Promise<Category[]> {
+        return await this.categoryService.findAll(householdId);
     }
 
     @Get(':id')
-    findOne(@Param('id') id: string, @HouseholdId() householdId: string): Category {
-        return this.categoryService.findOne(id, householdId);
+    async findOne(@Param('id') id: string, @HouseholdId() householdId: string): Promise<Category> {
+        const category = await this.categoryService.findOne(id, householdId);
+        if (!category) {
+            throw new NotFoundException('Category not found');
+        }
+        return category;
     }
 
     @Put(':id')
-    update(
+    async update(
         @Param('id') id: string,
         @Body() update: Partial<Category>,
         @HouseholdId() householdId: string
-    ): Category {
-        return this.categoryService.update(id, update, householdId);
+    ): Promise<Category> {
+        const updated = await this.categoryService.update(id, update, householdId);
+        if (!updated) {
+            throw new NotFoundException('Category not found');
+        }
+        return updated;
     }
 
     @Delete(':id')
-    remove(@Param('id') id: string, @HouseholdId() householdId: string): Category {
-        return this.categoryService.remove(id, householdId);
+    async remove(@Param('id') id: string, @HouseholdId() householdId: string): Promise<Category> {
+        const deleted = await this.categoryService.remove(id, householdId);
+        if (!deleted) {
+            throw new NotFoundException('Category not found');
+        }
+        return deleted;
     }
 }

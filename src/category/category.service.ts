@@ -1,6 +1,6 @@
-import { Injectable, NotFoundException, Inject } from '@nestjs/common';
-import { Category } from '../data-entities/category';
-import { CategoryRepository } from '../interfaces/category-repository.interface';
+import { Injectable, Inject } from '@nestjs/common';
+import { Category } from '../common/data-entities/category';
+import { CategoryRepository } from './category-repository.interface';
 
 @Injectable()
 export class CategoryService {
@@ -9,35 +9,23 @@ export class CategoryService {
         private readonly categoryRepository: CategoryRepository
     ) {}
 
-    create(category: Category): Category {
-        return this.categoryRepository.create(category);
+    async create(category: Category): Promise<Category> {
+        return await this.categoryRepository.create(category);
     }
 
-    findAll(householdId: string): Category[] {
-        return this.categoryRepository.findAll(householdId);
+    async findAll(householdId: string): Promise<Category[]> {
+        return await this.categoryRepository.findAll(householdId);
     }
 
-    findOne(id: string, householdId: string): Category {
-        const category = this.categoryRepository.findOne(id, householdId);
-        if (!category) {
-            throw new NotFoundException('Category not found');
-        }
-        return category;
+    async findOne(id: string, householdId: string): Promise<Category | null> {
+        return await this.categoryRepository.findOne(id, householdId);
     }
 
-    update(id: string, update: Partial<Category>, householdId: string): Category {
-        const updated = this.categoryRepository.update(id, update, householdId);
-        if (!updated) {
-            throw new NotFoundException('Category not found');
-        }
-        return updated;
+    async update(id: string, update: Partial<Category>, householdId: string): Promise<Category | null> {
+        return await this.categoryRepository.update(id, update, householdId);
     }
 
-    remove(id: string, householdId: string): Category {
-        const deleted = this.categoryRepository.remove(id, householdId);
-        if (!deleted) {
-            throw new NotFoundException('Category not found');
-        }
-        return deleted;
+    async remove(id: string, householdId: string): Promise<Category | null> {
+        return await this.categoryRepository.remove(id, householdId);
     }
 }
