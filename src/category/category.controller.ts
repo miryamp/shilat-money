@@ -1,8 +1,9 @@
-import { Controller, Get, Post, Put, Delete, Param, Body, UseGuards, Req, UnauthorizedException, NotFoundException } from '@nestjs/common';
+import { Controller, Get, Post, Put, Delete, Param, Body, UseGuards, Req, UnauthorizedException, NotFoundException, Query } from '@nestjs/common';
 import { AuthGuard } from '../common/auth/auth.guard';
 import { Category } from '../common/data-entities/category';
 import { CategoryService } from './category.service';
 import { HouseholdId } from '../common/auth/household-id.decorator';
+import { TransactionType } from '../common/data-entities/transaction-type.enum';
 
 @UseGuards(AuthGuard)
 @Controller('category')
@@ -18,8 +19,12 @@ export class CategoryController {
     }
 
     @Get()
-    async findAll(@HouseholdId() householdId: string): Promise<Category[]> {
-        return await this.categoryService.findAll(householdId);
+    async findAll(
+        @HouseholdId() householdId: string,
+        @Query('fatherId') fatherId?: string,
+        @Query('type') type?: TransactionType,
+    ): Promise<Category[]> {
+        return await this.categoryService.findAll(householdId, { fatherId, type });
     }
 
     @Get(':id')

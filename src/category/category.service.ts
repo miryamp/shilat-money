@@ -1,13 +1,14 @@
 import { Injectable, Inject } from '@nestjs/common';
 import { Category } from '../common/data-entities/category';
 import { CategoryRepository } from './category-repository.interface';
+import { TransactionType } from '../common/data-entities/transaction-type.enum';
 
 @Injectable()
 export class CategoryService {
     constructor(
-        @Inject('CategoryRepository') 
+        @Inject('CategoryRepository')
         private readonly categoryRepository: CategoryRepository
-    ) {}
+    ) { }
 
     async create(category: Category): Promise<Category> {
         if (category.fatherId && category.fatherId === category.id) {
@@ -16,8 +17,11 @@ export class CategoryService {
         return await this.categoryRepository.create(category);
     }
 
-    async findAll(householdId: string): Promise<Category[]> {
-        return await this.categoryRepository.findAll(householdId);
+    async findAll(
+        householdId: string,
+        options: { fatherId?: string; type?: TransactionType; } = {}
+    ): Promise<Category[]> {
+        return await this.categoryRepository.findAll(householdId, options);
     }
 
     async findOne(id: string, householdId: string): Promise<Category | null> {

@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Category } from '../common/data-entities/category';
 import { CategoryRepository } from './category-repository.interface';
+import { TransactionType } from '../common/data-entities/transaction-type.enum';
 
 @Injectable()
 export class MysqlCategoryRepository implements CategoryRepository {
@@ -15,8 +16,20 @@ export class MysqlCategoryRepository implements CategoryRepository {
         return await this.categoryRepo.save(category);
     }
 
-    async findAll(householdId: string): Promise<Category[]> {
-        return await this.categoryRepo.find({ where: { householdId, isDeleted: false } });
+    async findAll(
+        householdId: string,
+        options?: { fatherId?: string; type?: TransactionType; }
+    ): Promise<Category[]> {
+        const where = { 
+                householdId, 
+                isDeleted: false, 
+                ...(options?.fatherId !== undefined && { fatherId: options.fatherId }),
+                ...(options?.type !== undefined && { type: options.type })
+            };
+
+        return await this.categoryRepo.find({ 
+            where 
+        });
     }
 
     async findOne(id: string, householdId: string): Promise<Category | null> {
