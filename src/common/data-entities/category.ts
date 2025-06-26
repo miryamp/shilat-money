@@ -31,4 +31,11 @@ export class Category {
 
     @Column({ default: false })
     isDeleted: boolean;
+
+    @Column({ nullable: true })
+    fatherId?: string;
+
+    @ManyToOne(() => Category, { nullable: true, onDelete: 'SET NULL' })
+    @JoinColumn({ name: 'fatherId' })
+    father?: Category;
 }

@@ -10,6 +10,9 @@ export class CategoryService {
     ) {}
 
     async create(category: Category): Promise<Category> {
+        if (category.fatherId && category.fatherId === category.id) {
+            throw new Error('Category cannot be its own father');
+        }
         return await this.categoryRepository.create(category);
     }
 
@@ -22,6 +25,9 @@ export class CategoryService {
     }
 
     async update(id: string, update: Partial<Category>, householdId: string): Promise<Category | null> {
+        if (update.fatherId && update.fatherId === id) {
+            throw new Error('Category cannot be its own father');
+        }
         return await this.categoryRepository.update(id, update, householdId);
     }
 
