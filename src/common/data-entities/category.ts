@@ -28,4 +28,7 @@ export class Category {
 
     @Column()
     icon: string;
+
+    @Column({ default: false })
+    isDeleted: boolean;
 }

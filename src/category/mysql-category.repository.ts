@@ -16,11 +16,11 @@ export class MysqlCategoryRepository implements CategoryRepository {
     }
 
     async findAll(householdId: string): Promise<Category[]> {
-        return await this.categoryRepo.find({ where: { householdId } });
+        return await this.categoryRepo.find({ where: { householdId, isDeleted: false } });
     }
 
     async findOne(id: string, householdId: string): Promise<Category | null> {
-        return await this.categoryRepo.findOne({ where: { id, householdId } });
+        return await this.categoryRepo.findOne({ where: { id, householdId, isDeleted: false } });
     }
 
     async update(id: string, update: Partial<Category>, householdId: string): Promise<Category | null> {
@@ -31,9 +31,10 @@ export class MysqlCategoryRepository implements CategoryRepository {
     }
 
     async remove(id: string, householdId: string): Promise<Category | null> {
-        const category = await this.categoryRepo.findOne({ where: { id, householdId } });
+        const category = await this.categoryRepo.findOne({ where: { id, householdId, isDeleted: false } });
         if (!category) return null;
-        await this.categoryRepo.remove(category);
+        category.isDeleted = true;
+        await this.categoryRepo.save(category);
         return category;
     }
 }
