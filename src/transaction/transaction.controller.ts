@@ -3,18 +3,19 @@ import { AuthGuard } from '../common/auth/auth.guard';
 import { Transaction } from '../common/data-entities/transaction';
 import { TransactionService } from './transaction.service';
 import { HouseholdId } from '../common/auth/household-id.decorator';
+import { UserId } from 'src/common/auth/user-id.decorator';
 
 @UseGuards(AuthGuard)
 @Controller('transaction')
 export class TransactionController {
-    constructor(private readonly transactionService: TransactionService) {}
+    constructor(private readonly transactionService: TransactionService) { }
 
     @Post()
-    async create(@Body() transaction: Transaction, @HouseholdId() householdId: string): Promise<Transaction> {
+    async create(@Body() transaction: Transaction, @HouseholdId() householdId: string, @UserId() userId: string): Promise<Transaction> {
         if (transaction.householdId && transaction.householdId !== householdId) {
             throw new UnauthorizedException('Household ID mismatch');
         }
-        return await this.transactionService.create(transaction);
+        return await this.transactionService.create({ ...transaction, userId });
     }
 
     @Get()
@@ -35,9 +36,10 @@ export class TransactionController {
     async update(
         @Param('id') id: string,
         @Body() update: Partial<Transaction>,
-        @HouseholdId() householdId: string
+        @HouseholdId() householdId: string,
+        @UserId() userId: string
     ): Promise<Transaction> {
-        const updated = await this.transactionService.update(id, update, householdId);
+        const updated = await this.transactionService.update(id, {...update, userId}, householdId);
         if (!updated) {
             throw new NotFoundException('Transaction not found');
         }
