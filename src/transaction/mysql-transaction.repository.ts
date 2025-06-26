@@ -12,7 +12,7 @@ export class MysqlTransactionRepository implements TransactionRepository {
     ) { }
 
     async create(transaction: Transaction): Promise<Transaction> {
-        return await this.transactionRepo.save(transaction);
+        return await this.transactionRepo.save({ transaction, lastUpdated: new Date() });
     }
 
     async findAll(householdId: string): Promise<Transaction[]> {
@@ -26,7 +26,8 @@ export class MysqlTransactionRepository implements TransactionRepository {
     async update(id: string, update: Partial<Transaction>, householdId: string): Promise<Transaction | null> {
         const transaction = await this.transactionRepo.findOne({ where: { id, householdId } });
         if (!transaction) return null;
-        Object.assign(transaction, update);
+        Object.assign(transaction, { ...update, lastUpdated: new Date() });
+
         return await this.transactionRepo.save(transaction);
     }
 

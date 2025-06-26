@@ -32,4 +32,7 @@ export class Transaction {
 
     @Column({ nullable: true })
     comment?: string;
+
+    @Column({ type: 'timestamp', nullable: false })
+    lastUpdated: Date;
 }
