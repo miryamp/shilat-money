@@ -1,9 +1,10 @@
-import { Controller, Get, Post, Put, Delete, Param, Body, UseGuards, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import { Controller, Get, Post, Put, Delete, Param, Body, UseGuards, NotFoundException, UnauthorizedException, Query } from '@nestjs/common';
 import { AuthGuard } from '../common/auth/auth.guard';
 import { Transaction } from '../common/data-entities/transaction';
 import { TransactionService } from './transaction.service';
 import { HouseholdId } from '../common/auth/household-id.decorator';
 import { UserId } from 'src/common/auth/user-id.decorator';
+import { TransactionType } from '../common/data-entities/transaction-type.enum';
 
 @UseGuards(AuthGuard)
 @Controller('transaction')
@@ -19,8 +20,30 @@ export class TransactionController {
     }
 
     @Get()
-    async findAll(@HouseholdId() householdId: string): Promise<Transaction[]> {
-        return await this.transactionService.findAll(householdId);
+    async findAll(
+        @HouseholdId() householdId: string,
+        @Query('userId') userId?: string,
+        @Query('categoryId') categoryId?: string,
+        @Query('amount') amount?: {
+            gt?: number;
+            gte?: number;
+            lt?: number;
+            lte?: number;
+            eq?: number;
+        },
+        @Query('from') from?: string,
+        @Query('to') to?: string,
+        @Query('type') type?: TransactionType,
+    ): Promise<Transaction[]> {
+
+        return await this.transactionService.findAll(householdId, {
+            userId,
+            categoryId,
+            type,
+            amount: (amount?.eq || amount?.gte || amount?.gt || amount?.lte || amount?.lt) ? amount: undefined,
+            from: from ? new Date(from) : undefined,
+            to: to ? new Date(to) : undefined,
+        });
     }
 
     @Get(':id')

@@ -1,6 +1,7 @@
 import { Injectable, Inject } from '@nestjs/common';
 import { Transaction } from '../common/data-entities/transaction';
 import { TransactionRepository } from './transaction-repository.interface';
+import { TransactionType } from '../common/data-entities/transaction-type.enum';
 
 @Injectable()
 export class TransactionService {
@@ -13,8 +14,18 @@ export class TransactionService {
         return await this.transactionRepository.create(transaction);
     }
 
-    async findAll(householdId: string): Promise<Transaction[]> {
-        return await this.transactionRepository.findAll(householdId);
+    async findAll(
+        householdId: string,
+        options?: {
+            userId?: string;
+            categoryId?: string;
+            type?: TransactionType;
+            amount?: { gt?: number; gte?: number; lt?: number; lte?: number; eq?: number };
+            from?: Date;
+            to?: Date;
+        }
+    ): Promise<Transaction[]> {
+        return await this.transactionRepository.findAll(householdId, options);
     }
 
     async findOne(id: string, householdId: string): Promise<Transaction | null> {
