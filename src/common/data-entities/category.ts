@@ -1,5 +1,6 @@
 import { Entity, PrimaryColumn, Column, ManyToOne, JoinColumn } from 'typeorm';
-import { TransactionType } from './transaction-type';
+import { TransactionType } from './transaction-type.enum';
+import { Household } from './household';
 
 @Entity()
 export class Category {
