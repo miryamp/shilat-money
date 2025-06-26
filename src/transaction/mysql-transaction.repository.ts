@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { Category } from '../common/data-entities/category';
 import { Repository, Between } from 'typeorm';
 import { Transaction } from '../common/data-entities/transaction';
 import { TransactionRepository } from './transaction-repository.interface';
@@ -8,10 +9,16 @@ import { TransactionRepository } from './transaction-repository.interface';
 export class MysqlTransactionRepository implements TransactionRepository {
     constructor(
         @InjectRepository(Transaction)
-        private readonly transactionRepo: Repository<Transaction>
+        private readonly transactionRepo: Repository<Transaction>,
+        @InjectRepository(Category)
+        private readonly categoryRepo: Repository<Category>
     ) { }
 
     async create(transaction: Transaction): Promise<Transaction> {
+        if (transaction.categoryId) {
+            const category = await this.categoryRepo.findOne({ where: { id: transaction.categoryId, householdId: transaction.householdId, isDeleted: false } });
+            if (!category) throw new Error('Category does not exist or is deleted');
+        }
         return await this.transactionRepo.save({ transaction, lastUpdated: new Date() });
     }
 
@@ -26,6 +33,10 @@ export class MysqlTransactionRepository implements TransactionRepository {
     async update(id: string, update: Partial<Transaction>, householdId: string): Promise<Transaction | null> {
         const transaction = await this.transactionRepo.findOne({ where: { id, householdId } });
         if (!transaction) return null;
+        if (update.categoryId) {
+            const category = await this.categoryRepo.findOne({ where: { id: update.categoryId, householdId, isDeleted: false } });
+            if (!category) throw new Error('Category does not exist or is deleted');
+        }
         Object.assign(transaction, { ...update, lastUpdated: new Date() });
 
         return await this.transactionRepo.save(transaction);
