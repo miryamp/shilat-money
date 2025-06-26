@@ -4,7 +4,7 @@ import { Request } from 'express';
 @Injectable()
 export class AuthGuard implements CanActivate {
     canActivate(context: ExecutionContext): boolean {
-        const request: Request & { householdId? : string } = context.switchToHttp().getRequest<Request>();
+        const request: Request & { householdId? : string, userId?: string} = context.switchToHttp().getRequest<Request>();
         const cookie = request.cookies?.auth; // adjust cookie name as needed
 
         // TODO: Implement your real validation logic here
@@ -14,6 +14,7 @@ export class AuthGuard implements CanActivate {
 
         // Simulate extracting householdId from cookie
         request.householdId = 'mock-household-id'; // Replace with real extraction logic
+        request.userId = 'mock-user-id'; // Replace with real user ID extraction logic
 
         return true;
     }
