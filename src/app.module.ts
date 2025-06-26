@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { CategoryModule } from './category/category.module';
+import { TransactionModule } from './transaction/transaction.module';
 
 @Module({
   imports: [
@@ -14,7 +15,8 @@ import { CategoryModule } from './category/category.module';
       autoLoadEntities: true,
       synchronize: false,
     }),
-    CategoryModule
+    CategoryModule,
+    TransactionModule
   ],
   controllers: [],
   providers: [],
