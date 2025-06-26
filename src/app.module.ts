@@ -12,7 +12,7 @@ import { CategoryModule } from './category/category.module';
       password: process.env.DB_PASSWORD,
       database: process.env.DB_NAME,
       autoLoadEntities: true,
-      synchronize: true, // set to false in production
+      synchronize: false,
     }),
     CategoryModule
   ],
