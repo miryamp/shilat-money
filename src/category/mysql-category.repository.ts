@@ -24,7 +24,7 @@ export class MysqlCategoryRepository implements CategoryRepository {
     }
 
     async update(id: string, update: Partial<Category>, householdId: string): Promise<Category | null> {
-        const category = await this.categoryRepo.findOne({ where: { id, householdId } });
+        const category = await this.categoryRepo.findOne({ where: { id, householdId, isDeleted: false } });
         if (!category) return null;
         Object.assign(category, update);
         return await this.categoryRepo.save(category);
