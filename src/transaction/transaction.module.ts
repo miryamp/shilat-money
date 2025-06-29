@@ -16,13 +16,9 @@ import { MysqlCategoryRepository } from '../category/mysql-category.repository';
     providers: [
         TransactionService,
         {
-            provide: 'TransactionRepository',
+            provide: 'TransactionRepo',
             useClass: MysqlTransactionRepository
         },
-        {
-            provide: 'CategoryRepository',
-            useClass: MysqlCategoryRepository
-        }
     ],
     exports: [TransactionService]
 })

@@ -6,7 +6,7 @@ import { TransactionType } from '../common/data-entities/transaction-type.enum';
 @Injectable()
 export class CategoryService {
     constructor(
-        @Inject('CategoryRepository')
+        @Inject('CategoryRepo')
         private readonly categoryRepository: CategoryRepository
     ) { }
 
@@ -38,6 +38,5 @@ export class CategoryService {
     async remove(id: string, householdId: string, logical = true): Promise<Category | null> {
         return logical ? await this.categoryRepository.logicRemove(id, householdId) :
             await this.categoryRepository.remove(id, householdId);
-
     }
 }

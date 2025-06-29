@@ -13,7 +13,7 @@ import { CategoryController } from './category.controller';
     providers: [
         CategoryService,
         {
-            provide: 'CategoryRepository',
+            provide: 'CategoryRepo',
             useClass: MysqlCategoryRepository
         }
     ],

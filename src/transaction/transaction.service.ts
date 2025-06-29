@@ -6,7 +6,7 @@ import { TransactionType } from '../common/data-entities/transaction-type.enum';
 @Injectable()
 export class TransactionService {
     constructor(
-        @Inject('TransactionRepository')
+        @Inject('TransactionRepo')
         private readonly transactionRepository: TransactionRepository
     ) {}
 
