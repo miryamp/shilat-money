@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Plus } from 'lucide-react';
 import CategoryCard from './CategoryCard';
 import AddCategoryModal from './AddCategoryModal';
-import { fetchCategories } from '@/services/categoryService';
+import { fetchCategories, addCategory } from '@/services/categoryService';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 
@@ -36,28 +36,33 @@ const Categories = () => {
     }
   };
 
-  const handleAddCategory = (newCategory: Omit<Category, 'id'>) => {
-    if (editingCategory) {
-      // Update existing category
-      const updatedCategory = { ...editingCategory, ...newCategory };
-      setCategories(prev => prev.map(cat => 
-        cat.id === editingCategory.id ? updatedCategory : cat
-      ));
+  const handleAddCategory = async (newCategory: Omit<Category, 'id'>) => {
+    try {
+      if (editingCategory) {
+        // Update existing category (not implemented)
+        toast({
+          title: "Update not implemented",
+          description: "Category update is not yet supported.",
+          duration: 3000,
+        });
+        setEditingCategory(null);
+      } else {
+        // Add new category via backend
+        const createdCategory = await addCategory(newCategory);
+        setCategories(prev => [...prev, createdCategory]);
+        toast({
+          title: "Category added",
+          description: `${createdCategory.name} has been added successfully.`,
+          duration: 3000,
+
+        });
+      }
+    } catch (error) {
       toast({
-        title: "Category updated",
-        description: `${updatedCategory.name} has been updated successfully.`,
-      });
-      setEditingCategory(null);
-    } else {
-      // Add new category
-      const categoryWithId = {
-        ...newCategory,
-        id: Date.now().toString(),
-      };
-      setCategories(prev => [...prev, categoryWithId]);
-      toast({
-        title: "Category added",
-        description: `${categoryWithId.name} has been added successfully.`,
+        title: "Error",
+        description: (error as Error).message,
+        variant: "destructive",
+        duration: 3000,
       });
     }
     setIsModalOpen(false);
@@ -71,13 +76,15 @@ const Categories = () => {
   const handleDeleteCategory = (categoryId: string, keepTransactions: boolean) => {
     const categoryToDelete = categories.find(cat => cat.id === categoryId);
     setCategories(prev => prev.filter(cat => cat.id !== categoryId));
-    
+
     toast({
       title: "Category deleted",
-      description: keepTransactions 
+      description: keepTransactions
         ? `${categoryToDelete?.name} has been deleted. Associated transactions have been kept.`
         : `${categoryToDelete?.name} and all associated transactions have been deleted.`,
-    });
+            duration: 3000,
+
+      });
   };
 
   const handleModalClose = () => {
@@ -98,15 +105,15 @@ const Categories = () => {
       <div className="max-w-6xl mx-auto">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-8">
           {categories.map((category) => (
-            <CategoryCard 
-              key={category.id} 
-              category={category} 
+            <CategoryCard
+              key={category.id}
+              category={category}
               onEdit={handleEditCategory}
               onDelete={handleDeleteCategory}
             />
           ))}
         </div>
-        
+
         {categories.length === 0 && (
           <div className="text-center py-16">
             <div className="text-gray-400 mb-4">
@@ -118,7 +125,7 @@ const Categories = () => {
             <p className="text-gray-500 mb-6">Start by creating your first expense category</p>
           </div>
         )}
-        
+
         <div className="fixed bottom-8 right-8">
           <Button
             onClick={() => setIsModalOpen(true)}

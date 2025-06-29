@@ -8,13 +8,13 @@ export class AuthGuard implements CanActivate {
         const cookie = request.cookies?.auth; // adjust cookie name as needed
 
         // TODO: Implement your real validation logic here
-        if (!cookie) {
-            throw new UnauthorizedException('No auth cookie');
-        }
+        // if (!cookie) {
+        //     throw new UnauthorizedException('No auth cookie');
+        // }
 
         // Simulate extracting householdId from cookie
-        request.householdId = 'mock-household-id'; // Replace with real extraction logic
-        request.userId = 'mock-user-id'; // Replace with real user ID extraction logic
+        request.householdId = 'mainhousehold'; // Replace with real extraction logic
+        request.userId = 'mainuser'; // Replace with real user ID extraction logic
 
         return true;
     }
