@@ -3,6 +3,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { CategoryModule } from './category/category.module';
 import { TransactionModule } from './transaction/transaction.module';
 import { RecurrentTransactionModule } from './recurrent-transaction/recurrent-transaction.module';
+import { HouseholdModule } from './household/household.module';
 
 @Module({
   imports: [
@@ -19,6 +20,7 @@ import { RecurrentTransactionModule } from './recurrent-transaction/recurrent-tr
     CategoryModule,
     TransactionModule,
     RecurrentTransactionModule,
+    HouseholdModule,
   ],
   controllers: [],
   providers: [],
