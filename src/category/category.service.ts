@@ -5,9 +5,9 @@ import { CategoryRepository } from './category-repository.interface';
 @Injectable()
 export class CategoryService {
     constructor(
-        @Inject('CategoryRepository') 
+        @Inject('CategoryRepository')
         private readonly categoryRepository: CategoryRepository
-    ) {}
+    ) { }
 
     async create(category: Category): Promise<Category> {
         return await this.categoryRepository.create(category);
@@ -25,7 +25,9 @@ export class CategoryService {
         return await this.categoryRepository.update(id, update, householdId);
     }
 
-    async remove(id: string, householdId: string): Promise<Category | null> {
-        return await this.categoryRepository.remove(id, householdId);
+    async remove(id: string, householdId: string, logical = true): Promise<Category | null> {
+        return logical ? await this.categoryRepository.logicRemove(id, householdId) :
+            await this.categoryRepository.remove(id, householdId);
+
     }
 }

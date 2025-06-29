@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Put, Delete, Param, Body, UseGuards, Req, UnauthorizedException, NotFoundException } from '@nestjs/common';
+import { Controller, Get, Post, Put, Delete, Param, Body, UseGuards, Req, UnauthorizedException, NotFoundException, Query } from '@nestjs/common';
 import { AuthGuard } from '../common/auth/auth.guard';
 import { Category } from '../common/data-entities/category';
 import { CategoryService } from './category.service';
@@ -45,8 +45,12 @@ export class CategoryController {
     }
 
     @Delete(':id')
-    async remove(@Param('id') id: string, @HouseholdId() householdId: string): Promise<Category> {
-        const deleted = await this.categoryService.remove(id, householdId);
+    async remove(
+        @Param('id') id: string,
+        @HouseholdId() householdId: string,
+        @Query('logical') logical: boolean = true
+    ): Promise<Category> {
+        const deleted = await this.categoryService.remove(id, householdId, logical);
         if (!deleted) {
             throw new NotFoundException('Category not found');
         }
