@@ -14,5 +14,4 @@ export interface TransactionRepository {
     findOne(id: string, householdId: string): Promise<Transaction | null>;
     update(id: string, update: Partial<Transaction>, householdId: string): Promise<Transaction | null>;
     remove(id: string, householdId: string): Promise<Transaction | null>;
-    findByDateRange(householdId: string, from: Date, to: Date): Promise<Transaction[]>;
 }

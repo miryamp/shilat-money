@@ -8,6 +8,9 @@ export class RecurrentTransaction {
     @PrimaryColumn()
     id: string;
 
+    @Column()
+    householdId: string;
+
     @Column({ type: 'json' })
     transactionData: Transaction;
 

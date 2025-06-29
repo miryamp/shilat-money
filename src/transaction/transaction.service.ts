@@ -39,8 +39,4 @@ export class TransactionService {
     async remove(id: string, householdId: string): Promise<Transaction | null> {
         return await this.transactionRepository.remove(id, householdId);
     }
-
-    async findByDateRange(householdId: string, from: Date, to: Date): Promise<Transaction[]> {
-        return await this.transactionRepository.findByDateRange(householdId, from, to);
-    }
 }
