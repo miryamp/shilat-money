@@ -20,6 +20,9 @@ export class Transaction {
     @Column()
     categoryId: string;
 
+    @Column({ nullable: true })
+    reacurrenceId?: string;
+
     @ManyToOne(() => Category, { onDelete: 'CASCADE' })
     @JoinColumn({ name: 'categoryId' })
     category: Category;

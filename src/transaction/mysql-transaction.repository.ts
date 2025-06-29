@@ -79,14 +79,5 @@ export class MysqlTransactionRepository implements TransactionRepository {
         await this.transactionRepo.remove(transaction);
         return transaction;
     }
-
-    async findByDateRange(householdId: string, from: Date, to: Date): Promise<Transaction[]> {
-        return await this.transactionRepo.find({
-            where: {
-                householdId,
-                timestamp: Between(from, to)
-            }
-        });
-    }
 }
 
