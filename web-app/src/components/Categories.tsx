@@ -5,18 +5,12 @@ import AddCategoryModal from './AddCategoryModal';
 import { fetchCategories, addCategory } from '@/services/categoryService';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
-
-export interface Category {
-  id: string;
-  name: string;
-  color: string;
-  icon: string;
-}
+import { ICategory } from 'shared/entities/category.interface';
 
 const Categories = () => {
-  const [categories, setCategories] = useState<Category[]>([]);
+  const [categories, setCategories] = useState<ICategory[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editingCategory, setEditingCategory] = useState<Category | null>(null);
+  const [editingCategory, setEditingCategory] = useState<ICategory | null>(null);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
 
@@ -36,7 +30,7 @@ const Categories = () => {
     }
   };
 
-  const handleAddCategory = async (newCategory: Omit<Category, 'id'>) => {
+  const handleAddCategory = async (newCategory: Omit<ICategory, 'id'>) => {
     try {
       if (editingCategory) {
         // Update existing category (not implemented)
@@ -68,7 +62,7 @@ const Categories = () => {
     setIsModalOpen(false);
   };
 
-  const handleEditCategory = (category: Category) => {
+  const handleEditCategory = (category: ICategory) => {
     setEditingCategory(category);
     setIsModalOpen(true);
   };

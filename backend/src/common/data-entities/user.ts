@@ -1,13 +1,10 @@
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn } from 'typeorm';
 import { Household } from './household';
-
-export enum Language {
-  EN = 'en',
-  HE = 'he',
-}
+import { IUser } from 'shared/entities/user.interface';
+import { Language } from 'shared/entities/language.enum';
 
 @Entity()
-export class User {
+export class User implements IUser {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 

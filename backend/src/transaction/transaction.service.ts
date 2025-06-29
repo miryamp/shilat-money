@@ -1,7 +1,7 @@
 import { Injectable, Inject } from '@nestjs/common';
 import { Transaction } from '../common/data-entities/transaction';
 import { TransactionRepository } from './transaction-repository.interface';
-import { TransactionType } from '../common/data-entities/transaction-type.enum';
+import { TransactionType } from '../../../shared/entities/transaction-type.enum';
 
 @Injectable()
 export class TransactionService {

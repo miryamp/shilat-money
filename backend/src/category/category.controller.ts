@@ -3,7 +3,7 @@ import { AuthGuard } from '../common/auth/auth.guard';
 import { Category } from '../common/data-entities/category';
 import { CategoryService } from './category.service';
 import { HouseholdId } from '../common/auth/household-id.decorator';
-import { TransactionType } from '../common/data-entities/transaction-type.enum';
+import { TransactionType } from '../../../shared/entities/transaction-type.enum';
 import { AllowSameOrigin } from '../common/auth/allow-same-origin.decorator';
 
 @UseGuards(AuthGuard)

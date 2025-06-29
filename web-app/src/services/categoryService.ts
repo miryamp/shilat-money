@@ -1,15 +1,15 @@
-import { Category } from '@/components/Categories';
+import { ICategory } from 'shared/entities/category.interface';
 
 const API_BASE = 'http://192.168.1.107:3000';
 
-export const fetchCategories = async (): Promise<Category[]> => {
+export const fetchCategories = async (): Promise<ICategory[]> => {
   const res = await fetch(`${API_BASE}/category`, {
   });
   if (!res.ok) throw new Error('Failed to fetch categories');
   return res.json();
 };
 
-export const addCategory = async (category: Omit<Category, 'id'>): Promise<Category> => {
+export const addCategory = async (category: Omit<ICategory, 'id'>): Promise<ICategory> => {
   const res = await fetch(`${API_BASE}/category`, {
     method: 'POST',
     headers: {

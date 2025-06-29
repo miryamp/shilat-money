@@ -1,9 +1,10 @@
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn } from 'typeorm';
-import { TransactionType } from './transaction-type.enum';
+import { TransactionType } from 'shared/entities/transaction-type.enum';
 import { Household } from './household';
+import { ICategory } from 'shared/entities/category.interface'
 
 @Entity()
-export class Category {
+export class Category implements ICategory {
     @PrimaryGeneratedColumn('uuid')
     id: string;
 
@@ -32,7 +33,7 @@ export class Category {
     @Column({ default: false })
     isDeleted: boolean;
 
-    @Column({ nullable: true })
+    @Column({ nullable: true, default: null })
     fatherId?: string;
 
     @ManyToOne(() => Category, { nullable: true, onDelete: 'SET NULL' })
