@@ -20,7 +20,7 @@ export class Transaction {
     @Column()
     categoryId: string;
 
-    @ManyToOne(() => Category, { onDelete: 'SET NULL' })
+    @ManyToOne(() => Category, { onDelete: 'CASCADE' })
     @JoinColumn({ name: 'categoryId' })
     category: Category;
 

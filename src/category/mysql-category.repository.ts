@@ -10,7 +10,7 @@ export class MysqlCategoryRepository implements CategoryRepository {
     constructor(
         @InjectRepository(Category)
         private readonly categoryRepo: Repository<Category>
-    ) {}
+    ) { }
 
     async create(category: Category): Promise<Category> {
         return await this.categoryRepo.save(category);
@@ -46,8 +46,18 @@ export class MysqlCategoryRepository implements CategoryRepository {
     async remove(id: string, householdId: string): Promise<Category | null> {
         const category = await this.categoryRepo.findOne({ where: { id, householdId, isDeleted: false } });
         if (!category) return null;
+
+        await this.categoryRepo.remove(category);
+
+        return category;
+    }
+
+    async logicRemove(id: string, householdId: string): Promise<Category | null> {
+        const category = await this.categoryRepo.findOne({ where: { id, householdId, isDeleted: false } });
+        if (!category) return null;
         category.isDeleted = true;
         await this.categoryRepo.save(category);
+
         return category;
     }
 }

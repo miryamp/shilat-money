@@ -35,7 +35,9 @@ export class CategoryService {
         return await this.categoryRepository.update(id, update, householdId);
     }
 
-    async remove(id: string, householdId: string): Promise<Category | null> {
-        return await this.categoryRepository.remove(id, householdId);
+    async remove(id: string, householdId: string, logical = true): Promise<Category | null> {
+        return logical ? await this.categoryRepository.logicRemove(id, householdId) :
+            await this.categoryRepository.remove(id, householdId);
+
     }
 }

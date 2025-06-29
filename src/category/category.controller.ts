@@ -50,8 +50,12 @@ export class CategoryController {
     }
 
     @Delete(':id')
-    async remove(@Param('id') id: string, @HouseholdId() householdId: string): Promise<Category> {
-        const deleted = await this.categoryService.remove(id, householdId);
+    async remove(
+        @Param('id') id: string,
+        @HouseholdId() householdId: string,
+        @Query('logical') logical: boolean = true
+    ): Promise<Category> {
+        const deleted = await this.categoryService.remove(id, householdId, logical);
         if (!deleted) {
             throw new NotFoundException('Category not found');
         }
