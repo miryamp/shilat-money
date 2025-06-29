@@ -1,11 +1,11 @@
-import { Entity, PrimaryColumn, Column } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
 import { RecurrentTransactionType } from './recurrent-transaction-type.enum';
 import { Transaction } from './transaction';
 
 
 @Entity()
 export class RecurrentTransaction {
-    @PrimaryColumn()
+    @PrimaryGeneratedColumn('uuid')
     id: string;
 
     @Column()
