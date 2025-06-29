@@ -1,0 +1,9 @@
+{
+  "name": "shilat-money-monorepo",
+  "private": true,
+  "version": "1.0.0",
+  "workspaces": [
+    "backend",
+    "web-app"
+  ]
+}
