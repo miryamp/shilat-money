@@ -8,11 +8,11 @@ import { RecurrentTransactionController } from './recurrent-transaction.controll
 @Module({
     imports: [
         TypeOrmModule.forFeature([RecurrentTransaction]),
-        TypeOrmModule // <-- ensures DataSource is available for injection
+        TypeOrmModule
     ],
     providers: [
         {
-            provide: 'RecurrentTransactionRepository',
+            provide: 'RecurrentTransactionRepo',
             useClass: MysqlRecurrentTransactionRepository
         }
         , RecurrentTransactionService],

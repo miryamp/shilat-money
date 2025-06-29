@@ -8,7 +8,7 @@ import { Transaction } from '../common/data-entities/transaction';
 @Injectable()
 export class RecurrentTransactionService {
     constructor(
-        @Inject('RecurrentTransactionRepository')
+        @Inject('RecurrentTransactionRepo')
         private readonly repo: MysqlRecurrentTransactionRepository,
         private readonly dataSource: DataSource
     ) {}
