@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { CategoryModule } from './category/category.module';
 import { TransactionModule } from './transaction/transaction.module';
+import { RecurrentTransactionModule } from './recurrent-transaction/recurrent-transaction.module';
 
 @Module({
   imports: [
@@ -16,7 +17,8 @@ import { TransactionModule } from './transaction/transaction.module';
       synchronize: false,
     }),
     CategoryModule,
-    TransactionModule
+    TransactionModule,
+    RecurrentTransactionModule,
   ],
   controllers: [],
   providers: [],
