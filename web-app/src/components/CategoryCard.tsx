@@ -1,14 +1,14 @@
 
 import React, { useState } from 'react';
 import { MoreVertical, Edit, Trash2 } from 'lucide-react';
-import { Category } from './Categories';
+import { ICategory } from 'shared/entities/category.interface';
 import { Button } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import DeleteCategoryModal from './DeleteCategoryModal';
 
 interface CategoryCardProps {
-  category: Category;
-  onEdit: (category: Category) => void;
+  category: ICategory;
+  onEdit: (category: ICategory) => void;
   onDelete: (categoryId: string, keepTransactions: boolean) => void;
 }
 

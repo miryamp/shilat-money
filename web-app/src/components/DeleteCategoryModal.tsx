@@ -36,14 +36,14 @@ const DeleteCategoryModal = ({
             variant="outline"
             className="w-full border-orange-300 text-orange-700 hover:bg-orange-50"
           >
-            Delete category, keep transactions
+            Delete category, but keep associated transactions
           </Button>
           <Button
             onClick={onDeleteWithTransactions}
             variant="destructive"
             className="w-full"
           >
-            Delete category and all transactions
+            Delete category and all of its transactions
           </Button>
           <AlertDialogCancel className="w-full mt-2">
             Cancel

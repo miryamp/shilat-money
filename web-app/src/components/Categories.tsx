@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Plus } from 'lucide-react';
 import CategoryCard from './CategoryCard';
 import AddCategoryModal from './AddCategoryModal';
-import { fetchCategories, addCategory } from '@/services/categoryService';
+import { fetchCategories, addCategory, updateCategory, deleteCategory } from '@/services/categoryService';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { ICategory } from 'shared/entities/category.interface';
@@ -33,10 +33,12 @@ const Categories = () => {
   const handleAddCategory = async (newCategory: Omit<ICategory, 'id'>) => {
     try {
       if (editingCategory) {
-        // Update existing category (not implemented)
+        // Update existing category
+        const updatedCategory = await updateCategory(editingCategory.id, newCategory);
+        setCategories(prev => prev.map(cat => cat.id === editingCategory.id ? updatedCategory : cat));
         toast({
-          title: "Update not implemented",
-          description: "Category update is not yet supported.",
+          title: "Category updated",
+          description: `${updatedCategory.name} has been updated successfully.`,
           duration: 3000,
         });
         setEditingCategory(null);
@@ -48,7 +50,6 @@ const Categories = () => {
           title: "Category added",
           description: `${createdCategory.name} has been added successfully.`,
           duration: 3000,
-
         });
       }
     } catch (error) {
@@ -67,18 +68,25 @@ const Categories = () => {
     setIsModalOpen(true);
   };
 
-  const handleDeleteCategory = (categoryId: string, keepTransactions: boolean) => {
-    const categoryToDelete = categories.find(cat => cat.id === categoryId);
-    setCategories(prev => prev.filter(cat => cat.id !== categoryId));
-
-    toast({
-      title: "Category deleted",
-      description: keepTransactions
-        ? `${categoryToDelete?.name} has been deleted. Associated transactions have been kept.`
-        : `${categoryToDelete?.name} and all associated transactions have been deleted.`,
-            duration: 3000,
-
+  const handleDeleteCategory = async (categoryId: string, keepTransactions: boolean) => {
+    try {
+      const deletedCategory = await deleteCategory(categoryId, keepTransactions);
+      setCategories(prev => prev.filter(cat => cat.id !== categoryId));
+      toast({
+        title: "Category deleted",
+        description: keepTransactions
+          ? `${deletedCategory.name} has been deleted. Associated transactions have been kept.`
+          : `${deletedCategory.name} and all associated transactions have been deleted.`,
+        duration: 3000,
       });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: (error as Error).message,
+        variant: "destructive",
+        duration: 3000,
+      });
+    }
   };
 
   const handleModalClose = () => {

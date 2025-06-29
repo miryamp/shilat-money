@@ -3,13 +3,13 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Category } from './Categories';
+import { ICategory } from 'shared/entities/category.interface';
 
 interface AddCategoryModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (category: Omit<Category, 'id'>) => void;
-  editingCategory?: Category | null;
+  onSubmit: (category: Omit<ICategory, 'id'>) => void;
+  editingCategory?: ICategory | null;
 }
 
 const colors = [
@@ -65,7 +65,8 @@ const AddCategoryModal = ({ isOpen, onClose, onSubmit, editingCategory }: AddCat
       name: name.trim(),
       color: finalColor,
       icon: finalIcon,
-    });
+      householdId: 'mainhousehold',
+    } as Omit<ICategory, 'id'>);
 
     // Reset form
     setName('');
