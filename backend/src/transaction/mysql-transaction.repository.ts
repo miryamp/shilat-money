@@ -4,7 +4,7 @@ import { Category } from '../common/data-entities/category';
 import { Repository, Between } from 'typeorm';
 import { Transaction } from '../common/data-entities/transaction';
 import { TransactionRepository } from './transaction-repository.interface';
-import { TransactionType } from '../../../shared/entities/transaction-type.enum';
+import { TransactionType } from 'shared/dist/entities/transaction-type.enum';
 
 @Injectable()
 export class MysqlTransactionRepository implements TransactionRepository {

@@ -2,7 +2,7 @@ import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn } from 't
 import { Category } from './category';
 import { Household } from './household';
 import { User } from './user';
-import { ITransaction } from 'shared/entities/transaction.interface';
+import { ITransaction } from 'shared/dist/entities/transaction.interface';
 
 @Entity()
 export class Transaction implements ITransaction {

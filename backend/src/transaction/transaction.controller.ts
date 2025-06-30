@@ -3,8 +3,8 @@ import { AuthGuard } from '../common/auth/auth.guard';
 import { Transaction } from '../common/data-entities/transaction';
 import { TransactionService } from './transaction.service';
 import { HouseholdId } from '../common/auth/household-id.decorator';
-import { UserId } from 'src/common/auth/user-id.decorator';
-import { TransactionType } from '../../../shared/entities/transaction-type.enum';
+import { UserId } from '../common/auth/user-id.decorator';
+import { TransactionType } from 'shared/dist/entities/transaction-type.enum';
 
 @UseGuards(AuthGuard)
 @Controller('transaction')

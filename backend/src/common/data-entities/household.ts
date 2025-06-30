@@ -1,6 +1,6 @@
 import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
-import { Currency } from 'shared/entities/currency.enum';
-import { IHousehold } from 'shared/entities/household.interface';
+import { Currency } from 'shared/dist/entities/currency.enum';
+import { IHousehold } from 'shared/dist/entities/household.interface';
 
 @Entity()
 export class Household implements IHousehold {

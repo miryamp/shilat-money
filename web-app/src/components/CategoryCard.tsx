@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { MoreVertical, Edit, Trash2 } from 'lucide-react';
-import { ICategory } from 'shared/entities/category.interface';
+import { ICategory } from 'shared/dist/entities/category.interface';
 import { Button } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import DeleteCategoryModal from './DeleteCategoryModal';

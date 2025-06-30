@@ -5,7 +5,7 @@ import AddCategoryModal from './AddCategoryModal';
 import { fetchCategories, addCategory, updateCategory, deleteCategory } from '@/services/categoryService';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
-import { ICategory } from 'shared/entities/category.interface';
+import { ICategory } from 'shared/dist/entities/category.interface';
 
 const Categories = () => {
   const [categories, setCategories] = useState<ICategory[]>([]);

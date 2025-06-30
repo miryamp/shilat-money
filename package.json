@@ -4,6 +4,13 @@
   "version": "1.0.0",
   "workspaces": [
     "backend",
-    "web-app"
-  ]
+    "web-app",
+    "shared"
+  ],
+  "scripts": {
+    "build": "pnpm -r run build",
+    "dev": "pnpm -r run dev",
+    "start": "pnpm -r run start",
+    "lint": "pnpm -r run lint"
+  }
 }

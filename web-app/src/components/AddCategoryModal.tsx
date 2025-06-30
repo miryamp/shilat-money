@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { ICategory } from 'shared/entities/category.interface';
+import { ICategory } from 'shared/dist/entities/category.interface';
 
 interface AddCategoryModalProps {
   isOpen: boolean;

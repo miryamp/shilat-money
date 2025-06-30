@@ -1,7 +1,7 @@
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn } from 'typeorm';
 import { Household } from './household';
-import { IUser } from 'shared/entities/user.interface';
-import { Language } from 'shared/entities/language.enum';
+import { IUser } from 'shared/dist/entities/user.interface';
+import { Language } from 'shared/dist/entities/language.enum';
 
 @Entity()
 export class User implements IUser {

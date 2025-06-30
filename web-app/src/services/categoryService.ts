@@ -1,4 +1,4 @@
-import { ICategory } from 'shared/entities/category.interface';
+import { ICategory } from 'shared/dist/entities/category.interface';
 
 const API_BASE = 'http://192.168.1.107:3000';
 

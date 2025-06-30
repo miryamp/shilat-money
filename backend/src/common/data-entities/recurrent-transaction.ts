@@ -1,7 +1,7 @@
 import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
-import { RecurrentTransactionType } from 'shared/entities/recurrent-transaction-type.enum';
+import { RecurrentTransactionType } from 'shared/dist/entities/recurrent-transaction-type.enum';
 import { Transaction } from './transaction';
-import { IRecurrentTransaction } from 'shared/entities/recurrent-transaction.interface';
+import { IRecurrentTransaction } from 'shared/dist/entities/recurrent-transaction.interface';
 
 
 @Entity()
