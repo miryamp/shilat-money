@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Put, Delete, Param, Body, UseGuards, NotFoundException, UnauthorizedException, Query } from '@nestjs/common';
+import { Controller, Get, Post, Put, Delete, Param, Body, UseGuards, NotFoundException, UnauthorizedException, Query, ParseDatePipe } from '@nestjs/common';
 import { AuthGuard } from '../common/auth/auth.guard';
 import { Transaction } from '../common/data-entities/transaction';
 import { TransactionService } from './transaction.service';
@@ -78,12 +78,17 @@ export class TransactionController {
         return deleted;
     }
 
-    @Get('balance')
+    @Get('sum')
     async getBalance(
         @HouseholdId() householdId: string,
         @Query('categoryId') categoryId?: string,
-        @Query('type') type?: TransactionType,
+        @Query('from', new ParseDatePipe()) from?: Date,
+        @Query('to', new ParseDatePipe()) to?: Date,
     ): Promise<number> {
-        return await this.transactionService.getBalance(householdId, { categoryId, type });
+        return await this.transactionService.getSum(householdId, {
+            categoryId,
+            from,
+            to,
+        });
     }
 }

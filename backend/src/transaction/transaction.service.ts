@@ -40,14 +40,16 @@ export class TransactionService {
         return await this.transactionRepository.remove(id, householdId);
     }
 
-    async getBalance(
+    async getSum(
         householdId: string,
-        options: { categoryId?: string; type?: TransactionType } = {}
+        options: { categoryId?: string; from?: Date; to?: Date } = {}
     ): Promise<number> {
         const transactions = await this.findAll(householdId, {
             categoryId: options.categoryId,
-            type: options.type,
+            from: options.from,
+            to: options.to,
         });
+
         const balance = transactions.reduce((sum, tx) => {
             if (tx.category.type === TransactionType.Income) return sum + tx.amount;
             if (tx.category.type === TransactionType.Outcome) return sum - tx.amount;
