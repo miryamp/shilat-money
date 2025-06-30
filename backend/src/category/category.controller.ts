@@ -4,6 +4,7 @@ import { Category } from '../common/data-entities/category';
 import { CategoryService } from './category.service';
 import { HouseholdId } from '../common/auth/household-id.decorator';
 import { AllowSameOrigin } from '../common/auth/allow-same-origin.decorator';
+import { TransactionType } from 'shared/dist/entities/transaction-type.enum';
 
 @UseGuards(AuthGuard)
 @AllowSameOrigin()
@@ -19,23 +20,23 @@ export class CategoryController {
         return await this.categoryService.create(category);
     }
 
-    // @Get()
-    // async findAll(
-    //     @HouseholdId() householdId: string,
-    //     @Query('fatherId') fatherId?: string,
-    //     @Query('type') type?: TransactionType,
-    // ): Promise<Category[]> {
-    //     return await this.categoryService.findAll(householdId, { fatherId, type });
-    // }
+    @Get()
+    async findAll(
+        @HouseholdId() householdId: string,
+        @Query('fatherId') fatherId?: string,
+        @Query('type') type?: TransactionType,
+    ): Promise<Category[]> {
+        return await this.categoryService.findAll(householdId, { fatherId, type });
+    }
 
-    // @Get(':id')
-    // async findOne(@Param('id') id: string, @HouseholdId() householdId: string): Promise<Category> {
-    //     const category = await this.categoryService.findOne(id, householdId);
-    //     if (!category) {
-    //         throw new NotFoundException('Category not found');
-    //     }
-    //     return category;
-    // }
+    @Get(':id')
+    async findOne(@Param('id') id: string, @HouseholdId() householdId: string): Promise<Category> {
+        const category = await this.categoryService.findOne(id, householdId);
+        if (!category) {
+            throw new NotFoundException('Category not found');
+        }
+        return category;
+    }
 
     @Put(':id')
     async update(
@@ -61,11 +62,5 @@ export class CategoryController {
             throw new NotFoundException('Category not found');
         }
         return deleted;
-    }
-
-    @Get('test')
-    test(@Query('logical', ParseBoolPipe) logical: boolean) {
-        console.log(typeof logical, logical);
-        return { logical };
     }
 }
