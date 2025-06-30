@@ -40,7 +40,7 @@ export class TransactionController {
             userId,
             categoryId,
             type,
-            amount: (amount?.eq || amount?.gte || amount?.gt || amount?.lte || amount?.lt) ? amount: undefined,
+            amount: (amount?.eq || amount?.gte || amount?.gt || amount?.lte || amount?.lt) ? amount : undefined,
             from: from ? new Date(from) : undefined,
             to: to ? new Date(to) : undefined,
         });
@@ -62,7 +62,7 @@ export class TransactionController {
         @HouseholdId() householdId: string,
         @UserId() userId: string
     ): Promise<Transaction> {
-        const updated = await this.transactionService.update(id, {...update, userId}, householdId);
+        const updated = await this.transactionService.update(id, { ...update, userId }, householdId);
         if (!updated) {
             throw new NotFoundException('Transaction not found');
         }
@@ -76,5 +76,14 @@ export class TransactionController {
             throw new NotFoundException('Transaction not found');
         }
         return deleted;
+    }
+
+    @Get('balance')
+    async getBalance(
+        @HouseholdId() householdId: string,
+        @Query('categoryId') categoryId?: string,
+        @Query('type') type?: TransactionType,
+    ): Promise<number> {
+        return await this.transactionService.getBalance(householdId, { categoryId, type });
     }
 }

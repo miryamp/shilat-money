@@ -45,3 +45,5 @@ export class Transaction implements ITransaction {
     @Column({ type: 'timestamp', nullable: false })
     lastUpdated: Date;
 }
+
+

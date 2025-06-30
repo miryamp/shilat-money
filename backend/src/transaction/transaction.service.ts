@@ -39,4 +39,20 @@ export class TransactionService {
     async remove(id: string, householdId: string): Promise<Transaction | null> {
         return await this.transactionRepository.remove(id, householdId);
     }
+
+    async getBalance(
+        householdId: string,
+        options: { categoryId?: string; type?: TransactionType } = {}
+    ): Promise<number> {
+        const transactions = await this.findAll(householdId, {
+            categoryId: options.categoryId,
+            type: options.type,
+        });
+        const balance = transactions.reduce((sum, tx) => {
+            if (tx.category.type === TransactionType.Income) return sum + tx.amount;
+            if (tx.category.type === TransactionType.Outcome) return sum - tx.amount;
+            return sum;
+        }, 0);
+        return balance;
+    }
 }
