@@ -264,6 +264,17 @@ const Categories = () => {
               )}
             </div>
           ))}
+          {/* Add Category Card */}
+          <div
+            className="group relative overflow-hidden rounded-xl p-6 shadow-lg border-2 border-dashed border-gray-300 flex flex-col items-center justify-center cursor-pointer hover:border-blue-400 transition-colors bg-gray-50 min-h-[140px]"
+            onClick={() => setIsModalOpen(true)}
+            tabIndex={0}
+            role="button"
+            aria-label="Add Category"
+          >
+            <Plus className="h-10 w-10 text-gray-400 group-hover:text-blue-500 transition-colors mb-2" />
+            <span className="text-gray-500 font-medium">Add Category</span>
+          </div>
         </div>
 
         {categories.length === 0 && (
@@ -278,15 +289,7 @@ const Categories = () => {
           </div>
         )}
 
-        <div className="fixed bottom-8 right-8">
-          <Button
-            onClick={() => setIsModalOpen(true)}
-            size="lg"
-            className="h-14 w-14 rounded-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200"
-          >
-            <Plus className="h-6 w-6" />
-          </Button>
-        </div>
+        {/* Remove the floating add button */}
       </div>
 
       <AddCategoryModal
