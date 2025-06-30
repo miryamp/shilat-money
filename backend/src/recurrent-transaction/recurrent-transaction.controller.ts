@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Put, Delete, Param, Body, NotFoundException, UseGuards, Query } from '@nestjs/common';
+import { Controller, Get, Post, Put, Delete, Param, Body, NotFoundException, UseGuards, Query, ParseBoolPipe } from '@nestjs/common';
 import { RecurrentTransactionService } from './recurrent-transaction.service';
 import { RecurrentTransaction } from '../common/data-entities/recurrent-transaction';
 import { AuthGuard } from '../common/auth/auth.guard';
@@ -23,9 +23,10 @@ export class RecurrentTransactionController {
 
     @Get()
     async findAll(
-        @HouseholdId() householdId: string
-    ): Promise<RecurrentTransaction[]> {
-        return await this.service.findAll(householdId);
+        @HouseholdId() householdId: string,
+        @Query('isActive', ParseBoolPipe) isActive?: boolean
+    ): Promise<RecurrentTransaction[]> {        
+        return await this.service.findAll(householdId, { isActive });
     }
 
     @Get(':id')

@@ -3,7 +3,7 @@ export interface ITransaction {
   householdId: string;
   userId: string;
   categoryId: string;
-  reacurrenceId?: string;
+  recurrenceId?: string;
   amount: number;
   timestamp: Date;
   comment?: string;

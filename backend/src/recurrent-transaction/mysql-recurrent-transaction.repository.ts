@@ -14,8 +14,10 @@ export class MysqlRecurrentTransactionRepository {
         return await this.repo.save(entity);
     }
 
-    async findAll(householdId: string): Promise<RecurrentTransaction[]> {
-        return await this.repo.find({ where: { householdId } });
+    async findAll(householdId: string, options?: {isActive?: boolean}): Promise<RecurrentTransaction[]> {
+        const where: any = { householdId, ...(options?.isActive && { active: options.isActive }) };
+
+        return await this.repo.find({ where });
     }
 
     async findOne(id: string, householdId: string): Promise<RecurrentTransaction | null> {

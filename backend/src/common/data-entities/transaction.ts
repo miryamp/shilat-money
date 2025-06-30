@@ -27,7 +27,7 @@ export class Transaction implements ITransaction {
     categoryId: string;
 
     @Column({ nullable: true })
-    reacurrenceId?: string;
+    recurrenceId?: string;
 
     @ManyToOne(() => Category, { onDelete: 'CASCADE' })
     @JoinColumn({ name: 'categoryId' })
