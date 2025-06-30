@@ -36,7 +36,7 @@ export class Category implements ICategory {
     @Column({ nullable: true, default: null })
     fatherId?: string;
 
-    @ManyToOne(() => Category, { nullable: true, onDelete: 'SET NULL' })
+    @ManyToOne(() => Category, { nullable: true, onDelete: 'CASCADE' })
     @JoinColumn({ name: 'fatherId' })
     father?: Category;
 }

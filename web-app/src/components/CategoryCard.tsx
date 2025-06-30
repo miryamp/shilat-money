@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { MoreVertical, Edit, Trash2 } from 'lucide-react';
 import { ICategory } from 'shared/dist/entities/category.interface';
@@ -10,9 +9,11 @@ interface CategoryCardProps {
   category: ICategory;
   onEdit: (category: ICategory) => void;
   onDelete: (categoryId: string, keepTransactions: boolean) => void;
+  onAddSubcategory?: (category: ICategory) => void;
+  isMainCategory?: boolean
 }
 
-const CategoryCard = ({ category, onEdit, onDelete }: CategoryCardProps) => {
+const CategoryCard = ({ category, onEdit, onDelete, onAddSubcategory, isMainCategory = false }: CategoryCardProps) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
@@ -23,6 +24,13 @@ const CategoryCard = ({ category, onEdit, onDelete }: CategoryCardProps) => {
 
   const handleDeleteClick = () => {
     setIsDeleteModalOpen(true);
+    setIsPopoverOpen(false);
+  };
+
+  const handleAddSubcategory = () => {
+    if (onAddSubcategory) {
+      onAddSubcategory(category);
+    }
     setIsPopoverOpen(false);
   };
 
@@ -38,12 +46,12 @@ const CategoryCard = ({ category, onEdit, onDelete }: CategoryCardProps) => {
 
   return (
     <>
-      <div 
-        className="group relative overflow-hidden rounded-xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 cursor-pointer"
-        style={{ backgroundColor: category.color }}
+      <div
+        className={`group relative overflow-hidden rounded-xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 transform cursor-pointer ${isMainCategory ? '' : 'shadow-sm'
+          }`} style={{ backgroundColor: category.color }}
       >
         <div className="absolute inset-0 bg-black opacity-0 group-hover:opacity-10 transition-opacity duration-300"></div>
-        
+
         <div className="relative z-10">
           <div className="flex items-center justify-between mb-4">
             <div className="text-white">
@@ -84,16 +92,18 @@ const CategoryCard = ({ category, onEdit, onDelete }: CategoryCardProps) => {
               </PopoverContent>
             </Popover>
           </div>
-          
-          <h3 className="text-white font-semibold text-lg mb-2 group-hover:text-opacity-90 transition-all duration-200">
+
+          <h3 className={`text-white font-semibold mb-2 group-hover:text-opacity-90 transition-all duration-200 ${
+            isMainCategory ? 'text-lg' : 'text-base'
+          }`}>
             {category.name}
           </h3>
-          
+
           <div className="text-white text-opacity-80 text-sm">
-            Tap to view expenses
+            {isMainCategory ? 'Tap to view expenses' : 'Subcategory'}
           </div>
         </div>
-        
+
         <div className="absolute -bottom-4 -right-4 w-16 h-16 bg-white bg-opacity-20 rounded-full"></div>
       </div>
 

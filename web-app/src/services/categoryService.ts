@@ -1,9 +1,14 @@
 import { ICategory } from 'shared/dist/entities/category.interface';
+import { TransactionType } from 'shared/dist/entities/transaction-type.enum';
 
 const API_BASE = 'http://192.168.1.107:3000';
 
-export const fetchCategories = async (): Promise<ICategory[]> => {
-  const res = await fetch(`${API_BASE}/category`, {
+export const fetchCategories = async (categoryType?: TransactionType): Promise<ICategory[]> => {
+  let url = `${API_BASE}/category`;
+  if (categoryType) {
+    url += `?type=${encodeURIComponent(categoryType)}`;
+  }
+  const res = await fetch(url, {
   });
   if (!res.ok) throw new Error('Failed to fetch categories');
   return res.json();

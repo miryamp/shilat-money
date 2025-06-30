@@ -2,26 +2,39 @@ import React, { useState, useEffect } from 'react';
 import { Plus } from 'lucide-react';
 import CategoryCard from './CategoryCard';
 import AddCategoryModal from './AddCategoryModal';
+import AddSubcategoryModal from './AddSubcategoryModal';
+import DeleteCategoryModal from './DeleteCategoryModal';
 import { fetchCategories, addCategory, updateCategory, deleteCategory } from '@/services/categoryService';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { ICategory } from 'shared/dist/entities/category.interface';
 
+enum TransactionType {
+  Outcome = 'Outcome',
+  Income = 'Income'
+}
+
 const Categories = () => {
   const [categories, setCategories] = useState<ICategory[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isSubcategoryModalOpen, setIsSubcategoryModalOpen] = useState(false);
   const [editingCategory, setEditingCategory] = useState<ICategory | null>(null);
+  const [selectedParentCategory, setSelectedParentCategory] = useState<ICategory | null>(null);
   const [loading, setLoading] = useState(true);
+  const [hoveredCategoryId, setHoveredCategoryId] = useState<string | null>(null);
+  const [subCategoryToDelete, setSubCategoryToDelete] = useState<ICategory | null>(null);
+  const [categoryType, setCategoryType] = useState<TransactionType>(TransactionType.Outcome);
+  const hoverTimeout = React.useRef<NodeJS.Timeout | null>(null);
   const { toast } = useToast();
 
   useEffect(() => {
-    loadCategories();
-  }, []);
+    loadCategories(categoryType);
+  }, [categoryType]);
 
-  const loadCategories = async () => {
+  const loadCategories = async (categoryType: TransactionType) => {
     try {
       setLoading(true);
-      const fetchedCategories = await fetchCategories();
+      const fetchedCategories = await fetchCategories(categoryType as any);
       setCategories(fetchedCategories);
     } catch (error) {
       console.error('Failed to fetch categories:', error);
@@ -44,7 +57,7 @@ const Categories = () => {
         setEditingCategory(null);
       } else {
         // Add new category via backend
-        const createdCategory = await addCategory(newCategory);
+        const createdCategory = await addCategory({...newCategory, type: categoryType});
         setCategories(prev => [...prev, createdCategory]);
         toast({
           title: "Category added",
@@ -63,15 +76,49 @@ const Categories = () => {
     setIsModalOpen(false);
   };
 
+  const handleAddSubcategory = async (subcategory: Omit<ICategory, 'id'>) => {
+    if (!selectedParentCategory) return;
+
+    subcategory.fatherId = selectedParentCategory.id; 
+    subcategory.type = selectedParentCategory.type;
+    subcategory.householdId = selectedParentCategory.householdId;
+    subcategory.color = selectedParentCategory.color;
+
+    const newCategory = await addCategory(subcategory);
+    
+    setCategories(prev => [...prev, newCategory]);
+    toast({
+      title: "Subcategory added",
+      description: `${subcategory.name} has been added to ${selectedParentCategory.name}.`,
+    });
+    setIsSubcategoryModalOpen(false);
+    setSelectedParentCategory(null);
+  };
+
   const handleEditCategory = (category: ICategory) => {
     setEditingCategory(category);
     setIsModalOpen(true);
   };
 
+  const isSubcategory = (category: ICategory | null) => {
+    return !!category?.fatherId;
+  };
+
+  const handleAddSubcategoryClick = (parentCategory: ICategory) => {
+    setSelectedParentCategory(parentCategory);
+    setIsSubcategoryModalOpen(true);
+  };
+
   const handleDeleteCategory = async (categoryId: string, keepTransactions: boolean) => {
     try {
+      const categoryToDelete = categories.find(cat => cat.id === categoryId);
+
+      if (!categoryToDelete) {
+        throw new Error("Category not found");
+      }
       const deletedCategory = await deleteCategory(categoryId, keepTransactions);
       setCategories(prev => prev.filter(cat => cat.id !== categoryId));
+
       toast({
         title: "Category deleted",
         description: keepTransactions
@@ -94,6 +141,23 @@ const Categories = () => {
     setEditingCategory(null);
   };
 
+  const handleSubcategoryModalClose = () => {
+    setIsSubcategoryModalOpen(false);
+    setSelectedParentCategory(null);
+  };
+
+  // Separate main categories and subcategories
+  const mainCategories = categories.filter(cat => !cat.fatherId);
+  const subcategoriesMap = categories.reduce((acc, cat) => {
+    if (cat.fatherId) {
+      if (!acc[cat.fatherId]) {
+        acc[cat.fatherId] = [];
+      }
+      acc[cat.fatherId].push(cat);
+    }
+    return acc;
+  }, {} as Record<string, ICategory[]>);
+
   if (loading) {
     return (
       <div className="flex justify-center items-center h-64">
@@ -105,14 +169,100 @@ const Categories = () => {
   return (
     <>
       <div className="max-w-6xl mx-auto">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-8">
-          {categories.map((category) => (
-            <CategoryCard
+        <div className="flex justify-start mb-4">
+          <div className="inline-flex rounded-md shadow-sm" role="group">
+            <button
+              type="button"
+              className={`px-4 py-2 text-sm font-medium border border-gray-200 focus:z-10 focus:ring-2 focus:ring-blue-500 focus:text-blue-700 ${categoryType === TransactionType.Outcome ? 'bg-blue-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-50'}`}
+              onClick={() => setCategoryType(TransactionType.Outcome)}
+            >
+              Outcome
+            </button>
+            <button
+              type="button"
+              className={`px-4 py-2 text-sm font-medium border border-gray-200 focus:z-10 focus:ring-2 focus:ring-blue-500 focus:text-blue-700 ${categoryType === TransactionType.Income ? 'bg-blue-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-50'}`}
+              onClick={() => setCategoryType(TransactionType.Income)}
+            >
+              Income
+            </button>
+          </div>
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          {mainCategories.map((category) => (
+            <div
               key={category.id}
-              category={category}
-              onEdit={handleEditCategory}
-              onDelete={handleDeleteCategory}
-            />
+              className="relative"
+              onMouseEnter={() => {
+                if (hoverTimeout.current) clearTimeout(hoverTimeout.current);
+                setHoveredCategoryId(category.id);
+              }}
+              onMouseLeave={() => {
+                hoverTimeout.current = setTimeout(() => setHoveredCategoryId(null), 100);
+              }}
+            >
+              <CategoryCard
+                category={category}
+                onEdit={handleEditCategory}
+                onDelete={handleDeleteCategory}
+                onAddSubcategory={handleAddSubcategoryClick}
+                isMainCategory={true}
+              />
+              {hoveredCategoryId === category.id && (
+                <div
+                  className="absolute z-20 mt-2 bg-white rounded-lg shadow-lg border border-gray-200 p-3 min-w-48"
+                  onMouseEnter={() => {
+                    if (hoverTimeout.current) clearTimeout(hoverTimeout.current);
+                    setHoveredCategoryId(category.id);
+                  }}
+                  onMouseLeave={() => {
+                    hoverTimeout.current = setTimeout(() => setHoveredCategoryId(null), 100);
+                  }}
+                >
+                  <div className="space-y-2">
+                    {subcategoriesMap[category.id] && subcategoriesMap[category.id].map((subcategory) => (
+                      <div
+                        key={subcategory.id}
+                        className="flex items-center gap-3 p-2 rounded-md hover:bg-gray-50 cursor-pointer group"
+                      >
+                        <div
+                          className="w-6 h-6 rounded-full flex items-center justify-center"
+                          style={{ backgroundColor: subcategory.color }}
+                          onClick={() => handleEditCategory(subcategory)}
+                        >
+                          <span className="material-icons text-white text-sm">{subcategory.icon}</span>
+                        </div>
+                        <span
+                          className="text-sm font-medium text-gray-700 group-hover:text-gray-900 flex-1"
+                          onClick={() => handleEditCategory(subcategory)}
+                        >
+                          {subcategory.name}
+                        </span>
+                        <button
+                          type="button"
+                          className="ml-2 p-1 rounded hover:bg-gray-100"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setSubCategoryToDelete(subcategory);
+                          }}
+                          title="Delete Subcategory"
+                        >
+                          <span className="material-icons text-gray-400 group-hover:text-red-600 transition-colors duration-150">delete</span>
+                        </button>
+                      </div>
+                    ))}
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="justify-start h-8 text-blue-600 hover:text-blue-700 hover:bg-blue-50 w-full"
+                      onClick={() => handleAddSubcategoryClick(category)}
+                    >
+                      <Plus className="h-4 w-4 mr-2" />
+                      Add Subcategory
+                    </Button>
+                  </div>
+                </div>
+              )}
+            </div>
           ))}
         </div>
 
@@ -144,6 +294,28 @@ const Categories = () => {
         onClose={handleModalClose}
         onSubmit={handleAddCategory}
         editingCategory={editingCategory}
+        enableColorPicker={!isSubcategory(editingCategory)}
+      />
+
+      <AddSubcategoryModal
+        isOpen={isSubcategoryModalOpen}
+        onClose={handleSubcategoryModalClose}
+        onSubmit={handleAddSubcategory}
+        parentCategory={selectedParentCategory}
+      />
+
+      <DeleteCategoryModal
+        isOpen={!!subCategoryToDelete}
+        onClose={() => setSubCategoryToDelete(null)}
+        onDeleteKeepTransactions={() => {
+          if (subCategoryToDelete) handleDeleteCategory(subCategoryToDelete.id, true);
+          setSubCategoryToDelete(null);
+        }}
+        onDeleteWithTransactions={() => {
+          if (subCategoryToDelete) handleDeleteCategory(subCategoryToDelete.id, false);
+          setSubCategoryToDelete(null);
+        }}
+        categoryName={subCategoryToDelete?.name || ''}
       />
     </>
   );

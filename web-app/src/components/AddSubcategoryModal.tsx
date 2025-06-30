@@ -1,163 +1,83 @@
-import React, { useState, useEffect } from 'react';
+
+import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { ICategory } from 'shared/dist/entities/category.interface';
 
-interface AddCategoryModalProps {
+interface AddSubcategoryModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (category: Omit<ICategory, 'id'>) => void;
-  editingCategory?: ICategory | null;
-  enableColorPicker?: boolean;
+  onSubmit: (subcategory: { name: string; icon: string }) => void;
+  parentCategory: ICategory | null;
 }
 
-const colors = [
-  '#8B5CF6', '#F59E0B', '#EF4444', '#10B981', '#3B82F6'
-];
-
 const commonIcons = [
-  'home', 'restaurant', 'directions_car', 'local_hospital', 'sports_esports',
-  'shopping_cart', 'phone_android', 'flight', 'menu_book', 'music_note',
-  'fitness_center', 'store', 'attach_money', 'star', 'build',
-  'work', 'school', 'pets', 'local_gas_station', 'coffee'
+  'restaurant', 'fastfood', 'local_cafe', 'icecream', 'cake',
+  'directions_car', 'local_gas_station', 'train', 'flight', 'directions_bus',
+  'shopping_cart', 'store', 'local_mall', 'checkroom', 'diamond',
+  'sports_esports', 'movie', 'music_note', 'theater_comedy', 'celebration',
+  'local_hospital', 'medication', 'fitness_center', 'spa', 'psychology',
+  'home', 'electrical_services', 'plumbing', 'build', 'cleaning_services'
 ];
 
-const AddCategoryModal = ({ isOpen, onClose, onSubmit, editingCategory, enableColorPicker = true }: AddCategoryModalProps) => {
+const AddSubcategoryModal = ({ isOpen, onClose, onSubmit, parentCategory }: AddSubcategoryModalProps) => {
   const [name, setName] = useState('');
-  const [selectedColor, setSelectedColor] = useState(colors[0]);
-  const [customColor, setCustomColor] = useState('');
   const [selectedIcon, setSelectedIcon] = useState(commonIcons[0]);
   const [customIcon, setCustomIcon] = useState('');
-
-  useEffect(() => {
-    if (editingCategory) {
-      setName(editingCategory.name);
-      
-      // Check if the color is one of the preset colors
-      if (colors.includes(editingCategory.color)) {
-        setSelectedColor(editingCategory.color);
-        setCustomColor('');
-      } else {
-        setSelectedColor(colors[0]);
-        setCustomColor(editingCategory.color);
-      }
-      
-      // Check if the icon is one of the common icons
-      if (commonIcons.includes(editingCategory.icon)) {
-        setSelectedIcon(editingCategory.icon);
-        setCustomIcon('');
-      } else {
-        setSelectedIcon(commonIcons[0]);
-        setCustomIcon(editingCategory.icon);
-      }
-    }
-  }, [editingCategory]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!name.trim()) return;
 
-    const finalColor = customColor || selectedColor;
     const finalIcon = customIcon || selectedIcon;
 
     onSubmit({
       name: name.trim(),
-      color: finalColor,
       icon: finalIcon,
-      householdId: 'mainhousehold',
-    } as Omit<ICategory, 'id'>);
+    });
 
     // Reset form
     setName('');
-    setSelectedColor(colors[0]);
-    setCustomColor('');
     setSelectedIcon(commonIcons[0]);
     setCustomIcon('');
-    onClose();
   };
 
   const handleCancel = () => {
     // Reset form
     setName('');
-    setSelectedColor(colors[0]);
-    setCustomColor('');
     setSelectedIcon(commonIcons[0]);
     setCustomIcon('');
     onClose();
   };
+
+  if (!parentCategory) return null;
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
-            {editingCategory ? 'Edit Category' : 'Add New Category'}
+            Add Subcategory to {parentCategory.name}
           </DialogTitle>
         </DialogHeader>
         
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="name" className="text-sm font-medium">
-              Category Name
+              Subcategory Name
             </Label>
             <Input
               id="name"
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              placeholder="Enter category name"
+              placeholder="Enter subcategory name"
               className="w-full"
               required
             />
           </div>
-
-          {enableColorPicker && (
-            <div className="space-y-3">
-              <Label className="text-sm font-medium">Choose Color</Label>
-              <div className="grid grid-cols-5 gap-3">
-                {colors.map((color) => (
-                  <button
-                    key={color}
-                    type="button"
-                    onClick={() => {
-                      setSelectedColor(color);
-                      setCustomColor('');
-                    }}
-                    className={`w-10 h-10 rounded-lg transition-all duration-200 hover:scale-110 ${
-                      selectedColor === color && !customColor
-                        ? 'ring-2 ring-gray-400 ring-offset-2' 
-                        : 'hover:ring-2 hover:ring-gray-300 hover:ring-offset-1'
-                    }`}
-                    style={{ backgroundColor: color }}
-                  />
-                ))}
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="customColor" className="text-sm font-medium">
-                  Or choose custom color
-                </Label>
-                <div className="flex gap-2 items-center">
-                  <Input
-                    id="customColor"
-                    type="color"
-                    value={customColor}
-                    onChange={(e) => setCustomColor(e.target.value)}
-                    className="w-16 h-10 p-1 border rounded"
-                  />
-                  <Input
-                    type="text"
-                    value={customColor}
-                    onChange={(e) => setCustomColor(e.target.value)}
-                    placeholder="#000000"
-                    className="flex-1"
-                  />
-                </div>
-              </div>
-            </div>
-          )}
 
           <div className="space-y-3">
             <Label className="text-sm font-medium">Choose Icon</Label>
@@ -220,7 +140,7 @@ const AddCategoryModal = ({ isOpen, onClose, onSubmit, editingCategory, enableCo
               type="submit"
               className="flex-1 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
             >
-              {editingCategory ? 'Update Category' : 'Add Category'}
+              Add Subcategory
             </Button>
           </div>
         </form>
@@ -229,4 +149,4 @@ const AddCategoryModal = ({ isOpen, onClose, onSubmit, editingCategory, enableCo
   );
 };
 
-export default AddCategoryModal;
+export default AddSubcategoryModal;
