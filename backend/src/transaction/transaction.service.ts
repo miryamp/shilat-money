@@ -1,14 +1,17 @@
-import { Injectable, Inject } from '@nestjs/common';
+import { Injectable, Inject, forwardRef } from '@nestjs/common';
 import { Transaction } from '../common/data-entities/transaction';
 import { TransactionRepository } from './transaction-repository.interface';
 import { TransactionType } from 'shared/dist/entities/transaction-type.enum';
+import { CategoryRepository } from '../category/category-repository.interface';
 
 @Injectable()
 export class TransactionService {
     constructor(
         @Inject('TransactionRepo')
-        private readonly transactionRepository: TransactionRepository
-    ) {}
+        private readonly transactionRepository: TransactionRepository,
+        @Inject('CategoryRepo')
+        private readonly categoryRepository: CategoryRepository
+    ) { }
 
     async create(transaction: Transaction): Promise<Transaction> {
         return await this.transactionRepository.create(transaction);
@@ -18,7 +21,7 @@ export class TransactionService {
         householdId: string,
         options?: {
             userId?: string;
-            categoryId?: string;
+            categoryId?: string | string[];
             type?: TransactionType;
             amount?: { gt?: number; gte?: number; lt?: number; lte?: number; eq?: number };
             from?: Date;
@@ -44,16 +47,22 @@ export class TransactionService {
         householdId: string,
         options: { categoryId?: string; from?: Date; to?: Date } = {}
     ): Promise<number> {
+        let categoryIds: string[] | undefined = undefined;
+        if (options.categoryId) {
+            const subcategories = await this.categoryRepository.findAll(householdId, { fatherId: options.categoryId });
+            categoryIds = [options.categoryId, ...subcategories.map(cat => cat.id)];
+        }
+
         const transactions = await this.findAll(householdId, {
-            categoryId: options.categoryId,
+            categoryId: categoryIds,
             from: options.from,
             to: options.to,
         });
 
         const balance = transactions.reduce((sum, tx) => {
-            if (tx.category.type === TransactionType.Income) return sum + tx.amount;
-            if (tx.category.type === TransactionType.Outcome) return sum - tx.amount;
-            return sum;
+            return (tx.category.type === TransactionType.Income) ?
+                sum + tx.amount
+                : sum - tx.amount;
         }, 0);
         return balance;
     }
