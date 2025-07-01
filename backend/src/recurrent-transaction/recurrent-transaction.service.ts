@@ -15,7 +15,18 @@ export class RecurrentTransactionService {
     ) { }
 
     async create(entity: RecurrentTransaction): Promise<RecurrentTransaction> {
-        return await this.repo.create(entity);
+        return await this.dataSource.transaction(async manager => {
+            const created = await manager.save(RecurrentTransaction, entity);
+            // After creating the recurrent transaction, create all past instances up to today
+            const today = new Date();
+            if (entity.startDate && entity.startDate <= today) {
+                const pastInstances = await this.getInstancesInRange(entity.householdId, new Date(entity.startDate), today);
+                for (const instance of pastInstances) {
+                    await manager.save(Transaction, { ...instance, lastUpdated: new Date() });
+                }
+            }
+            return created;
+        });
     }
 
     async findAll(householdId: string, options?: { isActive?: boolean }): Promise<RecurrentTransaction[]> {
@@ -36,11 +47,7 @@ export class RecurrentTransactionService {
         }
 
         return await this.dataSource.transaction(async manager => {
-<<<<<<< HEAD
             // Find and remove all transactions with reacurrenceId = id
-=======
-            // Find and remove all transactions with recurrenceId = id
->>>>>>> feature/back/support-recurrent-transaction
             const transactions = await manager.find(Transaction, { where: { recurrenceId: id, householdId } });
             if (transactions.length > 0) {
                 await manager.remove(transactions);
@@ -66,9 +73,9 @@ export class RecurrentTransactionService {
             while (current <= to) {
                 const nextDate = this.getNextOperationDate(recurrence, current);
                 if (!nextDate || nextDate > to) break;
-                
-                results.push({...recurrence.transactionData, timestamp: new Date(nextDate), recurrenceId: recurrence.id});
-                current = new Date(nextDate); 
+
+                results.push({ ...recurrence.transactionData, timestamp: new Date(nextDate), recurrenceId: recurrence.id });
+                current = new Date(nextDate);
             }
         }
         return results;
