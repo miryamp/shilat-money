@@ -22,7 +22,11 @@ export const fetchTransactions = async (filter?: TransactionFilterParams): Promi
   if ([...params].length) url += `?${params.toString()}`;
   const res = await fetch(url);
   if (!res.ok) throw new Error('Failed to fetch transactions');
-  return res.json();
+  const data = await res.json();
+  if (Array.isArray(data)) {
+    return data.map(t => Object.assign(new Transaction(), t));
+  }
+  return Object.assign(new Transaction(), data);
 };
 
 export const addTransaction = async (transaction: Omit<Transaction, 'id'>): Promise<Transaction> => {
