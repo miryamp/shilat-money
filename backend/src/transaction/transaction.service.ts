@@ -3,6 +3,7 @@ import { Transaction } from '../common/data-entities/transaction';
 import { TransactionRepository } from './transaction-repository.interface';
 import { TransactionType } from 'shared/dist/entities/transaction-type.enum';
 import { CategoryRepository } from '../category/category-repository.interface';
+import { calculateTransactionsBalance } from 'shared/utils/transactionBalance';
 
 @Injectable()
 export class TransactionService {
@@ -59,11 +60,9 @@ export class TransactionService {
             to: options.to,
         });
 
-        const balance = transactions.reduce((sum, tx) => {
-            return (tx.category.type === TransactionType.Income) ?
-                sum + tx.amount
-                : sum - tx.amount;
-        }, 0);
-        return balance;
+        return calculateTransactionsBalance(transactions.map(t => ({
+            amount: t.amount,
+            type: t.category.type
+        })));
     }
 }

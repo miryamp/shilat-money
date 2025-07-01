@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Plus, Minus, Calendar } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -11,6 +10,7 @@ import TransactionList from '@/components/transactions/TransactionList';
 import { useToast } from '@/hooks/use-toast';
 import { Transaction } from '@/types/transaction';
 import { TransactionType } from 'shared/entities/transaction-type.enum';
+import { calculateTransactionsBalance } from 'shared/utils/transactionBalance';
 
 const Transactions = () => {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
@@ -28,9 +28,7 @@ const Transactions = () => {
     return transactionDate >= dateRange.from && transactionDate <= dateRange.to;
   });
 
-  const balance = filteredTransactions.reduce((sum, transaction) => {
-    return sum + (transaction.type === TransactionType.Income ? transaction.amount : -transaction.amount);
-  }, 0);
+  const balance = calculateTransactionsBalance(filteredTransactions);
 
   const handleAddTransaction = (transaction: Omit<Transaction, 'id'>) => {
     const newTransaction: Transaction = {
