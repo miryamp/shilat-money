@@ -121,26 +121,6 @@ const Transactions = () => {
       <div className="max-w-4xl mx-auto px-4 py-8">
         {/* Header with Balance */}
         <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
-          <div className="flex justify-between items-center mb-4">
-            <h1 className="text-2xl font-bold text-gray-900">Transactions</h1>
-            <div className="flex gap-2">
-              <Button
-                onClick={() => setIsIncomeModalOpen(true)}
-                className="bg-green-600 hover:bg-green-700"
-              >
-                <Plus className="w-4 h-4 mr-2" />
-                Income
-              </Button>
-              <Button
-                onClick={() => setIsExpenseModalOpen(true)}
-                className="bg-red-600 hover:bg-red-700"
-              >
-                <Minus className="w-4 h-4 mr-2" />
-                Expense
-              </Button>
-            </div>
-          </div>
-
           {/* Balance Display */}
           <div className="text-center mb-6">
             <div className="text-sm text-gray-500 mb-1">Current Balance</div>
@@ -148,7 +128,7 @@ const Transactions = () => {
               "text-3xl font-bold",
               balance >= 0 ? "text-green-600" : "text-red-600"
             )}>
-              {balance >= 0 ? '+' : ''}${balance.toFixed(2)}
+              ${Math.abs(balance).toFixed(2)}
             </div>
           </div>
 

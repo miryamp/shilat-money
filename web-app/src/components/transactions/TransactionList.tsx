@@ -1,10 +1,10 @@
-
 import React, { useState } from 'react';
-import { Transaction } from '@/types/Transaction';
+import { Transaction } from '@/types/transaction';
 import { format } from 'date-fns';
 import { Button } from '@/components/ui/button';
 import { Pen, Trash2 } from 'lucide-react';
 import DeleteTransactionModal from './DeleteTransactionModal';
+import { TransactionType } from 'shared/entities/transaction-type.enum';
 
 interface TransactionListProps {
   transactions: Transaction[];
@@ -21,7 +21,7 @@ const TransactionList: React.FC<TransactionListProps> = ({
   const [transactionToDelete, setTransactionToDelete] = useState<Transaction | null>(null);
 
   const sortedTransactions = [...transactions].sort((a, b) => 
-    new Date(b.date).getTime() - new Date(a.date).getTime()
+    new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
   );
 
   const handleDeleteClick = (transaction: Transaction, e: React.MouseEvent) => {
@@ -61,9 +61,25 @@ const TransactionList: React.FC<TransactionListProps> = ({
     <>
       <div className="bg-white rounded-lg shadow-sm">
         <div className="p-4 border-b border-gray-200">
-          <h2 className="text-lg font-semibold text-gray-900">
-            Transactions ({sortedTransactions.length})
-          </h2>
+          <div className="flex items-center justify-between">
+            <h2 className="text-lg font-semibold text-gray-900">
+              Transactions ({sortedTransactions.length})
+            </h2>
+            <div className="flex gap-2">
+              <Button
+                onClick={() => onEditTransaction && onEditTransaction({ type: TransactionType.Income } as any)}
+                className="bg-green-600 hover:bg-green-700"
+              >
+                + Income
+              </Button>
+              <Button
+                onClick={() => onEditTransaction && onEditTransaction({ type: TransactionType.Expense } as any)}
+                className="bg-red-600 hover:bg-red-700"
+              >
+                - Expense
+              </Button>
+            </div>
+          </div>
         </div>
         <div className="divide-y divide-gray-200">
           {sortedTransactions.map((transaction) => (
@@ -72,16 +88,16 @@ const TransactionList: React.FC<TransactionListProps> = ({
                 <div className="flex items-center gap-3">
                   <div 
                     className="w-10 h-10 rounded-full flex items-center justify-center"
-                    style={{ backgroundColor: transaction.categoryColor }}
+                    style={{ backgroundColor: transaction.category.color }}
                   >
                     <span className="material-icons text-white text-sm">
-                      {transaction.categoryIcon}
+                      {transaction.category.icon}
                     </span>
                   </div>
                   <div>
                     <div className="font-medium text-gray-900">
-                      {transaction.categoryName}
-                      {transaction.isRecurring && (
+                      {transaction.category.name}
+                      {transaction.reacurrenceId && (
                         <span className="ml-2 text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full">
                           🔁 Recurring
                         </span>
@@ -93,15 +109,15 @@ const TransactionList: React.FC<TransactionListProps> = ({
                       </div>
                     )}
                     <div className="text-xs text-gray-400">
-                      {format(new Date(transaction.date), 'MMM dd, yyyy')}
+                      {format(new Date(transaction.timestamp), 'MMM dd, yyyy')}
                     </div>
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
                   <div className={`text-lg font-semibold ${
-                    transaction.type === 'income' ? 'text-green-600' : 'text-red-600'
+                    transaction.type === TransactionType.Income ? 'text-green-600' : 'text-red-600'
                   }`}>
-                    {transaction.type === 'income' ? '+' : '-'}${transaction.amount.toFixed(2)}
+                    {transaction.type === TransactionType.Income ? '+' : '-'}${transaction.amount.toFixed(2)}
                   </div>
                   
                   {/* Edit and Delete buttons - only visible on hover */}
