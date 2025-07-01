@@ -41,7 +41,7 @@ const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
   const loadCategories = async () => {
     try {
       setLoading(true);
-      const fetchedCategories = await fetchCategories();
+      const fetchedCategories = await fetchCategories(type);
       setCategories(fetchedCategories);
     } catch (error) {
       console.error('Failed to fetch categories:', error);
