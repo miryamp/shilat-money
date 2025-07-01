@@ -9,6 +9,7 @@ import { Transaction } from '@/types/transaction';
 import { TransactionType } from 'shared/entities/transaction-type.enum';
 import { calculateTransactionsBalance } from 'shared/utils/transactionBalance';
 import TransactionFilters, { TransactionFilter } from '@/components/transactions/TransactionFilters';
+import { addTransaction, fetchTransactions } from '@/services/transactionService';
 
 const Transactions = () => {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
@@ -22,22 +23,34 @@ const Transactions = () => {
   const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null);
   const { toast } = useToast();
 
-  // Filter transactions by date and type
-  const filteredTransactions = transactions.filter(transaction => {
-    const transactionDate = new Date(transaction.timestamp);
-    const matchesDate = (!filter.from || transactionDate >= filter.from) && (!filter.to || transactionDate <= filter.to);
-    const matchesType = filter.types.includes(transaction.type);
-    return matchesDate && matchesType;
-  });
+  // Fetch transactions from backend on mount and when filter changes
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const params = {
+          from: filter.from ? filter.from.toISOString().slice(0, 10) : undefined,
+          to: filter.to ? filter.to.toISOString().slice(0, 10) : undefined,
+          types: filter.types.length === 1 ? filter.types : undefined,
+        };
+        const data = await fetchTransactions(params);
+        setTransactions(data);
+      } catch (err) {
+        toast({ title: 'Error', description: 'Failed to fetch transactions' });
+      }
+    };
+    fetchData();
+  }, [filter]);
 
-  const balance = calculateTransactionsBalance(filteredTransactions);
+  const balance = calculateTransactionsBalance(transactions);
 
-  const handleAddTransaction = (transaction: Omit<Transaction, 'id'>) => {
+  const handleAddTransaction = async (transaction: Omit<Transaction, 'id'>) => {
     const newTransaction: Transaction = {
       ...transaction,
-      id: Date.now().toString(),
+      id: Date.now().toString()
     };
     setTransactions(prev => [...prev, newTransaction]);
+    await addTransaction(newTransaction);
+
     toast({
       title: "Transaction added",
       description: `${transaction.type === TransactionType.Income ? 'Income' : 'Expense'} of $${transaction.amount} has been added.`,
@@ -145,7 +158,7 @@ const Transactions = () => {
 
         {/* Transaction List */}
         <TransactionList 
-          transactions={filteredTransactions}
+          transactions={transactions}
           onEditTransaction={handleEditTransaction}
           onDeleteTransaction={handleDeleteTransaction}
         />
