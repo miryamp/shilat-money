@@ -43,12 +43,21 @@ const Transactions = () => {
 
   const balance = calculateTransactionsBalance(transactions);
 
+  const matchesCurrentFilter = (transaction: Transaction) => {
+    if (filter.from && new Date(transaction.timestamp) < new Date(filter.from)) return false;
+    if (filter.to && new Date(transaction.timestamp) > new Date(filter.to)) return false;
+    if (filter.types && filter.types.length && !filter.types.includes(transaction.type)) return false;
+    return true;
+  };
+
   const handleAddTransaction = async (transaction: Omit<Transaction, 'id'>) => {
     const newTransaction: Transaction = {
       ...transaction,
       id: Date.now().toString()
     };
-    setTransactions(prev => [...prev, newTransaction]);
+    if (matchesCurrentFilter(newTransaction)) {
+      setTransactions(prev => [...prev, newTransaction]);
+    }
     await addTransaction(newTransaction);
 
     toast({
@@ -70,13 +79,11 @@ const Transactions = () => {
     if (editingTransaction) {
       try {
         await apiUpdateTransaction(editingTransaction.id, updatedTransaction);
-        setTransactions(prev => 
-          prev.map(t => 
-            t.id === editingTransaction.id 
-              ? { ...updatedTransaction, id: editingTransaction.id }
-              : t
-          )
-        );
+        const updated: Transaction = { ...updatedTransaction, id: editingTransaction.id };
+        setTransactions(prev => {
+          const filtered = prev.filter(t => t.id !== editingTransaction.id);
+          return matchesCurrentFilter(updated) ? [...filtered, updated] : filtered;
+        });
         toast({
           title: "Transaction updated",
           description: "The transaction has been successfully updated.",
@@ -145,7 +152,7 @@ const Transactions = () => {
         </div>
 
         {/* Transaction List */}
-        <TransactionList 
+        <TransactionList
           transactions={transactions}
           onEditTransaction={handleEditTransaction}
           onDeleteTransaction={handleDeleteTransaction}
