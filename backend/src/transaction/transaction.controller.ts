@@ -35,7 +35,6 @@ export class TransactionController {
         @Query('to') to?: string,
         @Query('type') type?: TransactionType,
     ): Promise<Transaction[]> {
-
         return await this.transactionService.findAll(householdId, {
             userId,
             categoryId,

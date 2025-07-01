@@ -33,7 +33,14 @@ export class Transaction implements ITransaction {
     @JoinColumn({ name: 'categoryId' })
     category: Category;
 
-    @Column('decimal', { precision: 12, scale: 2 })
+    @Column('decimal', { 
+        precision: 12, 
+        scale: 2,
+        transformer: {
+            to: (value: number) => value?.toString(),
+            from: (value: string) => value !== null && value !== undefined ? Number(value) : value
+        }
+    })
     amount: number;
 
     @Column({ type: 'timestamp' })
