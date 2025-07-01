@@ -7,28 +7,31 @@ import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import Sidebar from "@/components/Sidebar";
 import Transactions from "./pages/Transactions";
+import { HouseholdProvider } from "./context/HouseholdContext";
 
 const queryClient = new QueryClient();
 
 const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <Sidebar />
-        <div className="ml-48">
-          <Routes>
-            <Route path="/" element={<Transactions />} />
-            <Route path="/transactions" element={<Transactions />} />
-            <Route path="/categories" element={<Index />} />
-            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </div>
-      </BrowserRouter>
-    </TooltipProvider>
-  </QueryClientProvider>
+  <HouseholdProvider>
+    <QueryClientProvider client={queryClient}>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
+          <Sidebar />
+          <div className="ml-48">
+            <Routes>
+              <Route path="/" element={<Transactions />} />
+              <Route path="/transactions" element={<Transactions />} />
+              <Route path="/categories" element={<Index />} />
+              {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </div>
+        </BrowserRouter>
+      </TooltipProvider>
+    </QueryClientProvider>
+  </HouseholdProvider>
 );
 
 export default App;
