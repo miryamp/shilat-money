@@ -146,7 +146,7 @@ const TransactionForm: React.FC<TransactionFormProps> = ({
           className="w-full justify-start"
         >
           <Repeat className="mr-2 h-4 w-4" />
-          🔁 Recurrence
+          Repeat
         </Button>
         
         <RecurrencePanel
