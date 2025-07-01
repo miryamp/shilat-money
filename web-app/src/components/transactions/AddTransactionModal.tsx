@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { fetchCategories } from '@/services/categoryService';
-import { ICategory } from 'shared/dist/entities/category.interface';
+import { ICategory } from 'shared/entities/category.interface';
 import TransactionForm from './TransactionForm';
 import { Transaction } from '@/types/transaction';
-import { TransactionType } from 'shared/dist/entities/transaction-type.enum';
+import { TransactionType } from 'shared/entities/transaction-type.enum';
 
 interface AddTransactionModalProps {
   isOpen: boolean;

@@ -10,7 +10,7 @@ import AddTransactionModal from '@/components/transactions/AddTransactionModal';
 import TransactionList from '@/components/transactions/TransactionList';
 import { useToast } from '@/hooks/use-toast';
 import { Transaction } from '@/types/transaction';
-import { TransactionType } from 'shared/dist/entities/transaction-type.enum';
+import { TransactionType } from 'shared/entities/transaction-type.enum';
 
 const Transactions = () => {
   const [transactions, setTransactions] = useState<Transaction[]>([]);

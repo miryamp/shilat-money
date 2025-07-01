@@ -7,8 +7,8 @@ import DeleteCategoryModal from './DeleteCategoryModal';
 import { fetchCategories, addCategory, updateCategory, deleteCategory } from '@/services/categoryService';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
-import { ICategory } from 'shared/dist/entities/category.interface';
-import { TransactionType } from 'shared/dist/entities/transaction-type.enum';
+import { ICategory } from 'shared/entities/category.interface';
+import { TransactionType } from 'shared/entities/transaction-type.enum';
 
 
 const Categories = () => {

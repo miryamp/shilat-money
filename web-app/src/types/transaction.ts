@@ -1,6 +1,6 @@
-import { ITransaction } from "shared/dist/entities/transaction.interface";
-import { ICategory } from "shared/dist/entities/category.interface";
-import { TransactionType } from "shared/dist/entities/transaction-type.enum";
+import { ITransaction } from "shared/entities/transaction.interface";
+import { ICategory } from "shared/entities/category.interface";
+import { TransactionType } from "shared/entities/transaction-type.enum";
 
 export class Transaction implements ITransaction{
     id: string;

@@ -8,10 +8,10 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Calendar as CalendarIcon, Repeat } from 'lucide-react';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
-import {ICategory} from 'shared/dist/entities/category.interface';
+import {ICategory} from 'shared/entities/category.interface';
 import CategorySelector from './CategorySelector';
 import RecurrencePanel, { RecurrenceData } from './RecurrencePanel';
-import { TransactionType } from 'shared/dist/entities/transaction-type.enum';
+import { TransactionType } from 'shared/entities/transaction-type.enum';
 
 interface TransactionFormProps {
   type: TransactionType;
