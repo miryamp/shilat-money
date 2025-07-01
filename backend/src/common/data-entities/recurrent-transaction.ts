@@ -18,6 +18,9 @@ export class RecurrentTransaction implements IRecurrentTransaction {
     @Column({ type: 'enum', enum: RecurrentTransactionType })
     type: RecurrentTransactionType;
 
+    @Column({ type: 'int', nullable: true })
+    frequency?: number; 
+
     @Column({ type: 'date' })
     startDate: Date;
 
