@@ -9,7 +9,7 @@ import { Transaction } from '@/types/transaction';
 import { TransactionType } from 'shared/entities/transaction-type.enum';
 import { calculateTransactionsBalance } from 'shared/utils/transactionBalance';
 import TransactionFilters, { TransactionFilter } from '@/components/transactions/TransactionFilters';
-import { addTransaction, fetchTransactions, deleteTransaction as apiDeleteTransaction } from '@/services/transactionService';
+import { addTransaction, fetchTransactions, deleteTransaction as apiDeleteTransaction, updateTransaction as apiUpdateTransaction } from '@/services/transactionService';
 
 const Transactions = () => {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
@@ -66,19 +66,24 @@ const Transactions = () => {
     }
   };
 
-  const handleUpdateTransaction = (updatedTransaction: Omit<Transaction, 'id'>) => {
+  const handleUpdateTransaction = async (updatedTransaction: Omit<Transaction, 'id'>) => {
     if (editingTransaction) {
-      setTransactions(prev => 
-        prev.map(t => 
-          t.id === editingTransaction.id 
-            ? { ...updatedTransaction, id: editingTransaction.id }
-            : t
-        )
-      );
-      toast({
-        title: "Transaction updated",
-        description: "The transaction has been successfully updated.",
-      });
+      try {
+        await apiUpdateTransaction(editingTransaction.id, updatedTransaction);
+        setTransactions(prev => 
+          prev.map(t => 
+            t.id === editingTransaction.id 
+              ? { ...updatedTransaction, id: editingTransaction.id }
+              : t
+          )
+        );
+        toast({
+          title: "Transaction updated",
+          description: "The transaction has been successfully updated.",
+        });
+      } catch (err) {
+        toast({ title: 'Error', description: 'Failed to update transaction' });
+      }
     }
     setEditingTransaction(null);
   };
