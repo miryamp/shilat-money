@@ -20,7 +20,7 @@ export class MysqlTransactionRepository implements TransactionRepository {
             const category = await this.categoryRepo.findOne({ where: { id: transaction.categoryId, householdId: transaction.householdId, isDeleted: false } });
             if (!category) throw new Error('Category does not exist or is deleted');
         }
-        return await this.transactionRepo.save({ transaction, lastUpdated: new Date() });
+        return await this.transactionRepo.save({ ...transaction, lastUpdated: new Date() });
     }
 
     async findAll(

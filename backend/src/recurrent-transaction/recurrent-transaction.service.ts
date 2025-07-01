@@ -36,7 +36,7 @@ export class RecurrentTransactionService {
 
         return await this.dataSource.transaction(async manager => {
             // Find and remove all transactions with reacurrenceId = id
-            const transactions = await manager.find(Transaction, { where: { reacurrenceId: id, householdId } });
+            const transactions = await manager.find(Transaction, { where: { recurrenceId: id, householdId } });
             if (transactions.length > 0) {
                 await manager.remove(transactions);
             }
