@@ -9,7 +9,7 @@ import { Transaction } from '@/types/transaction';
 import { TransactionType } from 'shared/entities/transaction-type.enum';
 import { calculateTransactionsBalance } from 'shared/utils/transactionBalance';
 import TransactionFilters, { TransactionFilter } from '@/components/transactions/TransactionFilters';
-import { addTransaction, fetchTransactions } from '@/services/transactionService';
+import { addTransaction, fetchTransactions, deleteTransaction as apiDeleteTransaction } from '@/services/transactionService';
 
 const Transactions = () => {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
@@ -83,9 +83,13 @@ const Transactions = () => {
     setEditingTransaction(null);
   };
 
-  const handleDeleteTransaction = (transactionId: string, deleteOption?: 'this' | 'all' | 'up-to' | 'from') => {
+  const handleDeleteTransaction = async (transactionId: string, deleteOption?: 'this' | 'all' | 'up-to' | 'from') => {
     setTransactions(prev => prev.filter(t => t.id !== transactionId));
-    
+    try {
+      await apiDeleteTransaction(transactionId);
+    } catch (err) {
+      toast({ title: 'Error', description: 'Failed to delete transaction' });
+    }
     let message = "Transaction has been deleted.";
     if (deleteOption) {
       switch (deleteOption) {
@@ -103,7 +107,6 @@ const Transactions = () => {
           break;
       }
     }
-    
     toast({
       title: "Transaction deleted",
       description: message,
