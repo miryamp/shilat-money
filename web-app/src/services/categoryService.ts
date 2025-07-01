@@ -1,7 +1,7 @@
 import { ICategory } from 'shared/entities/category.interface';
 import { TransactionType } from 'shared/entities/transaction-type.enum.js';
 
-const API_BASE = 'http://192.168.120.226:3000';
+const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:3000';
 
 export const fetchCategories = async (categoryType?: TransactionType): Promise<ICategory[]> => {
   let url = `${API_BASE}/category`;
