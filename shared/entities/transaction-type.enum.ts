@@ -1,5 +1,5 @@
 enum TransactionType {
-    Outcome = 'Outcome',
+    Expense = 'Expense',
     Income = 'Income'
 }
 
