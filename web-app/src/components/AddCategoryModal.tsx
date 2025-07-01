@@ -4,6 +4,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { ICategory } from 'shared/entities/category.interface';
+import { useHousehold } from '@/context/HouseholdContext';
 
 interface AddCategoryModalProps {
   isOpen: boolean;
@@ -25,6 +26,7 @@ const commonIcons = [
 ];
 
 const AddCategoryModal = ({ isOpen, onClose, onSubmit, editingCategory, enableColorPicker = true }: AddCategoryModalProps) => {
+  const { householdId } = useHousehold();
   const [name, setName] = useState('');
   const [selectedColor, setSelectedColor] = useState(colors[0]);
   const [customColor, setCustomColor] = useState('');
@@ -66,7 +68,7 @@ const AddCategoryModal = ({ isOpen, onClose, onSubmit, editingCategory, enableCo
       name: name.trim(),
       color: finalColor,
       icon: finalIcon,
-      householdId: 'mainhousehold',
+      householdId,
     } as Omit<ICategory, 'id'>);
 
     // Reset form
