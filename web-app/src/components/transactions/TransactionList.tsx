@@ -10,12 +10,14 @@ interface TransactionListProps {
   transactions: Transaction[];
   onEditTransaction?: (transaction: Transaction) => void;
   onDeleteTransaction?: (transactionId: string, deleteOption?: 'this' | 'all' | 'up-to' | 'from') => void;
+  onAddTransaction?: (type: TransactionType) => void;
 }
 
 const TransactionList: React.FC<TransactionListProps> = ({ 
   transactions, 
   onEditTransaction,
-  onDeleteTransaction 
+  onDeleteTransaction,
+  onAddTransaction
 }) => {
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [transactionToDelete, setTransactionToDelete] = useState<Transaction | null>(null);
@@ -67,13 +69,13 @@ const TransactionList: React.FC<TransactionListProps> = ({
             </h2>
             <div className="flex gap-2">
               <Button
-                onClick={() => onEditTransaction && onEditTransaction({ type: TransactionType.Income } as any)}
+                onClick={() => onAddTransaction && onAddTransaction(TransactionType.Income)}
                 className="bg-green-600 hover:bg-green-700"
               >
                 + Income
               </Button>
               <Button
-                onClick={() => onEditTransaction && onEditTransaction({ type: TransactionType.Expense } as any)}
+                onClick={() => onAddTransaction && onAddTransaction(TransactionType.Expense)}
                 className="bg-red-600 hover:bg-red-700"
               >
                 - Expense

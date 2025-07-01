@@ -141,6 +141,10 @@ const Transactions = () => {
           transactions={transactions}
           onEditTransaction={handleEditTransaction}
           onDeleteTransaction={handleDeleteTransaction}
+          onAddTransaction={(type) => {
+            if (type === TransactionType.Income) setIsIncomeModalOpen(true);
+            else setIsExpenseModalOpen(true);
+          }}
         />
 
         {/* Add/Edit Transaction Modals */}
