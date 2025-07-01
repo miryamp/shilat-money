@@ -6,7 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import Sidebar from "@/components/Sidebar";
-import Transactions from "./pages/transactions";
+import Transactions from "./pages/Transactions";
 
 const queryClient = new QueryClient();
 
