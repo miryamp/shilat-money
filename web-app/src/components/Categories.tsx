@@ -8,11 +8,8 @@ import { fetchCategories, addCategory, updateCategory, deleteCategory } from '@/
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { ICategory } from 'shared/dist/entities/category.interface';
+import { TransactionType } from 'shared/dist/entities/transaction-type.enum';
 
-enum TransactionType {
-  Outcome = 'Outcome',
-  Income = 'Income'
-}
 
 const Categories = () => {
   const [categories, setCategories] = useState<ICategory[]>([]);
@@ -23,7 +20,7 @@ const Categories = () => {
   const [loading, setLoading] = useState(true);
   const [hoveredCategoryId, setHoveredCategoryId] = useState<string | null>(null);
   const [subCategoryToDelete, setSubCategoryToDelete] = useState<ICategory | null>(null);
-  const [categoryType, setCategoryType] = useState<TransactionType>(TransactionType.Outcome);
+  const [categoryType, setCategoryType] = useState<TransactionType>(TransactionType.Expense);
   const hoverTimeout = React.useRef<NodeJS.Timeout | null>(null);
   const { toast } = useToast();
 
@@ -57,7 +54,7 @@ const Categories = () => {
         setEditingCategory(null);
       } else {
         // Add new category via backend
-        const createdCategory = await addCategory({...newCategory, type: categoryType});
+        const createdCategory = await addCategory({ ...newCategory, type: categoryType });
         setCategories(prev => [...prev, createdCategory]);
         toast({
           title: "Category added",
@@ -79,13 +76,13 @@ const Categories = () => {
   const handleAddSubcategory = async (subcategory: Omit<ICategory, 'id'>) => {
     if (!selectedParentCategory) return;
 
-    subcategory.fatherId = selectedParentCategory.id; 
+    subcategory.fatherId = selectedParentCategory.id;
     subcategory.type = selectedParentCategory.type;
     subcategory.householdId = selectedParentCategory.householdId;
     subcategory.color = selectedParentCategory.color;
 
     const newCategory = await addCategory(subcategory);
-    
+
     setCategories(prev => [...prev, newCategory]);
     toast({
       title: "Subcategory added",
@@ -173,10 +170,10 @@ const Categories = () => {
           <div className="inline-flex rounded-md shadow-sm" role="group">
             <button
               type="button"
-              className={`px-4 py-2 text-sm font-medium border border-gray-200 focus:z-10 focus:ring-2 focus:ring-blue-500 focus:text-blue-700 ${categoryType === TransactionType.Outcome ? 'bg-blue-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-50'}`}
-              onClick={() => setCategoryType(TransactionType.Outcome)}
+              className={`px-4 py-2 text-sm font-medium border border-gray-200 focus:z-10 focus:ring-2 focus:ring-blue-500 focus:text-blue-700 ${categoryType === TransactionType.Expense ? 'bg-blue-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-50'}`}
+              onClick={() => setCategoryType(TransactionType.Expense)}
             >
-              Outcome
+              Expense
             </button>
             <button
               type="button"
