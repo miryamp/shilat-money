@@ -16,6 +16,7 @@ import { TransactionType } from 'shared/entities/transaction-type.enum';
 interface TransactionFormProps {
   type: TransactionType;
   categories: ICategory[];
+  subcategoriesMap: Record<string, ICategory[]>;
   selectedCategory: ICategory | null;
   selectedSubcategory: ICategory | null;
   expandedCategories: Set<string>;
@@ -45,6 +46,7 @@ interface TransactionFormProps {
 const TransactionForm: React.FC<TransactionFormProps> = ({
   type,
   categories,
+  subcategoriesMap,
   selectedCategory,
   selectedSubcategory,
   expandedCategories,
@@ -85,6 +87,7 @@ const TransactionForm: React.FC<TransactionFormProps> = ({
       {/* Category Selection */}
       <CategorySelector
         categories={categories}
+        subcategoriesMap={subcategoriesMap}
         selectedCategory={selectedCategory}
         selectedSubcategory={selectedSubcategory}
         expandedCategories={expandedCategories}

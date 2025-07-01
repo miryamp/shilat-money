@@ -1,23 +1,24 @@
-
 import React from 'react';
 import { ChevronDown, ChevronRight } from 'lucide-react';
 import { Label } from '@/components/ui/label';
 import { cn } from '@/lib/utils';
-import { Category } from '@/components/Categories';
+import { ICategory } from 'shared/entities/category.interface';
 
 interface CategorySelectorProps {
-  categories: Category[];
-  selectedCategory: Category | null;
-  selectedSubcategory: Category | null;
+  categories: ICategory[];
+  subcategoriesMap: Record<string, ICategory[]>;
+  selectedCategory: ICategory | null;
+  selectedSubcategory: ICategory | null;
   expandedCategories: Set<string>;
   loading: boolean;
-  onCategorySelect: (category: Category) => void;
-  onSubcategorySelect: (subcategory: Category) => void;
+  onCategorySelect: (category: ICategory) => void;
+  onSubcategorySelect: (subcategory: ICategory) => void;
   onToggleExpansion: (categoryId: string) => void;
 }
 
 const CategorySelector: React.FC<CategorySelectorProps> = ({
   categories,
+  subcategoriesMap,
   selectedCategory,
   selectedSubcategory,
   expandedCategories,
@@ -26,16 +27,8 @@ const CategorySelector: React.FC<CategorySelectorProps> = ({
   onSubcategorySelect,
   onToggleExpansion
 }) => {
-  const mainCategories = categories.filter(cat => !cat.parentId);
-  const subcategoriesMap = categories.reduce((acc, cat) => {
-    if (cat.parentId) {
-      if (!acc[cat.parentId]) {
-        acc[cat.parentId] = [];
-      }
-      acc[cat.parentId].push(cat);
-    }
-    return acc;
-  }, {} as Record<string, Category[]>);
+  const mainCategories = categories.filter(cat => !cat.fatherId);
+
 
   if (loading) {
     return (
@@ -57,18 +50,23 @@ const CategorySelector: React.FC<CategorySelectorProps> = ({
             {/* Main Category */}
             <button
               type="button"
-              onClick={() => onCategorySelect(category)}
+              onClick={() =>
+                selectedCategory?.id === category.id
+                  ? onCategorySelect(null)
+                  : onCategorySelect(category)
+              }
               className={cn(
                 "flex items-center gap-2 p-2 rounded-lg border transition-colors w-full",
                 (selectedCategory?.id === category.id)
-                  ? "border-purple-500 bg-purple-50"
-                  : "border-gray-200 hover:border-gray-300"
+                  ? "border-2 bg-opacity-90" // always show border when selected
+                  : "border border-gray-200 hover:border-gray-300"
               )}
+              style={selectedCategory?.id === category.id ? { backgroundColor: category.color, borderColor: category.color } : {}}
             >
               {subcategoriesMap[category.id] && subcategoriesMap[category.id].length > 0 && (
-                expandedCategories.has(category.id) ? 
-                  <ChevronDown className="w-4 h-4" /> : 
-                  <ChevronRight className="w-4 h-4" />
+                <span onClick={e => { e.stopPropagation(); onToggleExpansion(category.id); }}>
+                  {expandedCategories.has(category.id) ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
+                </span>
               )}
               <div 
                 className="w-6 h-6 rounded-full flex items-center justify-center"
@@ -82,7 +80,6 @@ const CategorySelector: React.FC<CategorySelectorProps> = ({
                 {category.name}
               </span>
             </button>
-
             {/* Subcategories */}
             {expandedCategories.has(category.id) && subcategoriesMap[category.id] && (
               <div className="ml-6 mt-1 space-y-1">
@@ -90,23 +87,32 @@ const CategorySelector: React.FC<CategorySelectorProps> = ({
                   <button
                     key={subcategory.id}
                     type="button"
-                    onClick={() => onSubcategorySelect(subcategory)}
-                    className={cn(
-                      "flex items-center gap-2 p-2 rounded-lg border transition-colors w-full",
+                    onClick={() =>
                       selectedSubcategory?.id === subcategory.id
-                        ? "border-purple-500 bg-purple-50"
-                        : "border-gray-200 hover:border-gray-300"
+                        ? onSubcategorySelect(null)
+                        : onSubcategorySelect(subcategory)
+                    }
+                    className={cn(
+                      "flex items-center gap-2 p-2 rounded-lg border transition-colors w-full bg-white",
+                      selectedSubcategory?.id === subcategory.id
+                        ? "border-2"
+                        : "border"
                     )}
+                    style={{
+                      borderColor: category.color,
+                      color: category.color,
+                      ...(selectedSubcategory?.id === subcategory.id ? { backgroundColor: subcategory.color + '22' } : {})
+                    }}
                   >
                     <div 
-                      className="w-5 h-5 rounded-full flex items-center justify-center"
-                      style={{ backgroundColor: subcategory.color }}
+                      className="w-5 h-5 rounded-full flex items-center justify-center bg-white"
+                      style={{ border: `2px solid ${category.color}` }}
                     >
-                      <span className="material-icons text-white text-xs">
+                      <span className="material-icons text-xs" style={{ color: category.color }}>
                         {subcategory.icon}
                       </span>
                     </div>
-                    <span className="text-sm font-medium truncate">
+                    <span className="text-sm font-medium truncate" style={{ color: category.color }}>
                       {subcategory.name}
                     </span>
                   </button>

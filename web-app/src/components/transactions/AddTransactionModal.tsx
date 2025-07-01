@@ -5,6 +5,7 @@ import { ICategory } from 'shared/entities/category.interface';
 import TransactionForm from './TransactionForm';
 import { Transaction } from '@/types/transaction';
 import { TransactionType } from 'shared/entities/transaction-type.enum';
+import { useHousehold } from '@/context/HouseholdContext';
 
 interface AddTransactionModalProps {
   isOpen: boolean;
@@ -20,6 +21,7 @@ const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
   type
 }) => {
   const [categories, setCategories] = useState<ICategory[]>([]);
+  const [subCategoriesMap, setSubCategoriesMap] = useState<Record<string, ICategory[]>>({});
   const [selectedCategory, setSelectedCategory] = useState<ICategory | null>(null);
   const [selectedSubcategory, setSelectedSubcategory] = useState<ICategory | null>(null);
   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set());
@@ -32,6 +34,8 @@ const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
   const [recurringInterval, setRecurringInterval] = useState<number>(1);
   const [recurringDate, setRecurringDate] = useState<string>('');
 
+  const { householdId } = useHousehold();
+
   useEffect(() => {
     if (isOpen) {
       loadCategories();
@@ -41,24 +45,15 @@ const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
   const loadCategories = async () => {
     try {
       setLoading(true);
-      const fetchedCategories = await fetchCategories(type);
+      const [fetchedCategories, subcategoriesMap] = await fetchCategories(type);
       setCategories(fetchedCategories);
+      setSubCategoriesMap(subcategoriesMap);
     } catch (error) {
       console.error('Failed to fetch categories:', error);
     } finally {
       setLoading(false);
     }
   };
-
-  const subcategoriesMap = categories.reduce((acc, cat) => {
-    if (cat.fatherId) {
-      if (!acc[cat.fatherId]) {
-        acc[cat.fatherId] = [];
-      }
-      acc[cat.fatherId].push(cat);
-    }
-    return acc;
-  }, {} as Record<string, ICategory[]>);
 
   const toggleCategoryExpansion = (categoryId: string) => {
     setExpandedCategories(prev => {
@@ -73,7 +68,7 @@ const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
   };
 
   const handleCategorySelect = (category: ICategory) => {
-    if (subcategoriesMap[category.id] && subcategoriesMap[category.id].length > 0) {
+    if (subCategoriesMap[category.id] && subCategoriesMap[category.id].length > 0) {
       toggleCategoryExpansion(category.id);
     } else {
       setSelectedCategory(category);
@@ -94,7 +89,7 @@ const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     const selectedCategoryInfo = getSelectedCategoryInfo();
     if (!selectedCategoryInfo || !amount) {
       return;
@@ -108,7 +103,7 @@ const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
       comment: comment.trim() || undefined,
       timestamp: date,
       lastUpdated: new Date(),
-      householdId: 'default-household-id', // Replace with actual household ID logic
+      householdId: householdId,
       userId: 'default-user-id', // Replace with actual user ID logic
     } as Omit<Transaction, "id">;
 
@@ -143,10 +138,11 @@ const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
             Add {type === TransactionType.Income ? 'Income' : 'Expense'}
           </DialogTitle>
         </DialogHeader>
-        
+
         <TransactionForm
           type={type}
           categories={categories}
+          subcategoriesMap={subCategoriesMap}
           selectedCategory={selectedCategory}
           selectedSubcategory={selectedSubcategory}
           expandedCategories={expandedCategories}

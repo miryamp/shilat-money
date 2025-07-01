@@ -13,6 +13,7 @@ import { TransactionType } from 'shared/entities/transaction-type.enum';
 
 const Categories = () => {
   const [categories, setCategories] = useState<ICategory[]>([]);
+  const [subcategoriesMap, setSubcategoriesMap] = useState<Record<string, ICategory[]>>({});
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isSubcategoryModalOpen, setIsSubcategoryModalOpen] = useState(false);
   const [editingCategory, setEditingCategory] = useState<ICategory | null>(null);
@@ -31,9 +32,10 @@ const Categories = () => {
   const loadCategories = async (categoryType: TransactionType) => {
     try {
       setLoading(true);
-      const fetchedCategories = await fetchCategories(categoryType as any);
-      setCategories(fetchedCategories);
-    } catch (error) {
+      const [fetchedCategories, subMap] = await fetchCategories(categoryType as any);
+      setCategories(fetchedCategories as ICategory[]);
+      setSubcategoriesMap(subMap);
+        } catch (error) {
       console.error('Failed to fetch categories:', error);
     } finally {
       setLoading(false);
@@ -143,17 +145,7 @@ const Categories = () => {
     setSelectedParentCategory(null);
   };
 
-  // Separate main categories and subcategories
   const mainCategories = categories.filter(cat => !cat.fatherId);
-  const subcategoriesMap = categories.reduce((acc, cat) => {
-    if (cat.fatherId) {
-      if (!acc[cat.fatherId]) {
-        acc[cat.fatherId] = [];
-      }
-      acc[cat.fatherId].push(cat);
-    }
-    return acc;
-  }, {} as Record<string, ICategory[]>);
 
   if (loading) {
     return (
