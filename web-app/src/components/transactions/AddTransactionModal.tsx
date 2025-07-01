@@ -12,13 +12,15 @@ interface AddTransactionModalProps {
   onClose: () => void;
   onSubmit: (transaction: Omit<Transaction, 'id'>) => void;
   type: TransactionType;
+  transaction?: Transaction | null;
 }
 
 const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
   isOpen,
   onClose,
   onSubmit,
-  type
+  type,
+  transaction
 }) => {
   const [categories, setCategories] = useState<ICategory[]>([]);
   const [subCategoriesMap, setSubCategoriesMap] = useState<Record<string, ICategory[]>>({});
@@ -39,8 +41,23 @@ const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
   useEffect(() => {
     if (isOpen) {
       loadCategories();
+      if (transaction) {
+        setAmount(transaction.amount.toString());
+        setComment(transaction.comment || '');
+        setDate(new Date(transaction.timestamp));
+        // Select category/subcategory
+        if (transaction.category && transaction.category.fatherId) {
+          setSelectedSubcategory(transaction.category);
+          setSelectedCategory(categories.find(cat => cat.id === transaction.category.fatherId) || null);
+        } else if (transaction.category) {
+          setSelectedCategory(transaction.category);
+          setSelectedSubcategory(null);
+        }
+      } else {
+        resetForm();
+      }
     }
-  }, [isOpen]);
+  }, [isOpen, transaction]);
 
   const loadCategories = async () => {
     try {
@@ -95,7 +112,7 @@ const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
       return;
     }
 
-    const transaction = {
+    const transactionData = {
       amount: parseFloat(amount),
       categoryId: selectedCategoryInfo.id,
       category: selectedCategoryInfo,
@@ -107,7 +124,7 @@ const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
       userId: 'default-user-id', // Replace with actual user ID logic
     } as Omit<Transaction, "id">;
 
-    onSubmit(transaction);
+    onSubmit(transactionData);
     resetForm();
     onClose();
   };
@@ -135,7 +152,7 @@ const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
       <DialogContent className="sm:max-w-md max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>
-            Add {type === TransactionType.Income ? 'Income' : 'Expense'}
+            {transaction ? 'Edit' : 'Add'} {type === TransactionType.Income ? 'Income' : 'Expense'}
           </DialogTitle>
         </DialogHeader>
 
@@ -167,6 +184,7 @@ const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
           onSubmit={handleSubmit}
           onCancel={handleClose}
           getSelectedCategoryInfo={getSelectedCategoryInfo}
+          submitLabel={transaction ? 'Edit' : undefined}
         />
       </DialogContent>
     </Dialog>

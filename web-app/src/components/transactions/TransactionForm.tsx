@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -41,6 +40,7 @@ interface TransactionFormProps {
   onSubmit: (e: React.FormEvent) => void;
   onCancel: () => void;
   getSelectedCategoryInfo: () => ICategory | null;
+  submitLabel?: string;
 }
 
 const TransactionForm: React.FC<TransactionFormProps> = ({
@@ -65,7 +65,8 @@ const TransactionForm: React.FC<TransactionFormProps> = ({
   onRecurringIntervalChange,
   onSubmit,
   onCancel,
-  getSelectedCategoryInfo
+  getSelectedCategoryInfo,
+  submitLabel
 }) => {
   const [isRecurrencePanelOpen, setIsRecurrencePanelOpen] = useState(false);
 
@@ -182,7 +183,7 @@ const TransactionForm: React.FC<TransactionFormProps> = ({
             type === TransactionType.Income ? "bg-green-600 hover:bg-green-700" : "bg-red-600 hover:bg-red-700"
           )}
         >
-          Add {type === TransactionType.Income ? 'Income' : 'Expense'}
+          {submitLabel ? submitLabel : `Add ${type === TransactionType.Income ? 'Income' : 'Expense'}`}
         </Button>
       </div>
     </form>
