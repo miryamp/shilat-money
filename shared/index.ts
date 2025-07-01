@@ -4,3 +4,5 @@ export * from './entities/recurrent-transaction.interface';
 export * from './entities/transaction.interface';
 export * from './entities/user.interface';
 export * from './entities/transaction-type.enum';
+
+export * from './utils/transactionBalance';

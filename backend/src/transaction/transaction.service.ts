@@ -3,7 +3,7 @@ import { Transaction } from '../common/data-entities/transaction';
 import { TransactionRepository } from './transaction-repository.interface';
 import { TransactionType } from 'shared/dist/entities/transaction-type.enum';
 import { CategoryRepository } from '../category/category-repository.interface';
-import { calculateTransactionsBalance } from 'shared/utils/transactionBalance';
+import { calculateTransactionsBalance } from 'shared/dist/utils/transactionBalance';
 
 @Injectable()
 export class TransactionService {
