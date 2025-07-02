@@ -18,8 +18,8 @@ const Transactions = () => {
     to: new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0),
     types: [TransactionType.Income, TransactionType.Expense],
   });
-  const [isIncomeModalOpen, setIsIncomeModalOpen] = useState(false);
-  const [isExpenseModalOpen, setIsExpenseModalOpen] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [modalType, setModalType] = useState<TransactionType | null>(null);
   const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null);
   const { toast } = useToast();
 
@@ -68,11 +68,8 @@ const Transactions = () => {
 
   const handleEditTransaction = (transaction: Transaction) => {
     setEditingTransaction(transaction);
-    if (transaction.type === TransactionType.Income) {
-      setIsIncomeModalOpen(true);
-    } else {
-      setIsExpenseModalOpen(true);
-    }
+    setModalType(transaction.type);
+    setIsModalOpen(true);
   };
 
   const handleUpdateTransaction = async (updatedTransaction: Omit<Transaction, 'id'>) => {
@@ -126,9 +123,9 @@ const Transactions = () => {
   };
 
   const handleModalClose = () => {
-    setIsIncomeModalOpen(false);
-    setIsExpenseModalOpen(false);
+    setIsModalOpen(false);
     setEditingTransaction(null);
+    setModalType(null);
   };
 
   return (
@@ -157,25 +154,17 @@ const Transactions = () => {
           onEditTransaction={handleEditTransaction}
           onDeleteTransaction={handleDeleteTransaction}
           onAddTransaction={(type) => {
-            if (type === TransactionType.Income) setIsIncomeModalOpen(true);
-            else setIsExpenseModalOpen(true);
+            setModalType(type);
+            setIsModalOpen(true);
           }}
         />
 
-        {/* Add/Edit Transaction Modals */}
+        {/* Add/Edit Transaction Modal */}
         <AddTransactionModal
-          isOpen={isIncomeModalOpen}
+          isOpen={isModalOpen}
           onClose={handleModalClose}
           onSubmit={editingTransaction ? handleUpdateTransaction : handleAddTransaction}
-          type={TransactionType.Income}
-          transaction={editingTransaction ? editingTransaction : undefined}
-        />
-
-        <AddTransactionModal
-          isOpen={isExpenseModalOpen}
-          onClose={handleModalClose}
-          onSubmit={editingTransaction ? handleUpdateTransaction : handleAddTransaction}
-          type={TransactionType.Expense}
+          type={modalType ?? TransactionType.Expense}
           transaction={editingTransaction ? editingTransaction : undefined}
         />
       </div>
