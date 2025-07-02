@@ -168,6 +168,7 @@ const Transactions = () => {
           onClose={handleModalClose}
           onSubmit={editingTransaction ? handleUpdateTransaction : handleAddTransaction}
           type={TransactionType.Income}
+          transaction={editingTransaction ? editingTransaction : undefined}
         />
 
         <AddTransactionModal
@@ -175,6 +176,7 @@ const Transactions = () => {
           onClose={handleModalClose}
           onSubmit={editingTransaction ? handleUpdateTransaction : handleAddTransaction}
           type={TransactionType.Expense}
+          transaction={editingTransaction ? editingTransaction : undefined}
         />
       </div>
     </div>

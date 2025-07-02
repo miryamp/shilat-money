@@ -24,6 +24,7 @@ const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
 }) => {
   const [categories, setCategories] = useState<ICategory[]>([]);
   const [subCategoriesMap, setSubCategoriesMap] = useState<Record<string, ICategory[]>>({});
+  const { householdId } = useHousehold();
   const [selectedCategory, setSelectedCategory] = useState<ICategory | null>(null);
   const [selectedSubcategory, setSelectedSubcategory] = useState<ICategory | null>(null);
   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set());
@@ -36,28 +37,39 @@ const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
   const [recurringInterval, setRecurringInterval] = useState<number>(1);
   const [recurringDate, setRecurringDate] = useState<string>('');
 
-  const { householdId } = useHousehold();
-
   useEffect(() => {
     if (isOpen) {
       loadCategories();
       if (transaction) {
-        setAmount(transaction.amount.toString());
-        setComment(transaction.comment || '');
-        setDate(new Date(transaction.timestamp));
-        // Select category/subcategory
-        if (transaction.category && transaction.category.fatherId) {
-          setSelectedSubcategory(transaction.category);
-          setSelectedCategory(categories.find(cat => cat.id === transaction.category.fatherId) || null);
-        } else if (transaction.category) {
-          setSelectedCategory(transaction.category);
-          setSelectedSubcategory(null);
-        }
-      } else {
-        resetForm();
+        populateFormWithTransaction(transaction);
       }
     }
   }, [isOpen, transaction]);
+
+  const populateFormWithTransaction = (trans: Transaction) => {
+    setAmount(trans.amount.toString());
+    setComment(trans.comment || '');
+    setDate(new Date(trans.timestamp));
+    setIsRecurring(!!trans.reacurrenceId);
+    // setRecurringType(trans.recurringType || 'monthly');
+    // setRecurringInterval(trans.recurringInterval || 1);
+    // setRecurringDate(trans.recurringDate || '');
+    
+    // Find and set the category
+    const category = categories.find(cat => cat.id === trans.categoryId);
+    if (category) {
+      if (category.fatherId) {
+        // It's a subcategory
+        setSelectedSubcategory(category);
+        setSelectedCategory(null);
+        setExpandedCategories(prev => new Set(prev).add(category.fatherId!));
+      } else {
+        // It's a main category
+        setSelectedCategory(category);
+        setSelectedSubcategory(null);
+      }
+    }
+  };
 
   const loadCategories = async () => {
     try {

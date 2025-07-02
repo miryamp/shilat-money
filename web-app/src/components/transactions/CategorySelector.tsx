@@ -55,10 +55,10 @@ const CategorySelector: React.FC<CategorySelectorProps> = ({
                   "flex items-center gap-2 p-2 rounded-lg border transition-colors w-full",
                   (selectedCategory?.id === category.id && !selectedSubcategory)
                     ? "border-purple-500 bg-opacity-100"
-                    : "border-gray-200 hover:border-gray-300 bg-opacity-60"
+                    : "border-gray-200 hover:border-gray-300"
                 )}
                 style={{
-                  backgroundColor: category.color + ((selectedCategory?.id === category.id && !selectedSubcategory) ? '' : '99'), // 99 = ~60% opacity
+                  backgroundColor: category.color + ((selectedCategory?.id === category.id && !selectedSubcategory) ? '' : '67'), // 67 = ~40% opacity
                   borderColor: (selectedCategory?.id === category.id && !selectedSubcategory) ? category.color : undefined
                 }}
               >
