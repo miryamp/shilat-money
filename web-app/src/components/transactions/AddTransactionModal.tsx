@@ -85,17 +85,31 @@ const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
   };
 
   const handleCategorySelect = (category: ICategory) => {
-    if (subCategoriesMap[category.id] && subCategoriesMap[category.id].length > 0) {
+    if (selectedCategory?.id === category.id) {
+      // Unselect if clicking the same category
+      setSelectedCategory(null);
+      setSelectedSubcategory(null);
+    } else if (subCategoriesMap[category.id] && subCategoriesMap[category.id].length > 0) {
+      // Toggle expansion if it has subcategories
       toggleCategoryExpansion(category.id);
+      // Also select the main category
+      setSelectedCategory(category);
+      setSelectedSubcategory(null);
     } else {
+      // Select category without subcategories
       setSelectedCategory(category);
       setSelectedSubcategory(null);
     }
   };
 
   const handleSubcategorySelect = (subcategory: ICategory) => {
-    setSelectedSubcategory(subcategory);
-    setSelectedCategory(null);
+    if (selectedSubcategory?.id === subcategory.id) {
+      // Unselect if clicking the same subcategory
+      setSelectedSubcategory(null);
+    } else {
+      setSelectedSubcategory(subcategory);
+      setSelectedCategory(null);
+    }
   };
 
   const getSelectedCategoryInfo = () => {

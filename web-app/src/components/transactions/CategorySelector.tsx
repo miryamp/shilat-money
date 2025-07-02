@@ -29,7 +29,6 @@ const CategorySelector: React.FC<CategorySelectorProps> = ({
 }) => {
   const mainCategories = categories.filter(cat => !cat.fatherId);
 
-
   if (loading) {
     return (
       <div className="space-y-2">
@@ -40,89 +39,121 @@ const CategorySelector: React.FC<CategorySelectorProps> = ({
       </div>
     );
   }
-
+  
   return (
     <div className="space-y-2">
       <Label>Category</Label>
-      <div className="space-y-1 max-h-48 overflow-y-auto border rounded-lg p-2">
-        {mainCategories.map((category) => (
-          <div key={category.id}>
-            {/* Main Category */}
-            <button
-              type="button"
-              onClick={() =>
-                selectedCategory?.id === category.id
-                  ? onCategorySelect(null)
-                  : onCategorySelect(category)
-              }
-              className={cn(
-                "flex items-center gap-2 p-2 rounded-lg border transition-colors w-full",
-                (selectedCategory?.id === category.id)
-                  ? "border-2 bg-opacity-90" // always show border when selected
-                  : "border border-gray-200 hover:border-gray-300"
-              )}
-              style={selectedCategory?.id === category.id ? { backgroundColor: category.color, borderColor: category.color } : {}}
-            >
-              {subcategoriesMap[category.id] && subcategoriesMap[category.id].length > 0 && (
-                <span onClick={e => { e.stopPropagation(); onToggleExpansion(category.id); }}>
-                  {expandedCategories.has(category.id) ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
-                </span>
-              )}
-              <div 
-                className="w-6 h-6 rounded-full flex items-center justify-center"
-                style={{ backgroundColor: category.color }}
+
+        <div className="space-y-1 max-h-48 overflow-y-auto border rounded-lg p-2">
+          {mainCategories.map((category) => (
+            <div key={category.id}>
+              {/* Main Category */}
+              <button
+                type="button"
+                onClick={() => onCategorySelect(category)}
+                className={cn(
+                  "flex items-center gap-2 p-2 rounded-lg border transition-colors w-full",
+                  (selectedCategory?.id === category.id && !selectedSubcategory)
+                    ? "border-purple-500 bg-opacity-100"
+                    : "border-gray-200 hover:border-gray-300 bg-opacity-60"
+                )}
+                style={{
+                  backgroundColor: category.color + ((selectedCategory?.id === category.id && !selectedSubcategory) ? '' : '99'), // 99 = ~60% opacity
+                  borderColor: (selectedCategory?.id === category.id && !selectedSubcategory) ? category.color : undefined
+                }}
               >
-                <span className="material-icons text-white text-xs">
-                  {category.icon}
-                </span>
-              </div>
-              <span className="text-sm font-medium truncate">
-                {category.name}
-              </span>
-            </button>
-            {/* Subcategories */}
-            {expandedCategories.has(category.id) && subcategoriesMap[category.id] && (
-              <div className="ml-6 mt-1 space-y-1">
-                {subcategoriesMap[category.id].map((subcategory) => (
+                {subcategoriesMap[category.id] && subcategoriesMap[category.id].length > 0 && (
                   <button
-                    key={subcategory.id}
                     type="button"
-                    onClick={() =>
-                      selectedSubcategory?.id === subcategory.id
-                        ? onSubcategorySelect(null)
-                        : onSubcategorySelect(subcategory)
-                    }
-                    className={cn(
-                      "flex items-center gap-2 p-2 rounded-lg border transition-colors w-full bg-white",
-                      selectedSubcategory?.id === subcategory.id
-                        ? "border-2"
-                        : "border"
-                    )}
-                    style={{
-                      borderColor: category.color,
-                      color: category.color,
-                      ...(selectedSubcategory?.id === subcategory.id ? { backgroundColor: subcategory.color + '22' } : {})
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onToggleExpansion(category.id);
                     }}
+                    className="p-1 hover:bg-gray-100 rounded"
                   >
-                    <div 
-                      className="w-5 h-5 rounded-full flex items-center justify-center bg-white"
-                      style={{ border: `2px solid ${category.color}` }}
-                    >
-                      <span className="material-icons text-xs" style={{ color: category.color }}>
-                        {subcategory.icon}
-                      </span>
-                    </div>
-                    <span className="text-sm font-medium truncate" style={{ color: category.color }}>
-                      {subcategory.name}
-                    </span>
+                    {expandedCategories.has(category.id) ?
+                      <ChevronDown className="w-4 h-4" /> :
+                      <ChevronRight className="w-4 h-4" />
+                    }
                   </button>
-                ))}
-              </div>
-            )}
-          </div>
-        ))}
+                )}
+                <div
+                  className="w-6 h-6 rounded-full flex items-center justify-center"
+                  style={{ backgroundColor: 'transparent' }}
+                >
+                  <span className="material-icons text-white text-xs">
+                    {category.icon}
+                  </span>
+                </div>
+                <span className="text-sm font-medium truncate text-white">
+                  {category.name}
+                </span>
+                {subcategoriesMap[category.id] && subcategoriesMap[category.id].length > 0 && (
+                  <span className="text-xs text-gray-500 ml-auto">
+                    ({subcategoriesMap[category.id].length})
+                  </span>
+                )}
+              </button>
+
+              {/* Subcategories */}
+              {expandedCategories.has(category.id) && subcategoriesMap[category.id] && (
+                <div className="ml-6 mt-1 space-y-1">
+                  {subcategoriesMap[category.id].map((subcategory) => (
+                    <button
+                      key={subcategory.id}
+                      type="button"
+                      onClick={() => onSubcategorySelect(subcategory)}
+                      className={cn(
+                        "flex items-center gap-2 p-2 rounded-lg border transition-colors w-full",
+                        selectedSubcategory?.id === subcategory.id
+                          ? "border-2"
+                          : "border"
+                      )}
+                      style={
+                        selectedSubcategory?.id === subcategory.id
+                          ? {
+                              backgroundColor: category.color,
+                              borderColor: category.color,
+                              color: 'white',
+                            }
+                          : {
+                              borderColor: category.color,
+                              color: category.color,
+                              backgroundColor: 'white',
+                            }
+                      }
+                    >
+                      <div
+                        className="w-5 h-5 rounded-full flex items-center justify-center"
+                        style={
+                          selectedSubcategory?.id === subcategory.id
+                            ? { backgroundColor: 'transparent' }
+                            : { backgroundColor: 'white' } // removed border outline when not selected
+                        }
+                      >
+                        <span
+                          className="material-icons text-xs"
+                          style={{
+                            color: selectedSubcategory?.id === subcategory.id ? 'white' : category.color,
+                          }}
+                        >
+                          {subcategory.icon}
+                        </span>
+                      </div>
+                      <span
+                        className="text-sm font-medium truncate"
+                        style={{ color: selectedSubcategory?.id === subcategory.id ? 'white' : category.color }}
+                      >
+                        {subcategory.name}
+                      </span>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
       </div>
-    </div>
   );
 };
 
