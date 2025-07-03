@@ -58,6 +58,15 @@ export class RecurrentTransactionService {
             const updated = await this.repo.update(id, update, householdId);
             if (!updated) return null;
 
+            // Update all associated transactions with new recurrence data
+            const associatedTransactions = await manager.find(Transaction, { where: { recurrenceId: id, householdId } });
+            for (const tx of associatedTransactions) {
+                // Only update fields that are present in update
+                Object.assign(tx, update);
+                tx.lastUpdated = new Date();
+                await manager.save(Transaction, tx);
+            }
+
             // Only operate if new date is <= today
             const today = new Date();
             const newStart = update.startDate || current.startDate;
