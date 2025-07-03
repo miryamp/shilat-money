@@ -76,11 +76,6 @@ const TransactionForm: React.FC<TransactionFormProps> = ({
     if (recurrenceData.interval) {
       onRecurringIntervalChange(recurrenceData.interval);
     }
-    setIsRecurrencePanelOpen(false);
-  };
-
-  const handleRecurrenceCancel = () => {
-    setIsRecurrencePanelOpen(false);
   };
 
   return (
@@ -155,43 +150,43 @@ const TransactionForm: React.FC<TransactionFormProps> = ({
       </div>
       {/* Recurrence Panel */}
       {isRecurrencePanelOpen && (
-        <div className="relative z-10 mt-2">
+        <div className="z-10 mt-2 w-full absolute left-0">
           <RecurrencePanel
             isOpen={isRecurrencePanelOpen}
             startDate={date}
             onStartDateChange={onDateChange}
             onSave={handleRecurrenceSave}
-            onCancel={handleRecurrenceCancel}
           />
         </div>
       )}
+      <div className={isRecurrencePanelOpen ? "pt-[420px]" : ""}>
+        {/* Comment */}
+        <div className="space-y-2">
+          <Label htmlFor="comment">Comment (optional)</Label>
+          <Input
+            id="comment"
+            value={comment}
+            onChange={(e) => onCommentChange(e.target.value)}
+            placeholder="Add a note about this transaction..."
+          />
+        </div>
 
-      {/* Comment */}
-      <div className="space-y-2">
-        <Label htmlFor="comment">Comment (optional)</Label>
-        <Input
-          id="comment"
-          value={comment}
-          onChange={(e) => onCommentChange(e.target.value)}
-          placeholder="Add a note about this transaction..."
-        />
-      </div>
-
-      {/* Submit Button */}
-      <div className="flex gap-2 pt-4">
-        <Button type="button" variant="outline" onClick={onCancel} className="flex-1">
-          Cancel
-        </Button>
-        <Button 
-          type="submit" 
-          disabled={!getSelectedCategoryInfo() || !amount}
-          className={cn(
-            "flex-1",
-            type === TransactionType.Income ? "bg-green-600 hover:bg-green-700" : "bg-red-600 hover:bg-red-700"
-          )}
-        >
-          {submitLabel ? submitLabel : `Add ${type === TransactionType.Income ? 'Income' : 'Expense'}`}
-        </Button>
+        {/* Submit Button */}
+        <div className="flex gap-2 pt-4">
+          <Button type="button" variant="outline" onClick={onCancel} className="flex-1">
+            Cancel
+          </Button>
+          <Button 
+            type="submit" 
+            disabled={!getSelectedCategoryInfo() || !amount}
+            className={cn(
+              "flex-1",
+              type === TransactionType.Income ? "bg-green-600 hover:bg-green-700" : "bg-red-600 hover:bg-red-700"
+            )}
+          >
+            {submitLabel ? submitLabel : `Add ${type === TransactionType.Income ? 'Income' : 'Expense'}`}
+          </Button>
+        </div>
       </div>
     </form>
   );

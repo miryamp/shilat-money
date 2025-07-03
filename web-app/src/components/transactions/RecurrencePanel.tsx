@@ -15,7 +15,6 @@ interface RecurrencePanelProps {
   startDate: Date;
   onStartDateChange: (date: Date) => void;
   onSave: (recurrence: RecurrenceData) => void;
-  onCancel: () => void;
 }
 
 export interface RecurrenceData {
@@ -30,8 +29,7 @@ const RecurrencePanel: React.FC<RecurrencePanelProps> = ({
   isOpen,
   startDate,
   onStartDateChange,
-  onSave,
-  onCancel
+  onSave
 }) => {
   const [recurrenceType, setRecurrenceType] = useState<'daily' | 'weekly' | 'monthly' | 'yearly'>('monthly');
   const [dailyInterval, setDailyInterval] = useState(1);
@@ -279,16 +277,6 @@ const RecurrencePanel: React.FC<RecurrencePanelProps> = ({
       <div className="p-3 bg-gray-50 rounded-md">
         <div className="text-sm text-gray-600 mb-1">Preview:</div>
         <div className="text-sm font-medium">{getPreviewText()}</div>
-      </div>
-
-      {/* Action Buttons */}
-      <div className="flex gap-2 pt-2">
-        <Button variant="outline" onClick={onCancel} className="flex-1">
-          Cancel
-        </Button>
-        <Button onClick={handleSave} className="flex-1 bg-purple-600 hover:bg-purple-700">
-          Save
-        </Button>
       </div>
     </div>
   );
