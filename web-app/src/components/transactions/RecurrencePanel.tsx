@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -42,6 +41,7 @@ const RecurrencePanel: React.FC<RecurrencePanelProps> = ({
   const [endCondition, setEndCondition] = useState<'never' | 'after' | 'on'>('never');
   const [endCount, setEndCount] = useState(12);
   const [endDate, setEndDate] = useState<Date>(addMonths(startDate, 12));
+  const [endConditionOpen, setEndConditionOpen] = useState(false);
 
   // Sync recurrence settings when start date changes
   useEffect(() => {
@@ -172,13 +172,13 @@ const RecurrencePanel: React.FC<RecurrencePanelProps> = ({
           
           <div className="flex items-center space-x-2">
             <RadioGroupItem value="weekly" id="weekly" />
-            <Label htmlFor="weekly" className="cursor-pointer">Weekly (every 7 days)</Label>
+            <Label htmlFor="weekly" className="cursor-pointer">Weekly</Label>
           </div>
           
           <div className="flex items-center space-x-2">
             <RadioGroupItem value="monthly" id="monthly" />
             <Label htmlFor="monthly" className="flex items-center gap-2 cursor-pointer">
-              Monthly on day
+              Monthly on
               <Input
                 type="number"
                 min="1"
@@ -221,53 +221,58 @@ const RecurrencePanel: React.FC<RecurrencePanelProps> = ({
 
       {/* End Condition */}
       <div className="space-y-3">
-        <Label className="text-base font-medium">End Condition</Label>
-        <RadioGroup value={endCondition} onValueChange={(value: 'never' | 'after' | 'on') => setEndCondition(value)}>
-          <div className="flex items-center space-x-2">
-            <RadioGroupItem value="never" id="never" />
-            <Label htmlFor="never" className="cursor-pointer">Never</Label>
-          </div>
-          
-          <div className="flex items-center space-x-2">
-            <RadioGroupItem value="after" id="after" />
-            <Label htmlFor="after" className="flex items-center gap-2 cursor-pointer">
-              Ends after
-              <Input
-                type="number"
-                min="1"
-                max="999"
-                value={endCount}
-                onChange={(e) => setEndCount(parseInt(e.target.value) || 1)}
-                className="w-20 h-8"
-              />
-              times
-            </Label>
-          </div>
-          
-          <div className="flex items-center space-x-2">
-            <RadioGroupItem value="on" id="on" />
-            <Label htmlFor="on" className="flex items-center gap-2 cursor-pointer">
-              Ends on
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button variant="outline" className="h-8 text-left">
-                    <CalendarIcon className="w-4 h-4 mr-2" />
-                    {format(endDate, "MMM d, yyyy")}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
-                  <Calendar
-                    mode="single"
-                    selected={endDate}
-                    onSelect={(date) => date && setEndDate(date)}
-                    initialFocus
-                    className="p-3 pointer-events-auto"
-                  />
-                </PopoverContent>
-              </Popover>
-            </Label>
-          </div>
-        </RadioGroup>
+        <Label className="text-base font-medium flex items-center cursor-pointer select-none" onClick={() => setEndConditionOpen((v) => !v)}>
+          <span className="mr-2">End Condition</span>
+          <span className={cn("transition-transform", endConditionOpen ? "rotate-90" : "rotate-0")}>▶</span>
+        </Label>
+        {endConditionOpen && (
+          <RadioGroup value={endCondition} onValueChange={(value: 'never' | 'after' | 'on') => setEndCondition(value)}>
+            <div className="flex items-center space-x-2">
+              <RadioGroupItem value="never" id="never" />
+              <Label htmlFor="never" className="cursor-pointer">Never</Label>
+            </div>
+            
+            <div className="flex items-center space-x-2">
+              <RadioGroupItem value="after" id="after" />
+              <Label htmlFor="after" className="flex items-center gap-2 cursor-pointer">
+                Ends after
+                <Input
+                  type="number"
+                  min="1"
+                  max="999"
+                  value={endCount}
+                  onChange={(e) => setEndCount(parseInt(e.target.value) || 1)}
+                  className="w-20 h-8"
+                />
+                times
+              </Label>
+            </div>
+            
+            <div className="flex items-center space-x-2">
+              <RadioGroupItem value="on" id="on" />
+              <Label htmlFor="on" className="flex items-center gap-2 cursor-pointer">
+                Ends on
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button variant="outline" className="h-8 text-left">
+                      <CalendarIcon className="w-4 h-4 mr-2" />
+                      {format(endDate, "MMM d, yyyy")}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={endDate}
+                      onSelect={(date) => date && setEndDate(date)}
+                      initialFocus
+                      className="p-3 pointer-events-auto"
+                    />
+                  </PopoverContent>
+                </Popover>
+              </Label>
+            </div>
+          </RadioGroup>
+        )}
       </div>
 
       {/* Preview */}
