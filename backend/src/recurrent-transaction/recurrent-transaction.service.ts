@@ -5,6 +5,7 @@ import { MysqlRecurrentTransactionRepository } from './mysql-recurrent-transacti
 import { DataSource } from 'typeorm';
 import { Transaction } from '../common/data-entities/transaction';
 import { RecurrentTransactionType } from 'shared/dist/entities/recurrent-transaction-type.enum';
+import { getNextRecurrenceDate, isDateInRecurrence } from './recurrence-strategy/recurrence-strategies.utils';
 
 @Injectable()
 export class RecurrentTransactionService {
@@ -68,10 +69,10 @@ export class RecurrentTransactionService {
 
             const startMovedForward = startDateChanged && newStart > prevStart && newStart <= today;
             const endMovedBackward = endDateChanged && prevEnd && newEnd && newEnd < prevEnd && newEnd <= today;
-            
+
             const startMovedBackward = startDateChanged && newStart < prevStart && newStart <= today;
             const endMovedForward = endDateChanged && newEnd && (!prevEnd || newEnd > prevEnd) && newEnd <= today;
-            
+
             if (startMovedForward || endMovedBackward) {
                 // Remove transactions with timestamp < newStart or > newEnd
                 const qb = manager.createQueryBuilder()
@@ -141,10 +142,18 @@ export class RecurrentTransactionService {
                 (recurrence.startDate && recurrence.startDate < from))
                 continue;
 
-            let current = new Date(recurrence.startDate < from ? recurrence.startDate: from);
-            results.push({ ...recurrence.transactionData, timestamp: new Date(current), recurrenceId: recurrence.id });
+            let current = new Date(recurrence.startDate < from ? from : recurrence.startDate);
+
+            if (isDateInRecurrence(current, recurrence)) {
+                results.push({
+                    ...recurrence.transactionData,
+                    timestamp: current,
+                    recurrenceId: recurrence.id
+                });
+            }
+            
             while (current <= to) {
-                const nextDate = this.getNextOperationDate(recurrence, current);
+                const nextDate = getNextRecurrenceDate(current, recurrence);
                 if (!nextDate || nextDate > to) break;
 
                 results.push({ ...recurrence.transactionData, timestamp: new Date(nextDate), recurrenceId: recurrence.id });
@@ -152,40 +161,5 @@ export class RecurrentTransactionService {
             }
         }
         return results;
-    }
-
-    getNextOperationDate(recurrence: RecurrentTransaction, lastOperated: Date): Date | null {
-        if (!recurrence.active) return null;
-        let next = new Date(lastOperated);
-        switch (recurrence.type) {
-            case RecurrentTransactionType.Daily:
-                next.setDate(next.getDate() + (recurrence.frequency || 1));
-                break;
-            case RecurrentTransactionType.Monthly:
-                {
-                    const originalDay = next.getDate();
-                    next.setMonth(next.getMonth() + 1);
-                    if (recurrence.shiftToValidDate && next.getDate() < originalDay) {
-                        next = new Date(next.getFullYear(), next.getMonth() + 1, 0);
-                    }
-                }
-                break;
-            case RecurrentTransactionType.Yearly:
-                {
-                    const originalMonth = next.getMonth();
-                    const originalDay = next.getDate();
-                    next.setFullYear(next.getFullYear() + 1);
-                    // If shiftToValidDate and the new date is not the same month or day, set to last day of the original month
-                    if (recurrence.shiftToValidDate && (next.getMonth() !== originalMonth || next.getDate() < originalDay)) {
-                        next = new Date(next.getFullYear(), originalMonth + 1, 0);
-                    }
-                }
-                break;
-            default:
-                return null;
-        }
-        if (recurrence.endDate && next > recurrence.endDate) return null;
-        if (next < recurrence.startDate) return new Date(recurrence.startDate);
-        return next;
     }
 }
