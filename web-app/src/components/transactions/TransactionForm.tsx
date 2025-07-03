@@ -113,51 +113,58 @@ const TransactionForm: React.FC<TransactionFormProps> = ({
         />
       </div>
 
-      {/* Date */}
-      <div className="space-y-2">
-        <Label>Date</Label>
-        <Popover>
-          <PopoverTrigger asChild>
-            <Button
-              variant="outline"
-              className="justify-start text-left font-normal w-full"
-            >
-              <CalendarIcon className="mr-2 h-4 w-4" />
-              {format(date, "PPP")}
-            </Button>
-          </PopoverTrigger>
-          <PopoverContent className="w-auto p-0" align="start">
-            <Calendar
-              mode="single"
-              selected={date}
-              onSelect={(selectedDate) => selectedDate && onDateChange(selectedDate)}
-              initialFocus
-              className="p-3 pointer-events-auto"
-            />
-          </PopoverContent>
-        </Popover>
+      {/* Date & Recurrence */}
+      <div className="flex gap-2 items-end">
+        <div className="flex-1 space-y-2">
+          <Label>Date</Label>
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button
+                variant="outline"
+                className="justify-start text-left font-normal w-full"
+              >
+                <CalendarIcon className="mr-2 h-4 w-4" />
+                {format(date, "PPP")}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0" align="start">
+              <Calendar
+                mode="single"
+                selected={date}
+                onSelect={(selectedDate) => selectedDate && onDateChange(selectedDate)}
+                initialFocus
+                className="p-3 pointer-events-auto"
+              />
+            </PopoverContent>
+          </Popover>
+        </div>
+        <div className="flex flex-col justify-end min-w-[110px] relative">
+          <Button
+            type="button"
+            variant={isRecurrencePanelOpen ? "secondary" : "outline"}
+            onClick={() => setIsRecurrencePanelOpen(!isRecurrencePanelOpen)}
+            className={cn(
+              "w-full justify-start",
+              isRecurrencePanelOpen && "border-blue-600 text-blue-700 bg-blue-50 hover:bg-blue-100"
+            )}
+          >
+            <Repeat className={cn("mr-2 h-4 w-4", isRecurrencePanelOpen && "text-blue-700")}/>
+            Repeat
+          </Button>
+        </div>
       </div>
-
-      {/* Recurrence */}
-      <div className="space-y-2 relative">
-        <Button
-          type="button"
-          variant="outline"
-          onClick={() => setIsRecurrencePanelOpen(!isRecurrencePanelOpen)}
-          className="w-full justify-start"
-        >
-          <Repeat className="mr-2 h-4 w-4" />
-          Repeat
-        </Button>
-        
-        <RecurrencePanel
-          isOpen={isRecurrencePanelOpen}
-          startDate={date}
-          onStartDateChange={onDateChange}
-          onSave={handleRecurrenceSave}
-          onCancel={handleRecurrenceCancel}
-        />
-      </div>
+      {/* Recurrence Panel */}
+      {isRecurrencePanelOpen && (
+        <div className="relative z-10 mt-2">
+          <RecurrencePanel
+            isOpen={isRecurrencePanelOpen}
+            startDate={date}
+            onStartDateChange={onDateChange}
+            onSave={handleRecurrenceSave}
+            onCancel={handleRecurrenceCancel}
+          />
+        </div>
+      )}
 
       {/* Comment */}
       <div className="space-y-2">
