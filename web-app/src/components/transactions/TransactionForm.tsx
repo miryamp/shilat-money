@@ -41,6 +41,7 @@ interface TransactionFormProps {
   onCancel: () => void;
   getSelectedCategoryInfo: () => ICategory | null;
   submitLabel?: string;
+  onRecurrencePanelChange?: (data: any) => void;
 }
 
 const TransactionForm: React.FC<TransactionFormProps> = ({
@@ -66,15 +67,19 @@ const TransactionForm: React.FC<TransactionFormProps> = ({
   onSubmit,
   onCancel,
   getSelectedCategoryInfo,
-  submitLabel
+  submitLabel,
+  onRecurrencePanelChange
 }) => {
-  const [isRecurrencePanelOpen, setIsRecurrencePanelOpen] = useState(false);
+  const [isRecurrent, setIsRecurrent] = useState(false);
 
   const handleRecurrenceSave = (recurrenceData: RecurrenceData) => {
     onRecurringChange(true);
     onRecurringTypeChange(recurrenceData.type);
     if (recurrenceData.interval) {
       onRecurringIntervalChange(recurrenceData.interval);
+    }
+    if (onRecurrencePanelChange) {
+      onRecurrencePanelChange(recurrenceData);
     }
   };
 
@@ -136,30 +141,30 @@ const TransactionForm: React.FC<TransactionFormProps> = ({
         <div className="flex flex-col justify-end min-w-[110px] relative">
           <Button
             type="button"
-            variant={isRecurrencePanelOpen ? "secondary" : "outline"}
-            onClick={() => setIsRecurrencePanelOpen(!isRecurrencePanelOpen)}
+            variant={isRecurrent ? "secondary" : "outline"}
+            onClick={() => setIsRecurrent(!isRecurrent)}
             className={cn(
               "w-full justify-start",
-              isRecurrencePanelOpen && "border-blue-600 text-blue-700 bg-blue-50 hover:bg-blue-100"
+              isRecurrent && "border-blue-600 text-blue-700 bg-blue-50 hover:bg-blue-100"
             )}
           >
-            <Repeat className={cn("mr-2 h-4 w-4", isRecurrencePanelOpen && "text-blue-700")}/>
+            <Repeat className={cn("mr-2 h-4 w-4", isRecurrent && "text-blue-700")}/>
             Repeat
           </Button>
         </div>
       </div>
       {/* Recurrence Panel */}
-      {isRecurrencePanelOpen && (
+      {isRecurrent && (
         <div className="z-10 mt-2 w-full absolute left-0">
           <RecurrencePanel
-            isOpen={isRecurrencePanelOpen}
+            isOpen={isRecurrent}
             startDate={date}
             onStartDateChange={onDateChange}
             onSave={handleRecurrenceSave}
           />
         </div>
       )}
-      <div className={isRecurrencePanelOpen ? "pt-[420px]" : ""}>
+      <div className={isRecurrent ? "pt-[420px]" : ""}>
         {/* Comment */}
         <div className="space-y-2">
           <Label htmlFor="comment">Comment (optional)</Label>

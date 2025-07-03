@@ -51,10 +51,28 @@ const RecurrencePanel: React.FC<RecurrencePanelProps> = ({
     }
   }, [startDate, recurrenceType]);
 
+  // Propagate recurrence data on any relevant state change
+  useEffect(() => {
+    let type = recurrenceType;
+    let interval = dailyInterval;
+    if (recurrenceType === 'weekly') {
+      type = 'daily';
+      interval = 7;
+    }
+    const recurrenceData: RecurrenceData = {
+      type: type,
+      interval: type === 'daily' ? interval : undefined,
+      endCondition,
+      endCount: endCondition === 'after' ? endCount : undefined,
+      endDate: endCondition === 'on' ? endDate : undefined,
+    };
+    onSave(recurrenceData);
+    // eslint-disable-next-line
+  }, [recurrenceType, dailyInterval, monthlyDay, yearlyMonth, yearlyDay, endCondition, endCount, endDate]);
+
   // Update start date when recurrence settings change
   const handleRecurrenceChange = (type: 'daily' | 'weekly' | 'monthly' | 'yearly') => {
     setRecurrenceType(type);
-    
     if (type === 'monthly') {
       const newDay = monthlyDay;
       const newDate = setDateFns(startDate, newDay);
@@ -96,7 +114,7 @@ const RecurrencePanel: React.FC<RecurrencePanelProps> = ({
 
   const getPreviewText = () => {
     let preview = "Will repeat ";
-    
+
     switch (recurrenceType) {
       case 'daily':
         preview += `every ${dailyInterval} day${dailyInterval > 1 ? 's' : ''}`;
@@ -111,15 +129,15 @@ const RecurrencePanel: React.FC<RecurrencePanelProps> = ({
         preview += `every ${format(new Date(2024, yearlyMonth - 1, yearlyDay), 'MMMM do')}`;
         break;
     }
-    
+
     preview += ` starting ${format(startDate, 'MMM d')}`;
-    
+
     if (endCondition === 'after') {
       preview += ` for ${endCount} times`;
     } else if (endCondition === 'on') {
       preview += ` until ${format(endDate, 'MMM d, yyyy')}`;
     }
-    
+
     return preview;
   };
 
@@ -134,9 +152,16 @@ const RecurrencePanel: React.FC<RecurrencePanelProps> = ({
   };
 
   const handleSave = () => {
+    let type = recurrenceType;
+    let interval = dailyInterval;
+
+    if (recurrenceType === 'weekly') {
+      type = 'daily';
+      interval = 7; 
+    }
     const recurrenceData: RecurrenceData = {
-      type: recurrenceType,
-      interval: recurrenceType === 'daily' ? dailyInterval : undefined,
+      type: type,
+      interval: type === 'daily' ? interval : undefined,
       endCondition,
       endCount: endCondition === 'after' ? endCount : undefined,
       endDate: endCondition === 'on' ? endDate : undefined,
@@ -161,18 +186,22 @@ const RecurrencePanel: React.FC<RecurrencePanelProps> = ({
                 min="1"
                 max="365"
                 value={dailyInterval}
-                onChange={(e) => setDailyInterval(parseInt(e.target.value) || 1)}
+                onChange={(e) => {
+                  setDailyInterval(parseInt(e.target.value) || 1);
+                  handleSave();
+                }
+                }
                 className="w-16 h-8"
               />
               days
             </Label>
           </div>
-          
+
           <div className="flex items-center space-x-2">
             <RadioGroupItem value="weekly" id="weekly" />
             <Label htmlFor="weekly" className="cursor-pointer">Weekly</Label>
           </div>
-          
+
           <div className="flex items-center space-x-2">
             <RadioGroupItem value="monthly" id="monthly" />
             <Label htmlFor="monthly" className="flex items-center gap-2 cursor-pointer">
@@ -182,17 +211,23 @@ const RecurrencePanel: React.FC<RecurrencePanelProps> = ({
                 min="1"
                 max="31"
                 value={monthlyDay}
-                onChange={(e) => handleMonthlyDayChange(parseInt(e.target.value) || 1)}
+                onChange={(e) => {
+                  handleMonthlyDayChange(parseInt(e.target.value) || 1);
+                  handleSave();
+                }}
                 className="w-16 h-8"
               />
             </Label>
           </div>
-          
+
           <div className="flex items-center space-x-2">
             <RadioGroupItem value="yearly" id="yearly" />
             <Label htmlFor="yearly" className="flex items-center gap-2 cursor-pointer">
               Yearly on
-              <Select value={yearlyMonth.toString()} onValueChange={(value) => handleYearlyDateChange(parseInt(value), yearlyDay)}>
+              <Select value={yearlyMonth.toString()} onValueChange={(value) => {
+                handleYearlyDateChange(parseInt(value), yearlyDay);
+                handleSave();
+              }}>
                 <SelectTrigger className="w-24 h-8">
                   <SelectValue />
                 </SelectTrigger>
@@ -209,7 +244,10 @@ const RecurrencePanel: React.FC<RecurrencePanelProps> = ({
                 min="1"
                 max="31"
                 value={yearlyDay}
-                onChange={(e) => handleYearlyDateChange(yearlyMonth, parseInt(e.target.value) || 1)}
+                onChange={(e) => {
+                  handleYearlyDateChange(yearlyMonth, parseInt(e.target.value) || 1);
+                  handleSave();
+                }}
                 className="w-16 h-8"
               />
             </Label>
@@ -229,7 +267,7 @@ const RecurrencePanel: React.FC<RecurrencePanelProps> = ({
               <RadioGroupItem value="never" id="never" />
               <Label htmlFor="never" className="cursor-pointer">Never</Label>
             </div>
-            
+
             <div className="flex items-center space-x-2">
               <RadioGroupItem value="after" id="after" />
               <Label htmlFor="after" className="flex items-center gap-2 cursor-pointer">
@@ -245,7 +283,7 @@ const RecurrencePanel: React.FC<RecurrencePanelProps> = ({
                 times
               </Label>
             </div>
-            
+
             <div className="flex items-center space-x-2">
               <RadioGroupItem value="on" id="on" />
               <Label htmlFor="on" className="flex items-center gap-2 cursor-pointer">

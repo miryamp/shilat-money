@@ -6,6 +6,9 @@ import TransactionForm from './TransactionForm';
 import { Transaction } from '@/types/transaction';
 import { TransactionType } from 'shared/entities/transaction-type.enum';
 import { useHousehold } from '@/context/HouseholdContext';
+import { addTransaction } from '@/services/transactionService';
+import { addRecurrenceTransaction } from '@/services/recurrenceTransactionService';
+import { IRecurrentTransaction } from 'shared/entities/recurrent-transaction.interface';
 
 interface AddTransactionModalProps {
   isOpen: boolean;
@@ -36,6 +39,7 @@ const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
   const [recurringType, setRecurringType] = useState<'daily' | 'weekly' | 'monthly' | 'yearly'>('monthly');
   const [recurringInterval, setRecurringInterval] = useState<number>(1);
   const [recurringDate, setRecurringDate] = useState<string>('');
+  const [recurrenceData, setRecurrenceData] = useState<any>(null); // Store RecurrencePanel data
 
   useEffect(() => {
     if (isOpen) {
@@ -130,14 +134,17 @@ const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
     return null;
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
+  // Update recurrenceData when RecurrencePanel changes
+  const handleRecurrencePanelChange = (data: any) => {
+    setRecurrenceData(data);
+  };
 
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
     const selectedCategoryInfo = getSelectedCategoryInfo();
     if (!selectedCategoryInfo || !amount) {
       return;
     }
-
     const transactionData = {
       amount: parseFloat(amount),
       categoryId: selectedCategoryInfo.id,
@@ -150,9 +157,29 @@ const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
       userId: 'default-user-id', // Replace with actual user ID logic
     } as Omit<Transaction, "id">;
 
-    onSubmit(transactionData);
-    resetForm();
-    onClose();
+    try {
+      if (isRecurring && recurrenceData) {
+        // Build IRecurrentTransaction (omit id)
+        const recurrencePayload: Omit<IRecurrentTransaction, 'id'> = {
+          householdId: householdId,
+          transactionData,
+          type: recurrenceData.type,
+          frequency: recurrenceData.type === 'daily'? recurringInterval : undefined,
+          startDate: date,
+          endDate: recurrenceData.endDate,
+          shiftToValidDate: false, // or true if you want to shift
+          isActive: true,
+        };
+        await addRecurrenceTransaction(recurrencePayload);
+      } else {
+        await addTransaction(transactionData);
+      }
+      resetForm();
+      onClose();
+    } catch (err) {
+      // Optionally handle error
+      console.error(err);
+    }
   };
 
   const resetForm = () => {
@@ -211,6 +238,8 @@ const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
           onCancel={handleClose}
           getSelectedCategoryInfo={getSelectedCategoryInfo}
           submitLabel={transaction ? 'Edit' : undefined}
+          // Add RecurrencePanel change handler
+          onRecurrencePanelChange={handleRecurrencePanelChange}
         />
       </DialogContent>
     </Dialog>
