@@ -2,11 +2,49 @@
   "name": "shared",
   "version": "1.0.0",
   "main": "dist/index.js",
+  "module": "dist/index.mjs",
   "types": "dist/index.d.ts",
   "scripts": {
-    "build": "tsc -p tsconfig.json"
+    "build": "tsup"
   },
   "dependencies": {
     "typescript": "^5.8.3"
+  },
+  "devDependencies": {
+    "tsup": "^8.0.0"
+  },
+  "exports": {
+    ".": {
+      "require": "./dist/index.js",
+      "import": "./dist/index.mjs"
+    },
+    "./entities/transaction-type.enum": {
+      "require": "./dist/entities/transaction-type.enum.js",
+      "import": "./dist/entities/transaction-type.enum.mjs"
+    },
+    "./entities/category.interface": {
+      "require": "./dist/entities/category.interface.js",
+      "import": "./dist/entities/category.interface.mjs"
+    },
+    "./entities/currency.enum": {
+      "require": "./dist/entities/currency.enum.js",
+      "import": "./dist/entities/currency.enum.mjs"
+    },
+    "./entities/language.enum": {
+      "require": "./dist/entities/language.enum.js",
+      "import": "./dist/entities/language.enum.mjs"
+    },
+    "./entities/recurrent-transaction-type.enum": {
+      "require": "./dist/entities/recurrent-transaction-type.enum.js",
+      "import": "./dist/entities/recurrent-transaction-type.enum.mjs"
+    },
+    "./entities/other": {
+      "require": "./dist/entities/other.js",
+      "import": "./dist/entities/other.mjs"
+    },
+    "./utils/transactionBalance": {
+      "require": "./dist/utils/transactionBalance.js",
+      "import": "./dist/utils/transactionBalance.mjs"
+    }
   }
 }

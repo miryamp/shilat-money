@@ -5,7 +5,7 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
   app.enableCors({
-    origin: 'http://192.168.1.107:8080', // or use a function to dynamically check the origin
+    origin: 'http://192.168.1.105:8080', // or use a function to dynamically check the origin
     credentials: true,
   });
 

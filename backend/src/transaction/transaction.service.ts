@@ -1,9 +1,9 @@
 import { Injectable, Inject, forwardRef } from '@nestjs/common';
 import { Transaction } from '../common/data-entities/transaction';
 import { TransactionRepository } from './transaction-repository.interface';
-import { TransactionType } from 'shared/dist/entities/transaction-type.enum';
+import { TransactionType } from 'shared/entities/transaction-type.enum';
 import { CategoryRepository } from '../category/category-repository.interface';
-import { calculateTransactionsBalance } from 'shared/dist/utils/transactionBalance';
+import { calculateTransactionsBalance } from 'shared/utils/transactionBalance';
 
 @Injectable()
 export class TransactionService {

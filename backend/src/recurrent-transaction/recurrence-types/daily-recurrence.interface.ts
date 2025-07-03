@@ -1,4 +1,4 @@
-import { RecurrentTransactionType } from "shared/dist/entities/recurrent-transaction-type.enum";
+import { RecurrentTransactionType } from "shared/entities/recurrent-transaction-type.enum";
 import { BaseRecurrence } from "./base-recurrence.interface";
 
 export interface DailyRecurrence extends BaseRecurrence {

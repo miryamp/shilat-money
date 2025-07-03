@@ -1,7 +1,7 @@
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn } from 'typeorm';
-import { TransactionType } from 'shared/dist/entities/transaction-type.enum';
+import { TransactionType } from 'shared/entities/transaction-type.enum';
 import { Household } from './household';
-import { ICategory } from 'shared/dist/entities/category.interface'
+import { ICategory } from 'shared/entities/category.interface'
 
 @Entity()
 export class Category implements ICategory {

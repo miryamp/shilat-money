@@ -3,7 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Category } from '../common/data-entities/category';
 import { CategoryRepository } from './category-repository.interface';
-import { TransactionType } from 'shared/dist/entities/transaction-type.enum';
+import { TransactionType } from 'shared/entities/transaction-type.enum';
 
 @Injectable()
 export class MysqlCategoryRepository implements CategoryRepository {

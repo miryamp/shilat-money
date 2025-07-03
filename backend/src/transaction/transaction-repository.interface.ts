@@ -1,4 +1,4 @@
-import { TransactionType } from 'shared/dist/entities/transaction-type.enum';
+import { TransactionType } from 'shared/entities/transaction-type.enum';
 import { Transaction } from '../common/data-entities/transaction';
 
 export interface TransactionRepository {

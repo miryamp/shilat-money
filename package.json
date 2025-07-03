@@ -3,9 +3,9 @@
   "private": true,
   "version": "1.0.0",
   "workspaces": [
+    "shared",
     "backend",
-    "web-app",
-    "shared"
+    "web-app"
   ],
   "scripts": {
     "build": "pnpm -r run build",

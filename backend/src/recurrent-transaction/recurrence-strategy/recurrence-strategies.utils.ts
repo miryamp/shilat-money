@@ -1,4 +1,4 @@
-import { RecurrentTransactionType } from "shared/dist/entities/recurrent-transaction-type.enum";
+import { RecurrentTransactionType } from "shared/entities/recurrent-transaction-type.enum";
 import { BaseRecurrence } from "../recurrence-types/base-recurrence.interface";
 import { RecurrenceStrategy } from "./recurrence-strategy";
 import { DailyRecurrenceStrategy } from "./daily-recurrence-strategy";

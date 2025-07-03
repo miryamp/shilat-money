@@ -3,3 +3,6 @@ node_modules/
 
 # Ignore all shared/dist build outputs
 shared/dist/
+
+# Ignore environment variable files
+web-app/.env
