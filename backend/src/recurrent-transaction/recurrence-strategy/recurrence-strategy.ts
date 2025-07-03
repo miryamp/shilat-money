@@ -1,4 +1,4 @@
-import { BaseRecurrence } from "./base-recurrence.interface";
+import { BaseRecurrence } from "../recurrence-types/base-recurrence.interface";
 
 export interface RecurrenceStrategy<T extends BaseRecurrence> {
     getNextDate(from: Date, recurrence: T): Date | null;

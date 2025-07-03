@@ -1,4 +1,4 @@
-import { RecurrenceStrategy } from "../recurrence-strategy";
+import { RecurrenceStrategy } from "./recurrence-strategy";
 import { YearlyRecurrence } from "../recurrence-types/yearly-recurrence.interface";
 
 export const YearlyRecurrenceStrategy: RecurrenceStrategy<YearlyRecurrence> = {
@@ -54,7 +54,7 @@ export const YearlyRecurrenceStrategy: RecurrenceStrategy<YearlyRecurrence> = {
             recurrence.startDate.getMonth() + 1,
             0
         ).getDate();
-        
+
         return (
             date.getDate() === lastDayOfMonth &&
             recurrence.startDate.getDate() === recurrenceLastDayOfMonth &&

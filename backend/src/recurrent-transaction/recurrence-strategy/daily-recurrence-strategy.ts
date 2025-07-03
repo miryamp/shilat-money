@@ -1,4 +1,4 @@
-import { RecurrenceStrategy } from "../recurrence-strategy";
+import { RecurrenceStrategy } from ".";
 import { DailyRecurrence } from "../recurrence-types/daily-recurrence.interface";
 
 export const DailyRecurrenceStrategy: RecurrenceStrategy<DailyRecurrence> = {
