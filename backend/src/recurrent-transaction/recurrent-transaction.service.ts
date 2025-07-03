@@ -122,11 +122,8 @@ export class RecurrentTransactionService {
         }
 
         return await this.dataSource.transaction(async manager => {
-            // Find and remove all transactions with reacurrenceId = id
-            const transactions = await manager.find(Transaction, { where: { recurrenceId: id, householdId } });
-            if (transactions.length > 0) {
-                await manager.remove(transactions);
-            }
+            await manager.delete(Transaction, { where: { recurrenceId: id, householdId } });
+
             // Remove the recurrent transaction itself
             const recurrent = await this.repo.findOne(id, householdId);
             if (!recurrent) return null;
@@ -144,7 +141,8 @@ export class RecurrentTransactionService {
                 (recurrence.startDate && recurrence.startDate < from))
                 continue;
 
-            let current = new Date(recurrence.startDate);
+            let current = new Date(recurrence.startDate < from ? recurrence.startDate: from);
+            results.push({ ...recurrence.transactionData, timestamp: new Date(current), recurrenceId: recurrence.id });
             while (current <= to) {
                 const nextDate = this.getNextOperationDate(recurrence, current);
                 if (!nextDate || nextDate > to) break;
