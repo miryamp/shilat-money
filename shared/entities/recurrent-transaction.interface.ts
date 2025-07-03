@@ -7,5 +7,5 @@ export interface IRecurrentTransaction {
   endDate?: Date;
   lastOperated?: Date;
   shiftToValidDate: boolean;
-  active: boolean;
+  isActive: boolean;
 }

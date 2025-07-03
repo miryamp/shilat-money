@@ -18,6 +18,9 @@ export class RecurrentTransaction implements IRecurrentTransaction {
     @Column({ type: 'enum', enum: RecurrentTransactionType })
     type: RecurrentTransactionType;
 
+    @Column({ type: 'int', nullable: true })
+    frequency?: number; 
+
     @Column({ type: 'date' })
     startDate: Date;
 
@@ -31,7 +34,7 @@ export class RecurrentTransaction implements IRecurrentTransaction {
     shiftToValidDate: boolean;
 
     @Column({ default: true })
-    active: boolean;
+    isActive: boolean;
 
     get isFixed(): boolean {
         return this.type !== RecurrentTransactionType.Daily;
