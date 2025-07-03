@@ -21,7 +21,7 @@ export class MysqlRecurrentTransactionRepository {
     }
 
     async findOne(id: string, householdId: string): Promise<RecurrentTransaction | null> {
-        return await this.repo.findOne({ where: { id, householdId } });
+        return await this.repo.findOne({ where: { id, householdId, isActive:true } });
     }
 
     async update(id: string, update: Partial<RecurrentTransaction>, householdId: string): Promise<RecurrentTransaction | null> {

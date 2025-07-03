@@ -34,7 +34,7 @@ export class RecurrentTransaction implements IRecurrentTransaction {
     shiftToValidDate: boolean;
 
     @Column({ default: true })
-    active: boolean;
+    isActive: boolean;
 
     get isFixed(): boolean {
         return this.type !== RecurrentTransactionType.Daily;
