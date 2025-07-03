@@ -1,5 +1,5 @@
-import { RecurrenceStrategy } from ".";
-import { MonthlyRecurrence } from "../../common/recurrence/recurrence-types/monthly-recurrence.interface";
+import { RecurrenceStrategy } from "./recurrence-strategy";
+import { MonthlyRecurrence } from "../recurrence-types/monthly-recurrence.interface";
 
 export const MonthlyRecurrenceStrategy: RecurrenceStrategy<MonthlyRecurrence> = {
     getNextDate(from: Date, recurrence: MonthlyRecurrence): Date | null {
