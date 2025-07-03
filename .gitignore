@@ -1,9 +1,5 @@
-shared/dist/*.js
-shared/dist/*.d.ts
-shared/dist/entities/*.js
-shared/dist/entities/*.d.ts
-node_modules/shared/**/*
-node_modules/typescript/**/*
-node_modules/.package-lock.json
-node_modules/.bin/tsc*
-node_modules/.bin/tsserver*
+# Ignore all node_modules and their contents
+node_modules/
+
+# Ignore all shared/dist build outputs
+shared/dist/
