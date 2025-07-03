@@ -1,11 +1,9 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
 import { RecurrentTransaction } from '../common/data-entities/recurrent-transaction';
 import { MysqlRecurrentTransactionRepository } from './mysql-recurrent-transaction.repository';
 import { DataSource } from 'typeorm';
 import { Transaction } from '../common/data-entities/transaction';
-import { RecurrentTransactionType } from 'shared/dist/entities/recurrent-transaction-type.enum';
-import { getNextRecurrenceDate, isDateInRecurrence } from './recurrence-strategy/recurrence-strategies.utils';
+import { getNextRecurrenceDate, getPreviousRecurrenceDate, isDateInRecurrence } from './recurrence-strategy/recurrence-strategies.utils';
 
 @Injectable()
 export class RecurrentTransactionService {
@@ -117,6 +115,33 @@ export class RecurrentTransactionService {
         });
     }
 
+    async updateDatesNotInclude(id: string, householdId: string, newStartDate?: Date, newEndDate?: Date): Promise<RecurrentTransaction | null> {
+        const current = await this.repo.findOne(id, householdId);
+        if (!current) return null;
+
+        const update: Partial<RecurrentTransaction> = {};
+        if (newStartDate && newStartDate.getTime() !== current.startDate.getTime()) {
+            const actualStartDate = getNextRecurrenceDate(newStartDate, current);
+            if (!actualStartDate) {
+                await this.remove(id, householdId, true);
+                return null;
+            }
+            update.startDate = actualStartDate;
+        }
+
+        if (newEndDate && (!current.endDate || newEndDate.getTime() !== current.endDate.getTime())) {
+            const actualStartDate = getPreviousRecurrenceDate(newEndDate, current);
+            if (!actualStartDate) {
+                await this.remove(id, householdId, true);
+                return null;
+            }
+
+            update.endDate = actualStartDate;
+        }
+
+        return await this.update(id, update, householdId);
+    }
+
     async remove(id: string, householdId: string, removeTransactions = false): Promise<RecurrentTransaction | null> {
         if (!removeTransactions) {
             return await this.repo.remove(id, householdId);
@@ -151,7 +176,7 @@ export class RecurrentTransactionService {
                     recurrenceId: recurrence.id
                 });
             }
-            
+
             while (current <= to) {
                 const nextDate = getNextRecurrenceDate(current, recurrence);
                 if (!nextDate || nextDate > to) break;
