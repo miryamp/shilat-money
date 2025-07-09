@@ -11,6 +11,32 @@ import { format, addDays, addMonths, addYears, setDate as setDateFns, getDate, g
 import { cn } from '@/lib/utils';
 import { getLastValidDailyDate, getValidMonthlyDate, getValidYearlyDate } from '@/utils/recurrenceDateUtils';
 
+function calculateEndDateFromCount({
+  startDate,
+  recurrenceType,
+  interval,
+  count,
+}: {
+  startDate: Date;
+  recurrenceType: 'daily' | 'weekly' | 'monthly' | 'yearly';
+  interval: number;
+  count: number;
+}): Date {
+  if (recurrenceType === 'daily') {
+    return getLastValidDailyDate(startDate, addDays(startDate, (count - 1) * interval), interval);
+  } else if (recurrenceType === 'weekly') {
+    return getLastValidDailyDate(startDate, addDays(startDate, (count - 1) * 7), 7);
+  } else if (recurrenceType === 'monthly') {
+    let target = addMonths(startDate, count - 1);
+    target = addDays(target, 1);
+    return getValidMonthlyDate(startDate, target);
+  } else if (recurrenceType === 'yearly') {
+    const target = addYears(startDate, count - 1);
+    return getValidYearlyDate(startDate, target);
+  }
+  return startDate;
+}
+
 interface RecurrencePanelProps {
   isOpen: boolean;
   startDate: Date;
@@ -101,20 +127,29 @@ const RecurrencePanel: React.FC<RecurrencePanelProps> = ({
   useEffect(() => {
     let type = recurrenceType;
     let interval = dailyInterval;
+    let calculatedEndDate = endDate;
     if (recurrenceType === 'weekly') {
       type = 'daily';
       interval = 7;
+    }
+    if (endCondition === 'after' && endCount) {
+      calculatedEndDate = calculateEndDateFromCount({
+        startDate,
+        recurrenceType,
+        interval,
+        count: endCount,
+      });
     }
     const recurrenceData: RecurrenceData = {
       type: type,
       interval: type === 'daily' ? interval : undefined,
       endCondition,
       endCount: endCondition === 'after' ? endCount : undefined,
-      endDate: endCondition === 'on' ? endDate : undefined,
+      endDate: endCondition === 'on' || endCondition === 'after' ? calculatedEndDate : undefined,
     };
     onSave(recurrenceData);
     // eslint-disable-next-line
-  }, [recurrenceType, dailyInterval, monthlyDay, yearlyMonth, yearlyDay, endCondition, endCount, endDate]);
+  }, [recurrenceType, dailyInterval, monthlyDay, yearlyMonth, yearlyDay, endCondition, endCount, endDate, startDate]);
 
   // Update start date when recurrence settings change
   const handleRecurrenceChange = (type: 'daily' | 'weekly' | 'monthly' | 'yearly') => {

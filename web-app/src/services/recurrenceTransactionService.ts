@@ -1,16 +1,16 @@
 import { IRecurrentTransaction } from 'shared/entities/recurrent-transaction.interface';
+import { format } from 'date-fns';
 
 const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:3000';
 
 export const addRecurrenceTransaction = async (recurrence: Omit<IRecurrentTransaction, 'id'>): Promise<IRecurrentTransaction> => {
-  // Ensure startDate and endDate are sent as YYYY-MM-DD strings
   const payload = {
     ...recurrence,
     startDate: recurrence.startDate instanceof Date
-      ? recurrence.startDate.toISOString().slice(0, 10)
+      ? format(recurrence.startDate, 'yyyy-MM-dd')
       : (typeof recurrence.startDate === 'string' ? (recurrence.startDate as string).slice(0, 10) : undefined),
     endDate: recurrence.endDate instanceof Date
-      ? recurrence.endDate.toISOString().slice(0, 10)
+      ?  format(recurrence.endDate, 'yyyy-MM-dd')
       : (typeof recurrence.endDate === 'string' && recurrence.endDate ? (recurrence.endDate as string).slice(0, 10) : undefined),
   };
   const res = await fetch(`${API_BASE}/recurrent-transaction`, {
