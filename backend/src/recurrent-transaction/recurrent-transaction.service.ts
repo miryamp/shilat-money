@@ -119,14 +119,12 @@ export class RecurrentTransactionService {
                 const gapInstances = await this.getInstancesInRange(current, gapFrom, gapTo);
                 if (gapInstances && gapInstances.length > 0) {
                     // Upsert all gapInstances by timestamp (if exists, do nothing)
-                    for (const instance of gapInstances) {
-                        await manager.createQueryBuilder()
-                            .insert()
-                            .into(Transaction)
-                            .values({ ...instance, lastUpdated: new Date() })
-                            .orIgnore() // Only insert if not exists (by unique constraint - recurrenceId, householdId, timestamp)
-                            .execute();
-                    }
+                    await manager.createQueryBuilder()
+                        .insert()
+                        .into(Transaction)
+                        .values(gapInstances.map(instance => ({ ...instance, lastUpdated: new Date() })))
+                        .orIgnore() // Only insert if not exists (by unique constraint - recurrenceId, householdId, timestamp)
+                        .execute();
                 }
             }
 
