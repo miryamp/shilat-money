@@ -66,11 +66,15 @@ export class RecurrentTransactionService {
             if (!updated) return null;
 
             // Update all associated transactions with new recurrence data
-            const associatedTransactions = await manager.find(Transaction, { where: { recurrenceId: id, householdId } });
-            for (const tx of associatedTransactions) {
-                // Only update fields that are present in update
-                Object.assign(tx, update.transactionData);
-                await manager.save(Transaction, {...tx, lastUpdated: new Date()});
+            if (update.transactionData && Object.keys(update.transactionData).length > 0) {
+                await manager.createQueryBuilder()
+                    .update(Transaction)
+                    .set({
+                        ...update.transactionData,
+                        lastUpdated: new Date()
+                    })
+                    .where("recurrenceId = :id AND householdId = :householdId", { id, householdId })
+                    .execute();
             }
 
             // Only operate if new date is <= today
