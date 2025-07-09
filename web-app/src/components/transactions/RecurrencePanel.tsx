@@ -9,6 +9,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Calendar as CalendarIcon, Repeat } from 'lucide-react';
 import { format, addDays, addMonths, addYears, setDate as setDateFns, getDate, getMonth, getYear } from 'date-fns';
 import { cn } from '@/lib/utils';
+import { getLastValidDailyDate, getValidMonthlyDate, getValidYearlyDate } from '@/utils/recurrenceDateUtils';
 
 interface RecurrencePanelProps {
   isOpen: boolean;
@@ -40,6 +41,51 @@ const RecurrencePanel: React.FC<RecurrencePanelProps> = ({
   const [endCount, setEndCount] = useState(12);
   const [endDate, setEndDate] = useState<Date>(addMonths(startDate, 12));
   const [endConditionOpen, setEndConditionOpen] = useState(false);
+  const [userMessage, setUserMessage] = useState<string | null>(null);
+
+  // When startDate changes, set default endDate according to rules
+  useEffect(() => {
+    let newEndDate: Date | null = null;
+    if (recurrenceType === 'daily') {
+      newEndDate = addYears(startDate, 1); // always 1 year after start, regardless of interval
+    } else if (recurrenceType === 'monthly') {
+      newEndDate = addMonths(startDate, 12); // 1 year
+      newEndDate = getValidMonthlyDate(startDate, newEndDate);
+    } else if (recurrenceType === 'yearly') {
+      newEndDate = addYears(startDate, 10); // 10 years
+      newEndDate = getValidYearlyDate(startDate, newEndDate);
+    }
+    if (newEndDate) setEndDate(newEndDate);
+    setUserMessage(null);
+  }, [startDate, recurrenceType, dailyInterval]);
+
+  // When user picks an end date, validate and correct if needed
+  const handleEndDateChange = (date: Date) => {
+    let validDate = date;
+    let message = null;
+    if (recurrenceType === 'daily') {
+      const diff = Math.floor((date.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
+      if (diff % dailyInterval !== 0) {
+        validDate = getLastValidDailyDate(startDate, date, dailyInterval);
+        message = 'End date adjusted to last valid occurrence.';
+      }
+    } else if (recurrenceType === 'monthly') {
+      const startDay = getDate(startDate);
+      if (getDate(date) !== startDay) {
+        validDate = getValidMonthlyDate(startDate, date);
+        message = 'End date adjusted to valid day in chosen month.';
+      }
+    } else if (recurrenceType === 'yearly') {
+      const startDay = getDate(startDate);
+      const startMonth = getMonth(startDate);
+      if (getDate(date) !== startDay || getMonth(date) !== startMonth) {
+        validDate = getValidYearlyDate(startDate, date);
+        message = 'End date adjusted to valid recurrence date in chosen year.';
+      }
+    }
+    setEndDate(validDate);
+    setUserMessage(message);
+  };
 
   // Sync recurrence settings when start date changes
   useEffect(() => {
@@ -299,7 +345,7 @@ const RecurrencePanel: React.FC<RecurrencePanelProps> = ({
                     <Calendar
                       mode="single"
                       selected={endDate}
-                      onSelect={(date) => date && setEndDate(date)}
+                      onSelect={(date) => date && handleEndDateChange(date)}
                       initialFocus
                       className="p-3 pointer-events-auto"
                     />
@@ -316,6 +362,10 @@ const RecurrencePanel: React.FC<RecurrencePanelProps> = ({
         <div className="text-sm text-gray-600 mb-1">Preview:</div>
         <div className="text-sm font-medium">{getPreviewText()}</div>
       </div>
+
+      {userMessage && (
+        <div className="text-xs text-yellow-600 mb-2">{userMessage}</div>
+      )}
     </div>
   );
 };
