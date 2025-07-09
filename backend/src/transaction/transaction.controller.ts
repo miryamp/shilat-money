@@ -5,6 +5,8 @@ import { TransactionService } from './transaction.service';
 import { HouseholdId } from '../common/auth/household-id.decorator';
 import { UserId } from '../common/auth/user-id.decorator';
 import { TransactionType } from 'shared/entities/transaction-type.enum';
+import { CreateTransactionDto } from './dto/create-transaction.dto';
+import { plainToInstance } from 'class-transformer';
 
 @UseGuards(AuthGuard)
 @Controller('transaction')
@@ -12,11 +14,12 @@ export class TransactionController {
     constructor(private readonly transactionService: TransactionService) { }
 
     @Post()
-    async create(@Body() transaction: Transaction, @HouseholdId() householdId: string, @UserId() userId: string): Promise<Transaction> {
+    async create(@Body() transaction: CreateTransactionDto, @HouseholdId() householdId: string, @UserId() userId: string): Promise<Transaction> {
         if (transaction.householdId && transaction.householdId !== householdId) {
             throw new UnauthorizedException('Household ID mismatch');
         }
-        return await this.transactionService.create({ ...transaction, userId });
+
+        return await this.transactionService.create(plainToInstance(Transaction, { ...transaction, userId }));
     }
 
     @Get()
