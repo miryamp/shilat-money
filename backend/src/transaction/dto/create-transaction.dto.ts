@@ -1,4 +1,4 @@
-import { IsString, IsOptional, IsNumber, IsDateString, Min } from 'class-validator';
+import { IsString, IsOptional, IsNumber, IsDateString, Min, IsISO8601, IsDate } from 'class-validator';
 import { Type } from 'class-transformer';
 
 export class CreateTransactionDto {
@@ -20,7 +20,7 @@ export class CreateTransactionDto {
   amount: number;
 
   @Type(() => Date)
-  @IsDateString()
+  @IsDate()
   timestamp: Date;
 
   @IsOptional()
@@ -28,6 +28,6 @@ export class CreateTransactionDto {
   comment?: string;
 
   @Type(() => Date)
-  @IsDateString()
+  @IsDate()
   lastUpdated: Date;
 }
