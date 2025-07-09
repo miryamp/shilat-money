@@ -343,10 +343,8 @@ const RecurrencePanel: React.FC<RecurrencePanelProps> = ({
                   </PopoverTrigger>
                   <PopoverContent className="w-auto p-0" align="start">
                     <Calendar
-                      mode="single"
-                      selected={endDate}
-                      onSelect={(date) => date && handleEndDateChange(date)}
-                      initialFocus
+                      value={endDate}
+                      onChange={(date) => date && handleEndDateChange(date)}
                       className="p-3 pointer-events-auto"
                     />
                   </PopoverContent>

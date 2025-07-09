@@ -129,11 +129,9 @@ const TransactionForm: React.FC<TransactionFormProps> = ({
             </PopoverTrigger>
             <PopoverContent className="w-auto p-0" align="start">
               <Calendar
-                mode="single"
-                selected={date}
-                onSelect={(selectedDate) => selectedDate && onDateChange(selectedDate)}
-                initialFocus
-                className="p-3 pointer-events-auto"
+              value={date}
+              onChange={(selectedDate) => selectedDate && onDateChange(selectedDate as Date)}
+              className="p-3 pointer-events-auto"
               />
             </PopoverContent>
           </Popover>
