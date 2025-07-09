@@ -19,9 +19,17 @@ export class RecurrentTransactionService {
             // After creating the recurrent transaction, create all past instances up to today
             const today = new Date();
             if (entity.startDate && entity.startDate <= today) {
-                const pastInstances = await this.getInstancesInRange(entity.householdId, new Date(entity.startDate), today);
-                for (const instance of pastInstances) {
-                    await manager.save(Transaction, { ...instance, lastUpdated: new Date() });
+                const pastInstances = await this.getInstancesInRange(created, new Date(entity.startDate), today);
+                if (pastInstances.length > 0) {
+                    await manager.createQueryBuilder()
+                        .insert()
+                        .into(Transaction)
+                        .values(pastInstances.map(instance => ({ ...instance, lastUpdated: new Date() })))
+                        .execute();
+
+                    const latestTimestamp = pastInstances.reduce((max, tx) => tx.timestamp > max ? tx.timestamp : max, pastInstances[0].timestamp);
+                    await manager.update(RecurrentTransaction, created.id, { lastOperated: latestTimestamp });
+                    created.lastOperated = latestTimestamp;
                 }
             }
             return created;
@@ -37,7 +45,6 @@ export class RecurrentTransactionService {
     }
 
     async update(id: string, update: Partial<RecurrentTransaction>, householdId: string): Promise<RecurrentTransaction | null> {
-        // Fetch the current recurrence
         const current = await this.repo.findOne(id, householdId);
         if (!current) return null;
 
@@ -62,9 +69,8 @@ export class RecurrentTransactionService {
             const associatedTransactions = await manager.find(Transaction, { where: { recurrenceId: id, householdId } });
             for (const tx of associatedTransactions) {
                 // Only update fields that are present in update
-                Object.assign(tx, update);
-                tx.lastUpdated = new Date();
-                await manager.save(Transaction, tx);
+                Object.assign(tx, update.transactionData);
+                await manager.save(Transaction, {...tx, lastUpdated: new Date()});
             }
 
             // Only operate if new date is <= today
@@ -106,7 +112,7 @@ export class RecurrentTransactionService {
                     gapTo = newEnd;
                 }
 
-                const gapInstances = await this.getInstancesInRange(householdId, gapFrom, gapTo);
+                const gapInstances = await this.getInstancesInRange(current, gapFrom, gapTo);
                 if (gapInstances && gapInstances.length > 0) {
                     // Upsert all gapInstances by timestamp (if exists, do nothing)
                     for (const instance of gapInstances) {
@@ -167,33 +173,30 @@ export class RecurrentTransactionService {
         });
     }
 
-    async getInstancesInRange(householdId: string, from: Date, to: Date): Promise<Transaction[]> {
-        const recurrences = await this.findAll(householdId, { isActive: true });
+    async getInstancesInRange(recurrence: RecurrentTransaction, from: Date, to: Date): Promise<Transaction[]> {
+        if ((recurrence.endDate && recurrence.endDate < from) ||
+            (recurrence.startDate && recurrence.startDate > to))
+            return [];
+
+        let current = new Date(recurrence.startDate < from ? from : recurrence.startDate);
         const results: Transaction[] = [];
 
-        for (const recurrence of recurrences) {
-            if ((recurrence.endDate && recurrence.endDate > to) ||
-                (recurrence.startDate && recurrence.startDate < from))
-                continue;
-
-            let current = new Date(recurrence.startDate < from ? from : recurrence.startDate);
-
-            if (isDateInRecurrence(current, recurrence)) {
-                results.push({
-                    ...recurrence.transactionData,
-                    timestamp: current,
-                    recurrenceId: recurrence.id
-                });
-            }
-
-            while (current <= to) {
-                const nextDate = getNextRecurrenceDate(current, recurrence);
-                if (!nextDate || nextDate > to) break;
-
-                results.push({ ...recurrence.transactionData, timestamp: new Date(nextDate), recurrenceId: recurrence.id });
-                current = new Date(nextDate);
-            }
+        if (isDateInRecurrence(current, recurrence)) {
+            results.push({
+                ...recurrence.transactionData,
+                timestamp: current,
+                recurrenceId: recurrence.id
+            });
         }
+
+        while (current <= to) {
+            const nextDate = getNextRecurrenceDate(current, recurrence);
+            if (!nextDate || nextDate > to) break;
+
+            results.push({ ...recurrence.transactionData, timestamp: new Date(nextDate), recurrenceId: recurrence.id });
+            current = new Date(nextDate);
+        }
+
         return results;
     }
 }
