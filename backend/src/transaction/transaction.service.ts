@@ -14,8 +14,8 @@ export class TransactionService {
         private readonly categoryRepository: CategoryRepository
     ) { }
 
-    async create(transaction: Transaction): Promise<Transaction> {
-        return await this.transactionRepository.create(transaction);
+    async create(transaction: Transaction, householdId: string): Promise<Transaction> {
+        return await this.transactionRepository.create({...transaction, householdId});
     }
 
     async findAll(
