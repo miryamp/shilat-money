@@ -3,6 +3,8 @@ import { RecurrentTransactionService } from './recurrent-transaction.service';
 import { RecurrentTransaction } from '../common/data-entities/recurrent-transaction';
 import { AuthGuard } from '../common/auth/auth.guard';
 import { HouseholdId } from '../common/auth/household-id.decorator';
+import { CreateRecurrentTransactionDto } from './dto/create-recurrent-transaction.dto';
+import { plainToInstance } from 'class-transformer';
 
 @UseGuards(AuthGuard)
 @Controller('recurrent-transaction')
@@ -11,14 +13,14 @@ export class RecurrentTransactionController {
 
     @Post()
     async create(
-        @Body() entity: RecurrentTransaction,
+        @Body() entity: CreateRecurrentTransactionDto,
         @HouseholdId() householdId: string
     ): Promise<RecurrentTransaction> {
         if (entity.householdId && entity.householdId !== householdId) {
             throw new NotFoundException('Household ID mismatch');
         }
 
-        return await this.service.create(entity);
+        return await this.service.create(plainToInstance(RecurrentTransaction, entity));
     }
 
     @Get()

@@ -4,6 +4,9 @@ import { format } from 'date-fns';
 const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:3000';
 
 export const addRecurrenceTransaction = async (recurrence: Omit<IRecurrentTransaction, 'id'>): Promise<IRecurrentTransaction> => {
+  delete recurrence.transactionData.category;
+  delete recurrence.transactionData.type;
+  
   const payload = {
     ...recurrence,
     startDate: recurrence.startDate instanceof Date
