@@ -5,7 +5,7 @@ import { TransactionService } from './transaction.service';
 import { HouseholdId } from '../common/auth/household-id.decorator';
 import { UserId } from '../common/auth/user-id.decorator';
 import { TransactionType } from 'shared/entities/transaction-type.enum';
-import { CreateTransactionDto } from './dto/create-transaction.dto';
+import { TransactionDto } from './dto/transaction.dto';
 import { plainToInstance } from 'class-transformer';
 
 @UseGuards(AuthGuard)
@@ -14,12 +14,15 @@ export class TransactionController {
     constructor(private readonly transactionService: TransactionService) { }
 
     @Post()
-    async create(@Body() transaction: CreateTransactionDto, @HouseholdId() householdId: string, @UserId() userId: string): Promise<Transaction> {
-        if (transaction.householdId && transaction.householdId !== householdId) {
-            throw new UnauthorizedException('Household ID mismatch');
+    async create(
+        @Body() transaction: TransactionDto,
+        @HouseholdId() householdId: string,
+        @UserId() userId: string
+    ): Promise<Transaction> {
+        if (!transaction.categoryId || typeof transaction.amount !== 'number' || !transaction.timestamp) {
+            throw new NotFoundException('Missing required fields: categoryId, amount, timestamp');
         }
-
-        return await this.transactionService.create(plainToInstance(Transaction, { ...transaction, userId }));
+        return await this.transactionService.create(plainToInstance(Transaction, { ...transaction, userId }), householdId);
     }
 
     @Get()
@@ -60,7 +63,7 @@ export class TransactionController {
     @Put(':id')
     async update(
         @Param('id') id: string,
-        @Body() update: Partial<Transaction>,
+        @Body() update: TransactionDto,
         @HouseholdId() householdId: string,
         @UserId() userId: string
     ): Promise<Transaction> {

@@ -3,31 +3,30 @@ import { RecurrentTransactionService } from './recurrent-transaction.service';
 import { RecurrentTransaction } from '../common/data-entities/recurrent-transaction';
 import { AuthGuard } from '../common/auth/auth.guard';
 import { HouseholdId } from '../common/auth/household-id.decorator';
-import { CreateRecurrentTransactionDto } from './dto/create-recurrent-transaction.dto';
+import { RecurrentTransactionDto } from './dto/recurrent-transaction.dto';
 import { plainToInstance } from 'class-transformer';
 
 @UseGuards(AuthGuard)
 @Controller('recurrent-transaction')
 export class RecurrentTransactionController {
-    constructor(private readonly service: RecurrentTransactionService) {}
+    constructor(private readonly service: RecurrentTransactionService) { }
 
     @Post()
     async create(
-        @Body() entity: CreateRecurrentTransactionDto,
+        @Body() entity: RecurrentTransactionDto,
         @HouseholdId() householdId: string
     ): Promise<RecurrentTransaction> {
-        if (entity.householdId && entity.householdId !== householdId) {
-            throw new NotFoundException('Household ID mismatch');
+        if (!entity.transactionData || !entity.type || !entity.startDate) {
+            throw new NotFoundException('Missing required fields: transactionData, type, startDate');
         }
-
-        return await this.service.create(plainToInstance(RecurrentTransaction, entity));
+        return await this.service.create(plainToInstance(RecurrentTransaction, { ...entity, householdId }));
     }
 
     @Get()
     async findAll(
         @HouseholdId() householdId: string,
         @Query('isActive', ParseBoolPipe) isActive?: boolean
-    ): Promise<RecurrentTransaction[]> {        
+    ): Promise<RecurrentTransaction[]> {
         return await this.service.findAll(householdId, { isActive });
     }
 
@@ -44,13 +43,10 @@ export class RecurrentTransactionController {
     @Put(':id')
     async update(
         @Param('id') id: string,
-        @Body() update: Partial<RecurrentTransaction>,
+        @Body() update: RecurrentTransactionDto,
         @HouseholdId() householdId: string
     ): Promise<RecurrentTransaction> {
-        if (update.householdId && update.householdId !== householdId) {
-            throw new NotFoundException('Household ID mismatch');
-        }
-        const updated = await this.service.update(id, update, householdId);
+        const updated = await this.service.update(id, plainToInstance(RecurrentTransaction, update), householdId);
         if (!updated) throw new NotFoundException('RecurrentTransaction not found');
         return updated;
     }
