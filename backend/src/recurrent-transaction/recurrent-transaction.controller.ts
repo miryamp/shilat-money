@@ -4,6 +4,7 @@ import { RecurrentTransaction } from '../common/data-entities/recurrent-transact
 import { AuthGuard } from '../common/auth/auth.guard';
 import { HouseholdId } from '../common/auth/household-id.decorator';
 import { CreateRecurrentTransactionDto } from './dto/create-recurrent-transaction.dto';
+import { UpdateRecurrentTransactionDto } from './dto/update-recurrent-transaction.dto';
 import { plainToInstance } from 'class-transformer';
 
 @UseGuards(AuthGuard)
@@ -44,12 +45,9 @@ export class RecurrentTransactionController {
     @Put(':id')
     async update(
         @Param('id') id: string,
-        @Body() update: Partial<CreateRecurrentTransactionDto>,
+        @Body() update: UpdateRecurrentTransactionDto,
         @HouseholdId() householdId: string
     ): Promise<RecurrentTransaction> {
-        if (update.householdId && update.householdId !== householdId) {
-            throw new NotFoundException('Household ID mismatch');
-        }
         const updated = await this.service.update(id, plainToInstance(RecurrentTransaction, update), householdId);
         if (!updated) throw new NotFoundException('RecurrentTransaction not found');
         return updated;

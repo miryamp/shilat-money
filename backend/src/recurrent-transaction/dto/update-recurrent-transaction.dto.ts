@@ -1,19 +1,17 @@
-import { IRecurrentTransaction } from 'shared/entities/recurrent-transaction.interface';
-import { IsString, IsOptional, IsBoolean, IsDateString, IsInt, ValidateNested, IsEnum, Min, IsISO8601, IsDate } from 'class-validator';
+import { IsOptional, IsBoolean, IsInt, ValidateNested, IsEnum, Min, IsDate } from 'class-validator';
 import { Type } from 'class-transformer';
 import { RecurrentTransactionType } from 'shared/entities/recurrent-transaction-type.enum';
 import { CreateTransactionDto } from '../../transaction/dto/create-transaction.dto';
 
-export class CreateRecurrentTransactionDto implements Omit<IRecurrentTransaction, 'id'> {
-    @IsString()
-    householdId: string;
-
+export class UpdateRecurrentTransactionDto {
+    @IsOptional()
     @ValidateNested()
     @Type(() => CreateTransactionDto)
-    transactionData: CreateTransactionDto;
+    transactionData?: CreateTransactionDto;
 
+    @IsOptional()
     @IsEnum(RecurrentTransactionType)
-    type: RecurrentTransactionType;
+    type?: RecurrentTransactionType;
 
     @IsOptional()
     @IsInt()
@@ -21,19 +19,22 @@ export class CreateRecurrentTransactionDto implements Omit<IRecurrentTransaction
     @Min(1)
     frequency?: number;
 
+    @IsOptional()
     @Type(() => Date)
     @IsDate()
-    startDate: Date;
+    startDate?: Date;
 
     @IsOptional()
     @Type(() => Date)
     @IsDate()
     endDate?: Date;
 
+    @IsOptional()
     @IsBoolean()
     @Type(() => Boolean)
-    shiftToValidDate: boolean = false;
+    shiftToValidDate?: boolean;
 
+    @IsOptional()
     @IsBoolean()
-    isActive: boolean;
+    isActive?: boolean;
 }
