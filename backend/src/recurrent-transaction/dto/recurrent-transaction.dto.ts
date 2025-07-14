@@ -1,13 +1,13 @@
-import { IsOptional, IsBoolean, IsInt, ValidateNested, IsEnum, Min, IsDate } from 'class-validator';
+import { IsOptional, IsBoolean, IsInt, ValidateNested, IsEnum, Min, IsDate, IsString } from 'class-validator';
 import { Type } from 'class-transformer';
 import { RecurrentTransactionType } from 'shared/entities/recurrent-transaction-type.enum';
-import { CreateTransactionDto } from '../../transaction/dto/create-transaction.dto';
+import { TransactionDto } from '../../transaction/dto/transaction.dto';
 
-export class UpdateRecurrentTransactionDto {
+export class RecurrentTransactionDto {
     @IsOptional()
     @ValidateNested()
-    @Type(() => CreateTransactionDto)
-    transactionData?: CreateTransactionDto;
+    @Type(() => TransactionDto)
+    transactionData?: TransactionDto;
 
     @IsOptional()
     @IsEnum(RecurrentTransactionType)
@@ -36,5 +36,5 @@ export class UpdateRecurrentTransactionDto {
 
     @IsOptional()
     @IsBoolean()
-    isActive?: boolean;
+    isActive: boolean = true;
 }
