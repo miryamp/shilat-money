@@ -9,7 +9,7 @@ import { plainToInstance } from 'class-transformer';
 @UseGuards(AuthGuard)
 @Controller('recurrent-transaction')
 export class RecurrentTransactionController {
-    constructor(private readonly service: RecurrentTransactionService) {}
+    constructor(private readonly service: RecurrentTransactionService) { }
 
     @Post()
     async create(
@@ -27,7 +27,7 @@ export class RecurrentTransactionController {
     async findAll(
         @HouseholdId() householdId: string,
         @Query('isActive', ParseBoolPipe) isActive?: boolean
-    ): Promise<RecurrentTransaction[]> {        
+    ): Promise<RecurrentTransaction[]> {
         return await this.service.findAll(householdId, { isActive });
     }
 
@@ -44,13 +44,13 @@ export class RecurrentTransactionController {
     @Put(':id')
     async update(
         @Param('id') id: string,
-        @Body() update: Partial<RecurrentTransaction>,
+        @Body() update: Partial<CreateRecurrentTransactionDto>,
         @HouseholdId() householdId: string
     ): Promise<RecurrentTransaction> {
         if (update.householdId && update.householdId !== householdId) {
             throw new NotFoundException('Household ID mismatch');
         }
-        const updated = await this.service.update(id, update, householdId);
+        const updated = await this.service.update(id, plainToInstance(RecurrentTransaction, update), householdId);
         if (!updated) throw new NotFoundException('RecurrentTransaction not found');
         return updated;
     }
