@@ -1,45 +1,59 @@
 import { RecurrenceStrategy } from "./recurrence-strategy";
 import { MonthlyRecurrence } from "../recurrence-types/monthly-recurrence.interface";
+import { addMonths, isLastDayOfMonth, lastDayOfMonth } from 'date-fns';
 
 export const MonthlyRecurrenceStrategy: RecurrenceStrategy<MonthlyRecurrence> = {
     getNextDate(from: Date, recurrence: MonthlyRecurrence): Date | null {
         const originalDay = from.getDate();
-        from.setMonth(from.getMonth() + 1);
-        if (recurrence.shiftToValidDate && from.getDate() < originalDay) {
-            from = new Date(from.getFullYear(), from.getMonth() + 1, 0);
+        const next = addMonths(from, 1);
+        if (next.getDate() === originalDay || recurrence.shiftToValidDate) {
+            return next;
         }
-        return from;
+
+        // Find next valid month with the same day
+        for (let i = 2; i <= 11; i++) {
+            const tryMonth = addMonths(from, i);
+            if (tryMonth.getDate() === originalDay) {
+                return new Date(tryMonth.getFullYear(), tryMonth.getMonth(), originalDay);
+            }
+        }
+        return null;
     },
 
-    getPreviousDate: function (from: Date, recurrence: MonthlyRecurrence): Date | null {
+    getPreviousDate(from: Date, recurrence: MonthlyRecurrence): Date | null {
         const originalDay = from.getDate();
-        from.setMonth(from.getMonth() - 1);
-        if (recurrence.shiftToValidDate && from.getDate() < originalDay) {
-            from = new Date(from.getFullYear(), from.getMonth() + 1, 0);
+        const prev = addMonths(from, -1);
+        if (prev.getDate() === originalDay || recurrence.shiftToValidDate) {
+            return prev;
         }
-        return from;
+
+        // Find prev valid month with the same day
+        for (let i = 2; i <= 11; i++) {
+            const tryMonth = addMonths(from, -i);
+            if (tryMonth.getDate() === originalDay) {
+                return new Date(tryMonth.getFullYear(), tryMonth.getMonth(), originalDay);
+            }
+        }
+        return null;
     },
 
     includesDate: function (date: Date, recurrence: MonthlyRecurrence): boolean {
-        if (date < recurrence.startDate ||
-            (recurrence.endDate && date > recurrence.endDate)) {
+        if (date < recurrence.startDate || (recurrence.endDate && date > recurrence.endDate)) {
             return false;
         }
-
-        if (date.getDate() == recurrence.startDate.getDate()) {
+        const startDay = recurrence.startDate.getDate();
+        
+        // If shiftToValidDate is true, allow last day of month for start days 29, 30, or 31
+        if (date.getDate() === startDay) {
             return true;
         }
 
+        // If shiftToValidDate is false and start date is not exactly the same as date
         if (!recurrence.shiftToValidDate) {
             return false;
         }
-        // If shiftToValidDate is true, check if the date falls on the last day of the month
-        const lastDayOfMonth = new Date(date.getFullYear(), date.getMonth() +
-            1, 0).getDate();
 
-        const recurrenceLastDayOfMonth = new Date(recurrence.startDate.getFullYear(),
-            recurrence.startDate.getMonth() + 1, 0).getDate();
-
-        return date.getDate() === lastDayOfMonth && recurrence.startDate.getDate() === recurrenceLastDayOfMonth;
+        const startIsEdgeDay = [29, 30, 31].includes(startDay);
+        return isLastDayOfMonth(date) && startIsEdgeDay;
     }
 }
