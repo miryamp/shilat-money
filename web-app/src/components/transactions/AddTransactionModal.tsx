@@ -154,7 +154,7 @@ const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
       timestamp: date,
       lastUpdated: new Date(),
       householdId: householdId,
-      userId: 'default-user-id', // Replace with actual user ID logic
+      userId: 'mainuser', // Replace with actual user ID logic
     } as Omit<Transaction, "id">;
 
     try {
