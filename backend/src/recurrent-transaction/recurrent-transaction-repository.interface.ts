@@ -5,5 +5,5 @@ export interface RecurrentTransactionRepository {
     findAll(householdId: string, options?: { isActive?: boolean }): Promise<RecurrentTransaction[]>;
     findOne(id: string, householdId: string): Promise<RecurrentTransaction | null>;
     update(id: string, update: Partial<RecurrentTransaction>, householdId: string, tx?: any): Promise<RecurrentTransaction | null>;
-    remove(id: string, householdId: string): Promise<RecurrentTransaction | null>;
+    remove(id: string, householdId: string, tx?: any): Promise<RecurrentTransaction | null>;
 }

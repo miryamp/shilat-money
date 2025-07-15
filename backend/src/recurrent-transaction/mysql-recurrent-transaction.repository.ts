@@ -38,10 +38,16 @@ export class MysqlRecurrentTransactionRepository implements RecurrentTransaction
         return await this.repo.save(entity);
     }
 
-    async remove(id: string, householdId: string): Promise<RecurrentTransaction | null> {
+    async remove(id: string, householdId: string, tx?: EntityManager): Promise<RecurrentTransaction | null> {
         const entity = await this.repo.findOne({ where: { id, householdId } });
         if (!entity) return null;
-        await this.repo.remove(entity);
+
+        if (tx) {
+            await tx.remove(RecurrentTransaction, entity);
+        } else {
+            await this.repo.remove(entity);
+        }
+
         return entity;
     }
 }

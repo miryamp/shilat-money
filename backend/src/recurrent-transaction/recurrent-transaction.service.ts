@@ -110,7 +110,7 @@ export class RecurrentTransactionService {
                     }
                 }
                 if (toRemove.length > 0) {
-                    await this.transactionRepo.removeMany(toRemove, manager);
+                    await this.transactionRepo.removeMany(toRemove, manager, false);
                 }
             }
 
@@ -168,12 +168,15 @@ export class RecurrentTransactionService {
         }
 
         return await this.dataSource.transaction(async manager => {
-            await manager.delete(Transaction, { where: { recurrenceId: id, householdId } });
+            const transactions = await this.transactionRepo.findAll(householdId, { recurrenceId: id });
+            const toRemove = transactions.map(t => t.id);
+
+            this.transactionRepo.removeMany(toRemove, householdId, false, manager);
 
             // Remove the recurrent transaction itself
             const recurrent = await this.repo.findOne(id, householdId);
             if (!recurrent) return null;
-            await manager.remove(recurrent);
+            await this.repo.remove(id, householdId, manager);
             return recurrent;
         });
     }
