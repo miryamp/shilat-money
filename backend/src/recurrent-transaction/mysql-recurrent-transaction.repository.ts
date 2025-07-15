@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { EntityManager, Repository } from 'typeorm';
 import { RecurrentTransaction } from '../common/data-entities/recurrent-transaction';
 import { RecurrentTransactionRepository } from './recurrent-transaction-repository.interface';
 
@@ -11,7 +11,10 @@ export class MysqlRecurrentTransactionRepository implements RecurrentTransaction
         private readonly repo: Repository<RecurrentTransaction>
     ) {}
 
-    async create(entity: RecurrentTransaction): Promise<RecurrentTransaction> {
+    async create(entity: RecurrentTransaction, tx?: EntityManager): Promise<RecurrentTransaction> {
+        if (tx) {
+            return await tx.save(RecurrentTransaction, entity);
+        }
         return await this.repo.save(entity);
     }
 
@@ -25,10 +28,13 @@ export class MysqlRecurrentTransactionRepository implements RecurrentTransaction
         return await this.repo.findOne({ where: { id, householdId, isActive:true } });
     }
 
-    async update(id: string, update: Partial<RecurrentTransaction>, householdId: string): Promise<RecurrentTransaction | null> {
+    async update(id: string, update: Partial<RecurrentTransaction>, householdId: string, tx?: EntityManager): Promise<RecurrentTransaction | null> {
         const entity = await this.repo.findOne({ where: { id, householdId } });
         if (!entity) return null;
         Object.assign(entity, update);
+        if (tx) {
+            return await tx.save(RecurrentTransaction, entity);
+        }
         return await this.repo.save(entity);
     }
 

@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Category } from '../common/data-entities/category';
-import { Repository, Between } from 'typeorm';
+import { Repository, Between, EntityManager, In } from 'typeorm';
 import { Transaction } from '../common/data-entities/transaction';
 import { TransactionRepository } from './transaction-repository.interface';
 import { TransactionType } from 'shared/entities/transaction-type.enum';
@@ -15,12 +15,32 @@ export class MysqlTransactionRepository implements TransactionRepository {
         private readonly categoryRepo: Repository<Category>
     ) { }
 
-    async create(transaction: Transaction): Promise<Transaction> {
+    async create(transaction: Transaction, tx?: EntityManager): Promise<Transaction> {
         if (transaction.categoryId) {
             const category = await this.categoryRepo.findOne({ where: { id: transaction.categoryId, householdId: transaction.householdId, isDeleted: false } });
             if (!category) throw new Error('Category does not exist or is deleted');
         }
+        if (tx) {
+            return await tx.save(Transaction, { ...transaction, lastUpdated: new Date() });
+        }
         return await this.transactionRepo.save({ ...transaction, lastUpdated: new Date() });
+    }
+
+    async createMany(bulk: Transaction[], tx?: EntityManager): Promise<void> {
+        const checkedCategories = new Set<string>();
+        for (const transaction of bulk) {
+            if (transaction.categoryId && checkedCategories.has(transaction.categoryId)) continue; // Skip if already checked
+            const category = await this.categoryRepo.findOne({ where: { id: transaction.categoryId, householdId: transaction.householdId, isDeleted: false } });
+            if (!category) throw new Error(`Category does not exist or is deleted for transaction ${transaction.id}`);
+            checkedCategories.add(transaction.categoryId);
+        }
+        const transactionsWithTimestamp = bulk.map(t => ({ ...t, lastUpdated: new Date() }));
+
+        if (tx) {
+            await tx.save(Transaction, transactionsWithTimestamp);
+        } else {
+            await this.transactionRepo.save(transactionsWithTimestamp);
+        }
     }
 
     async findAll(
@@ -32,6 +52,7 @@ export class MysqlTransactionRepository implements TransactionRepository {
             amount?: { gt?: number; gte?: number; lt?: number; lte?: number; eq?: number };
             from?: Date;
             to?: Date;
+            recurrenceId?: string;
         }
     ): Promise<Transaction[]> {
         const query = this.transactionRepo.createQueryBuilder('transaction')
@@ -41,9 +62,10 @@ export class MysqlTransactionRepository implements TransactionRepository {
         if (options?.userId) query.andWhere('transaction.userId = :userId', { userId: options.userId });
         if (options?.categoryId) query.andWhere('transaction.categoryId = :categoryId', { categoryId: options.categoryId });
         if (options?.type) query.andWhere('category.type = :type', { type: options.type });
+        if (options?.recurrenceId) query.andWhere('transaction.recurrenceId = :recurrenceId', { recurrenceId: options.recurrenceId });
 
         if (options?.amount) {
-            const amountOprations = {'eq': '=', 'gte': '>=', 'gt': '>', 'lte': '<=', 'lt': '<'};
+            const amountOprations = { 'eq': '=', 'gte': '>=', 'gt': '>', 'lte': '<=', 'lt': '<' };
             for (const [op, sign] of Object.entries(amountOprations)) {
                 if (options.amount[op] !== undefined) {
                     query.andWhere(`transaction.amount ${sign} :${op}`, { [op]: options.amount[op] });
@@ -61,7 +83,7 @@ export class MysqlTransactionRepository implements TransactionRepository {
         return await this.transactionRepo.findOne({ where: { id, householdId } });
     }
 
-    async update(id: string, update: Partial<Transaction>, householdId: string): Promise<Transaction | null> {
+    async update(id: string, update: Partial<Transaction>, householdId: string, tx?: any): Promise<Transaction | null> {
         const transaction = await this.transactionRepo.findOne({ where: { id, householdId }, relations: ['category'] });
         if (!transaction) return null;
         if (update.categoryId && update.categoryId !== transaction.categoryId) {
@@ -69,15 +91,46 @@ export class MysqlTransactionRepository implements TransactionRepository {
             if (!category) throw new Error('Category does not exist or is deleted');
         }
         Object.assign(transaction, { ...update, lastUpdated: new Date() });
-
+        if (tx) {
+            return await tx.save(Transaction, transaction);
+        }
         return await this.transactionRepo.save(transaction);
     }
 
-    async remove(id: string, householdId: string): Promise<Transaction | null> {
+    async upsertMany(transactions: Transaction[], tx?: EntityManager): Promise<void> {
+        const transactionsWithTimestamp = transactions.map(t => ({ ...t, lastUpdated: new Date() }));
+        const repo = tx ? tx.getRepository(Transaction) : this.transactionRepo;
+
+        await repo.createQueryBuilder()
+            .insert()
+            .into(Transaction)
+            .values(transactionsWithTimestamp)
+            .orIgnore()
+            .execute();
+    }
+
+    async remove(id: string, householdId: string, tx?: any): Promise<Transaction | null> {
         const transaction = await this.transactionRepo.findOne({ where: { id, householdId } });
         if (!transaction) return null;
-        await this.transactionRepo.remove(transaction);
+        if (tx) {
+            await tx.remove(Transaction, transaction);
+        } else {
+            await this.transactionRepo.remove(transaction);
+        }
         return transaction;
+    }
+
+    async removeMany(ids: string[], householdId: string, tx?: EntityManager): Promise<void> {
+        const transactions = (tx
+            ? await tx.find(Transaction, { where: { id: In(ids), householdId } })
+            : await this.transactionRepo.find({ where: { id: In(ids), householdId } })).filter(t => !!t);
+        if (transactions.length === 0) return; // No transactions to remove
+
+        if (tx) {
+            await tx.remove(Transaction, transactions);
+        } else {
+            await this.transactionRepo.remove(transactions);
+        }
     }
 }
 
