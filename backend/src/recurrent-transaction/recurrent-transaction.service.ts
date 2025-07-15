@@ -3,7 +3,7 @@ import { RecurrentTransaction } from '../common/data-entities/recurrent-transact
 import { MysqlRecurrentTransactionRepository } from './mysql-recurrent-transaction.repository';
 import { DataSource } from 'typeorm';
 import { Transaction } from '../common/data-entities/transaction';
-import { getNextRecurrenceDate, getPreviousRecurrenceDate, isDateInRecurrence } from './recurrence-strategy/recurrence-strategies.utils';
+import { RecurrenceStrategiesUtils } from './recurrence-strategy/recurrence-strategies.utils';
 
 @Injectable()
 export class RecurrentTransactionService {
@@ -138,7 +138,7 @@ export class RecurrentTransactionService {
 
         const update: Partial<RecurrentTransaction> = {};
         if (newStartDate && newStartDate.getTime() !== current.startDate.getTime()) {
-            const actualStartDate = getNextRecurrenceDate(newStartDate, current);
+            const actualStartDate = RecurrenceStrategiesUtils.getNextDate(newStartDate, current);
             if (!actualStartDate) {
                 await this.remove(id, householdId, true);
                 return null;
@@ -147,7 +147,7 @@ export class RecurrentTransactionService {
         }
 
         if (newEndDate && (!current.endDate || newEndDate.getTime() !== current.endDate.getTime())) {
-            const actualStartDate = getPreviousRecurrenceDate(newEndDate, current);
+            const actualStartDate = RecurrenceStrategiesUtils.getPreviousDate(newEndDate, current);
             if (!actualStartDate) {
                 await this.remove(id, householdId, true);
                 return null;
@@ -183,7 +183,7 @@ export class RecurrentTransactionService {
         let current = new Date(recurrence.startDate < from ? from : recurrence.startDate);
         const results: Transaction[] = [];
 
-        if (isDateInRecurrence(current, recurrence)) {
+        if (RecurrenceStrategiesUtils.includesDate(current, recurrence)) {
             results.push({
                 ...recurrence.transactionData,
                 timestamp: current,
@@ -192,7 +192,7 @@ export class RecurrentTransactionService {
         }
 
         while (current <= to) {
-            const nextDate = getNextRecurrenceDate(current, recurrence);
+            const nextDate = RecurrenceStrategiesUtils.getNextDate(current, recurrence);
             if (!nextDate || nextDate > to) break;
 
             results.push({ ...recurrence.transactionData, timestamp: new Date(nextDate), recurrenceId: recurrence.id });

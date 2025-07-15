@@ -17,23 +17,14 @@ function getRecurrenceStrategy(type: RecurrentTransactionType) {
     return recurrenceStrategies[type];
 }
 
-export function getNextRecurrenceDate(
-  from: Date,
-  recurrence: BaseRecurrence
-): Date | null {
-  return getRecurrenceStrategy(recurrence.type).getNextDate(from, recurrence);
-}
-
-export function getPreviousRecurrenceDate(
-  from: Date,
-  recurrence: BaseRecurrence
-): Date | null {
-  return getRecurrenceStrategy(recurrence.type).getPreviousDate(from, recurrence);
-}
-
-export function isDateInRecurrence(
-  date: Date,
-  recurrence: BaseRecurrence
-): boolean {
-  return getRecurrenceStrategy(recurrence.type).includesDate(date, recurrence);
-}
+export const RecurrenceStrategiesUtils: RecurrenceStrategy<BaseRecurrence> = {
+  getNextDate: (from: Date, recurrence: BaseRecurrence): Date | null => {
+    return getRecurrenceStrategy(recurrence.type).getNextDate(from, recurrence);
+  },
+  getPreviousDate: (from: Date, recurrence: BaseRecurrence): Date | null => {
+    return getRecurrenceStrategy(recurrence.type).getPreviousDate(from, recurrence);
+  },
+  includesDate: (date: Date, recurrence: BaseRecurrence): boolean => {
+    return getRecurrenceStrategy(recurrence.type).includesDate(date, recurrence);
+  }
+};
