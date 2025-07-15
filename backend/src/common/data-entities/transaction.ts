@@ -27,6 +27,9 @@ export class Transaction implements ITransaction {
     @Column()
     categoryId: string;
 
+    @Column({ default: false })
+    isDeleted: boolean;
+    
     @Column({ nullable: true })
     recurrenceId?: string;
 

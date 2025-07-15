@@ -109,22 +109,44 @@ export class MysqlTransactionRepository implements TransactionRepository {
             .execute();
     }
 
-    async remove(id: string, householdId: string, tx?: any): Promise<Transaction | null> {
+    async remove(id: string, householdId: string, logicalDelete: boolean = true, tx?: any): Promise<Transaction | null> {
         const transaction = await this.transactionRepo.findOne({ where: { id, householdId } });
         if (!transaction) return null;
+
+        if (logicalDelete) {
+            const update = { isDeleted: true, lastUpdated: new Date() }
+            if (tx) {
+                await tx.save(Transaction, update);
+            } else {
+                await this.transactionRepo.save(update);
+            }
+            return { ...transaction, ...update };
+        }
+        
         if (tx) {
             await tx.remove(Transaction, transaction);
         } else {
             await this.transactionRepo.remove(transaction);
         }
+
         return transaction;
     }
 
-    async removeMany(ids: string[], householdId: string, tx?: EntityManager): Promise<void> {
+    async removeMany(ids: string[], householdId: string, logicalDelete = true, tx?: EntityManager): Promise<void> {
         const transactions = (tx
             ? await tx.find(Transaction, { where: { id: In(ids), householdId } })
             : await this.transactionRepo.find({ where: { id: In(ids), householdId } })).filter(t => !!t);
         if (transactions.length === 0) return; // No transactions to remove
+
+        if (logicalDelete) {
+            const updates = transactions.map(t => ({ ...t, isDeleted: true, lastUpdated: new Date() }));
+            if (tx) {
+                await tx.save(Transaction, updates);
+            } else {
+                await this.transactionRepo.save(updates);
+            }
+            return;
+        }
 
         if (tx) {
             await tx.remove(Transaction, transactions);
