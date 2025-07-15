@@ -11,11 +11,6 @@ export default {
     prefix: '<rootDir>/../../'
   }),
   transform: {
-    '^.+\\.ts$': 'ts-jest'
-  },
-  globals: {
-    'ts-jest': {
-      tsconfig: './tsconfig.json',
-    },
+    '^.+\\.ts$': ['ts-jest', { tsconfig: './tsconfig.json' }],
   },
 };
