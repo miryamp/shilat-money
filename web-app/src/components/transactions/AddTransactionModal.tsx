@@ -54,7 +54,7 @@ const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
     setAmount(trans.amount.toString());
     setComment(trans.comment || '');
     setDate(new Date(trans.timestamp));
-    setIsRecurring(!!trans.reacurrenceId);
+    setIsRecurring(!!trans.recurrenceId);
     // setRecurringType(trans.recurringType || 'monthly');
     // setRecurringInterval(trans.recurringInterval || 1);
     // setRecurringDate(trans.recurringDate || '');

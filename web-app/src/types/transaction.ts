@@ -8,7 +8,7 @@ export class Transaction implements ITransaction{
     userId: string;
     categoryId: string;
     category: ICategory;
-    reacurrenceId?: string;
+    recurrenceId?: string;
     amount: number;
     timestamp: Date;
     comment?: string;

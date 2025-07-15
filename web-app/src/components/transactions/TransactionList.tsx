@@ -99,7 +99,7 @@ const TransactionList: React.FC<TransactionListProps> = ({
                   <div>
                     <div className="font-medium text-gray-900 flex items-center gap-2">
                       <span>{transaction.category.name}</span>
-                      {transaction.reacurrenceId && (
+                      {transaction.recurrenceId && (
                         <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full">
                           🔁 Recurring
                         </span>
