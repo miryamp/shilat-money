@@ -97,21 +97,21 @@ const TransactionList: React.FC<TransactionListProps> = ({
                     </span>
                   </div>
                   <div>
-                    <div className="font-medium text-gray-900">
-                      {transaction.category.name}
+                    <div className="font-medium text-gray-900 flex items-center gap-2">
+                      <span>{transaction.category.name}</span>
                       {transaction.reacurrenceId && (
-                        <span className="ml-2 text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full">
+                        <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full">
                           🔁 Recurring
                         </span>
                       )}
                     </div>
-                    {transaction.comment && (
-                      <div className="text-sm text-gray-500">
-                        {transaction.comment}
-                      </div>
-                    )}
-                    <div className="text-xs text-gray-400">
+                    <div className="text-xs text-gray-400 flex items-center">
                       {format(new Date(transaction.timestamp), 'MMM dd, yyyy')}
+                      {transaction.comment && (
+                        <span className="text-sm text-gray-500 ml-2" style={{ whiteSpace: 'nowrap', position: 'relative', top: '-2px' }}>
+                          {transaction.comment}
+                        </span>
+                      )}
                     </div>
                   </div>
                 </div>
