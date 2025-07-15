@@ -10,14 +10,14 @@ export const MonthlyRecurrenceStrategy: RecurrenceStrategy<MonthlyRecurrence> = 
             return next;
         }
 
-        // Find next valid month with the same day
-        for (let i = 2; i <= 11; i++) {
+        let i = 2;
+        while (true) {
             const tryMonth = addMonths(from, i);
             if (tryMonth.getDate() === originalDay) {
                 return new Date(tryMonth.getFullYear(), tryMonth.getMonth(), originalDay);
             }
+            i++;
         }
-        return null;
     },
 
     getPreviousDate(from: Date, recurrence: MonthlyRecurrence): Date | null {
@@ -27,14 +27,14 @@ export const MonthlyRecurrenceStrategy: RecurrenceStrategy<MonthlyRecurrence> = 
             return prev;
         }
 
-        // Find prev valid month with the same day
-        for (let i = 2; i <= 11; i++) {
+        let i = 2;
+        while (true) {
             const tryMonth = addMonths(from, -i);
             if (tryMonth.getDate() === originalDay) {
                 return new Date(tryMonth.getFullYear(), tryMonth.getMonth(), originalDay);
             }
+            i++;
         }
-        return null;
     },
 
     includesDate: function (date: Date, recurrence: MonthlyRecurrence): boolean {
