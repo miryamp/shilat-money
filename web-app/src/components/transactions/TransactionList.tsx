@@ -13,8 +13,8 @@ interface TransactionListProps {
   onAddTransaction?: (type: TransactionType) => void;
 }
 
-const TransactionList: React.FC<TransactionListProps> = ({ 
-  transactions, 
+const TransactionList: React.FC<TransactionListProps> = ({
+  transactions,
   onEditTransaction,
   onDeleteTransaction,
   onAddTransaction
@@ -22,7 +22,7 @@ const TransactionList: React.FC<TransactionListProps> = ({
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [transactionToDelete, setTransactionToDelete] = useState<Transaction | null>(null);
 
-  const sortedTransactions = [...transactions].sort((a, b) => 
+  const sortedTransactions = [...transactions].sort((a, b) =>
     new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
   );
 
@@ -59,8 +59,11 @@ const TransactionList: React.FC<TransactionListProps> = ({
     );
   }
 
+  console.log(sortedTransactions.map(transaction => `${transaction.id}, ${transaction.recurrenceId}`))
+
   return (
     <>
+      <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&icon_names=repeat" />
       <div className="bg-white rounded-lg shadow-sm">
         <div className="p-4 border-b border-gray-200">
           <div className="flex items-center justify-between">
@@ -88,22 +91,35 @@ const TransactionList: React.FC<TransactionListProps> = ({
             <div key={transaction.id} className="p-4 hover:bg-gray-50 transition-colors group relative">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <div 
-                    className="w-10 h-10 rounded-full flex items-center justify-center"
-                    style={{ backgroundColor: transaction.category.color }}
-                  >
+                  <div className="w-10 h-10 rounded-full flex items-center justify-center relative" style={{ backgroundColor: transaction.category.color }}>
                     <span className="material-icons text-white text-sm">
                       {transaction.category.icon}
                     </span>
+                    {!!transaction.recurrenceId && (
+                      <span
+                        className="absolute"
+                        style={{
+                          top: '-4px',
+                          right: '-4px',
+                          width: '18px',
+                          height: '18px',
+                          backgroundColor: '#7fceffff', // Tailwind blue-500
+                          borderRadius: '50%',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          boxShadow: '0 0 2px rgba(0,0,0,0.08)'
+                        }}
+                      >
+                        <span className="material-symbols-outlined" style={{ color: 'white', fontSize: '14px', lineHeight: 1 }}>
+                          repeat
+                        </span>
+                      </span>
+                    )}
                   </div>
                   <div>
                     <div className="font-medium text-gray-900 flex items-center gap-2">
                       <span>{transaction.category.name}</span>
-                      {transaction.recurrenceId && (
-                        <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full">
-                          🔁 Recurring
-                        </span>
-                      )}
                     </div>
                     <div className="text-xs text-gray-400 flex items-center">
                       {format(new Date(transaction.timestamp), 'MMM dd, yyyy')}
@@ -116,12 +132,11 @@ const TransactionList: React.FC<TransactionListProps> = ({
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
-                  <div className={`text-lg font-semibold ${
-                    transaction.type === TransactionType.Income ? 'text-green-600' : 'text-red-600'
-                  }`}>
+                  <div className={`text-lg font-semibold ${transaction.type === TransactionType.Income ? 'text-green-600' : 'text-red-600'
+                    }`}>
                     {transaction.type === TransactionType.Income ? '+' : '-'}${transaction.amount.toFixed(2)}
                   </div>
-                  
+
                   {/* Edit and Delete buttons - only visible on hover */}
                   <div className="opacity-0 group-hover:opacity-100 transition-opacity flex gap-1 ml-2">
                     <Button
