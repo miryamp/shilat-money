@@ -5,36 +5,30 @@ import { addMonths, isLastDayOfMonth, lastDayOfMonth } from 'date-fns';
 export const MonthlyRecurrenceStrategy: RecurrenceStrategy<MonthlyRecurrence> = {
     getNextDate(from: Date, recurrence: MonthlyRecurrence): Date | null {
         const originalDay = from.getDate();
-        const next = addMonths(from, 1);
+        let next = addMonths(from, 1);
         if (next.getDate() === originalDay || recurrence.shiftToValidDate) {
             return next;
         }
 
-        let i = 2;
-        while (true) {
-            const tryMonth = addMonths(from, i);
-            if (tryMonth.getDate() === originalDay) {
-                return new Date(tryMonth.getFullYear(), tryMonth.getMonth(), originalDay);
-            }
-            i++;
-        }
+        // If date is invalid, skip to next month
+        // There is no date that is absent two months in a row
+        next = addMonths(next, 1);
+        next.setDate(from.getDate());
+        return next;
     },
 
     getPreviousDate(from: Date, recurrence: MonthlyRecurrence): Date | null {
         const originalDay = from.getDate();
-        const prev = addMonths(from, -1);
+        let prev = addMonths(from, -1);
         if (prev.getDate() === originalDay || recurrence.shiftToValidDate) {
             return prev;
         }
 
-        let i = 2;
-        while (true) {
-            const tryMonth = addMonths(from, -i);
-            if (tryMonth.getDate() === originalDay) {
-                return new Date(tryMonth.getFullYear(), tryMonth.getMonth(), originalDay);
-            }
-            i++;
-        }
+        // If date is invalid, skip to prev month
+        // There is no date that is absent two months in a row
+        prev = addMonths(prev, -1);
+        prev.setDate(from.getDate());
+        return prev;
     },
 
     includesDate: function (date: Date, recurrence: MonthlyRecurrence): boolean {
