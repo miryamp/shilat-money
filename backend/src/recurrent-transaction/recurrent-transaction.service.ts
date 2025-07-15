@@ -1,6 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { RecurrentTransaction } from '../common/data-entities/recurrent-transaction';
-import { MysqlRecurrentTransactionRepository } from './mysql-recurrent-transaction.repository';
+import { RecurrentTransactionRepository } from './recurrent-transaction-repository.interface';
 import { DataSource } from 'typeorm';
 import { Transaction } from '../common/data-entities/transaction';
 import { RecurrenceStrategiesUtils } from './recurrence-strategy/recurrence-strategies.utils';
@@ -9,7 +9,7 @@ import { RecurrenceStrategiesUtils } from './recurrence-strategy/recurrence-stra
 export class RecurrentTransactionService {
     constructor(
         @Inject('RecurrentTransactionRepo')
-        private readonly repo: MysqlRecurrentTransactionRepository,
+        private readonly repo: RecurrentTransactionRepository,
         private readonly dataSource: DataSource
     ) { }
 

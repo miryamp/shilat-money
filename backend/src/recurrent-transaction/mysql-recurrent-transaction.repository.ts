@@ -2,9 +2,10 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { RecurrentTransaction } from '../common/data-entities/recurrent-transaction';
+import { RecurrentTransactionRepository } from './recurrent-transaction-repository.interface';
 
 @Injectable()
-export class MysqlRecurrentTransactionRepository {
+export class MysqlRecurrentTransactionRepository implements RecurrentTransactionRepository {
     constructor(
         @InjectRepository(RecurrentTransaction)
         private readonly repo: Repository<RecurrentTransaction>
