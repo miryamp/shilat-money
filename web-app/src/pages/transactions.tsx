@@ -24,7 +24,7 @@ const Transactions = () => {
   const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null);
   const { toast } = useToast();
 
-  const fetchAndSetTransactions = async () => {
+  const fetchAndSetTransactions = React.useCallback(async () => {
     try {
       const params = {
         from: filter.from ? filter.from.toISOString().slice(0, 10) : undefined,
@@ -36,7 +36,7 @@ const Transactions = () => {
     } catch (err) {
       toast({ title: 'Error', description: 'Failed to fetch transactions' });
     }
-  };
+  }, [filter, toast]);
 
   // Fetch transactions from backend on mount and when filter changes
   useEffect(() => {
@@ -108,11 +108,11 @@ const Transactions = () => {
           message = "All occurrences have been deleted.";
           break;
         case 'up-to':
-          await patchRecurrenceTransactionDates(transaction.recurrenceId, { endDate: transaction.timestamp });
+          await patchRecurrenceTransactionDates(transaction.recurrenceId, { startDate: transaction.timestamp });
           message = "Occurrences up to this date have been deleted.";
           break;
         case 'from':
-          await patchRecurrenceTransactionDates(transaction.recurrenceId, { startDate: transaction.timestamp });
+          await patchRecurrenceTransactionDates(transaction.recurrenceId, { endDate: transaction.timestamp });
           message = "Occurrences from this date forward have been deleted.";
           break;
       }
