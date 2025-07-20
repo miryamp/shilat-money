@@ -22,6 +22,15 @@ export const addRecurrenceTransaction = async (recurrence: Omit<IRecurrentTransa
     body: JSON.stringify(payload),
   });
   if (!res.ok) throw new Error('Failed to add recurrence transaction');
+
+  return res.json();
+};
+
+export const deleteRecurrenceTransaction = async (id: string): Promise<IRecurrentTransaction> => {
+  const res = await fetch(`${API_BASE}/recurrent-transaction/${id}`, {
+    method: 'DELETE',
+  });
+  if (!res.ok) throw new Error('Failed to delete recurrence transaction');
   return res.json();
 };
 
@@ -35,10 +44,27 @@ export const updateRecurrenceTransaction = async (id: string, update: Partial<IR
   return res.json();
 };
 
-export const deleteRecurrenceTransaction = async (id: string): Promise<IRecurrentTransaction> => {
-  const res = await fetch(`${API_BASE}/recurrent-transaction/${id}`, {
-    method: 'DELETE',
+
+export const patchRecurrenceTransactionDates = async (
+  id: string,
+  dates: { startDate?: string | Date; endDate?: string | Date }
+): Promise<{ message: string; transaction: IRecurrentTransaction }> => {
+  const payload: { startDate?: string; endDate?: string } = {};
+  if (dates.startDate) {
+    payload.startDate = dates.startDate instanceof Date
+      ? format(dates.startDate, 'yyyy-MM-dd')
+      : (typeof dates.startDate === 'string' ? dates.startDate.slice(0, 10) : undefined);
+  }
+  if (dates.endDate) {
+    payload.endDate = dates.endDate instanceof Date
+      ? format(dates.endDate, 'yyyy-MM-dd')
+      : (typeof dates.endDate === 'string' ? dates.endDate.slice(0, 10) : undefined);
+  }
+  const res = await fetch(`${API_BASE}/recurrent-transaction/${id}/dates`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
   });
-  if (!res.ok) throw new Error('Failed to delete recurrence transaction');
+  if (!res.ok) throw new Error('Failed to patch recurrence transaction dates');
   return res.json();
 };
