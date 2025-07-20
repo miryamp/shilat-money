@@ -24,10 +24,10 @@ export class RecurrentTransaction implements IRecurrentTransaction {
     @Column({ type: 'int', nullable: true })
     frequency?: number; 
 
-    @Column({ type: 'date' })
+    @Column({ type: 'timestamp' })
     startDate: Date;
 
-    @Column({ type: 'date', nullable: true })
+    @Column({ type: 'timestamp', nullable: true })
     endDate?: Date;
 
     @Column({ type: 'timestamp', nullable: true, default: null })
