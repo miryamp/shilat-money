@@ -29,7 +29,7 @@ const DeleteTransactionModal: React.FC<DeleteTransactionModalProps> = ({
   if (!transaction) return null;
 
   const handleSimpleDelete = () => {
-    onConfirm();
+    onConfirm('this');
   };
 
   const handleRecurringDelete = (option: 'this' | 'all' | 'up-to' | 'from') => {

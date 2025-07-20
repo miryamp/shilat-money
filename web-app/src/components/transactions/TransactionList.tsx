@@ -37,7 +37,7 @@ const TransactionList: React.FC<TransactionListProps> = ({
     onEditTransaction?.(transaction);
   };
 
-  const handleDeleteConfirm = (deleteOption?: 'this' | 'all' | 'up-to' | 'from') => {
+  const handleDeleteConfirm = (deleteOption: 'this' | 'all' | 'up-to' | 'from') => {
     if (transactionToDelete && onDeleteTransaction) {
       onDeleteTransaction(transactionToDelete, deleteOption);
     }
