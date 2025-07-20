@@ -114,15 +114,10 @@ export class MysqlTransactionRepository implements TransactionRepository {
         if (!transaction) return null;
 
         if (logicalDelete) {
-            const update = { isDeleted: true, lastUpdated: new Date() }
-            if (tx) {
-                await tx.save(Transaction, update);
-            } else {
-                await this.transactionRepo.save(update);
-            }
-            return { ...transaction, ...update };
+            const update = { ...transaction, isDeleted: true, lastUpdated: new Date() }
+            return tx ? await tx.save(Transaction, update) : await this.transactionRepo.save(update);
         }
-        
+
         if (tx) {
             await tx.remove(Transaction, transaction);
         } else {
