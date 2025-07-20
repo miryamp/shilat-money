@@ -10,6 +10,7 @@ import { TransactionType } from 'shared/entities/transaction-type.enum';
 import { calculateTransactionsBalance } from 'shared/utils/transactionBalance';
 import TransactionFilters, { TransactionFilter } from '@/components/transactions/TransactionFilters';
 import { addTransaction, fetchTransactions, deleteTransaction as apiDeleteTransaction, updateTransaction as apiUpdateTransaction } from '@/services/transactionService';
+import { deleteRecurrenceTransaction, patchRecurrenceTransactionDates } from '@/services/recurrenceTransactionService';
 
 const Transactions = () => {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
@@ -23,22 +24,23 @@ const Transactions = () => {
   const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null);
   const { toast } = useToast();
 
+  const fetchAndSetTransactions = async () => {
+    try {
+      const params = {
+        from: filter.from ? filter.from.toISOString().slice(0, 10) : undefined,
+        to: filter.to ? filter.to.toISOString().slice(0, 10) : undefined,
+        types: filter.types.length === 1 ? filter.types : undefined,
+      };
+      const data = await fetchTransactions(params);
+      setTransactions(data);
+    } catch (err) {
+      toast({ title: 'Error', description: 'Failed to fetch transactions' });
+    }
+  };
+
   // Fetch transactions from backend on mount and when filter changes
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const params = {
-          from: filter.from ? filter.from.toISOString().slice(0, 10) : undefined,
-          to: filter.to ? filter.to.toISOString().slice(0, 10) : undefined,
-          types: filter.types.length === 1 ? filter.types : undefined,
-        };
-        const data = await fetchTransactions(params);
-        setTransactions(data);
-      } catch (err) {
-        toast({ title: 'Error', description: 'Failed to fetch transactions' });
-      }
-    };
-    fetchData();
+    fetchAndSetTransactions();
   }, [filter]);
 
   const balance = calculateTransactionsBalance(transactions);
@@ -92,34 +94,45 @@ const Transactions = () => {
     setEditingTransaction(null);
   };
 
-  const handleDeleteTransaction = async (transactionId: string, deleteOption?: 'this' | 'all' | 'up-to' | 'from') => {
-    setTransactions(prev => prev.filter(t => t.id !== transactionId));
+  const handleDeleteTransaction = async (transaction: Transaction, deleteOption?: 'this' | 'all' | 'up-to' | 'from') => {
     try {
-      await apiDeleteTransaction(transactionId);
-    } catch (err) {
-      toast({ title: 'Error', description: 'Failed to delete transaction' });
-    }
-    let message = "Transaction has been deleted.";
-    if (deleteOption) {
+      if (!deleteOption) {
+        toast({
+          title: "Error",
+          description: "Please select a delete option.",
+        });
+        return;
+      }
+
+      let message = "Transaction has been deleted.";
       switch (deleteOption) {
         case 'this':
           message = "This occurrence has been deleted.";
+          await apiDeleteTransaction(transaction.id);
           break;
         case 'all':
+          await deleteRecurrenceTransaction(transaction.recurrenceId);
           message = "All occurrences have been deleted.";
           break;
         case 'up-to':
+          await patchRecurrenceTransactionDates(transaction.recurrenceId, { endDate: transaction.timestamp });
           message = "Occurrences up to this date have been deleted.";
           break;
         case 'from':
+          await patchRecurrenceTransactionDates(transaction.recurrenceId, { startDate: transaction.timestamp });
           message = "Occurrences from this date forward have been deleted.";
           break;
       }
+
+      await fetchAndSetTransactions();
+
+      toast({
+        title: "Transaction deleted",
+        description: message,
+      });
+    } catch (err) {
+      toast({ title: 'Error', description: 'Failed to delete transaction' });
     }
-    toast({
-      title: "Transaction deleted",
-      description: message,
-    });
   };
 
   const handleModalClose = () => {

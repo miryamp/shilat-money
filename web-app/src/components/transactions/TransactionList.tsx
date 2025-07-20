@@ -9,7 +9,7 @@ import { TransactionType } from 'shared/entities/transaction-type.enum';
 interface TransactionListProps {
   transactions: Transaction[];
   onEditTransaction?: (transaction: Transaction) => void;
-  onDeleteTransaction?: (transactionId: string, deleteOption?: 'this' | 'all' | 'up-to' | 'from') => void;
+  onDeleteTransaction?: (transaction: Transaction, deleteOption?: 'this' | 'all' | 'up-to' | 'from') => void;
   onAddTransaction?: (type: TransactionType) => void;
 }
 
@@ -39,7 +39,7 @@ const TransactionList: React.FC<TransactionListProps> = ({
 
   const handleDeleteConfirm = (deleteOption?: 'this' | 'all' | 'up-to' | 'from') => {
     if (transactionToDelete && onDeleteTransaction) {
-      onDeleteTransaction(transactionToDelete.id, deleteOption);
+      onDeleteTransaction(transactionToDelete, deleteOption);
     }
     setDeleteModalOpen(false);
     setTransactionToDelete(null);
