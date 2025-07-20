@@ -12,6 +12,9 @@ export class RecurrentTransaction implements IRecurrentTransaction {
     @Column()
     householdId: string;
 
+    @Column()
+    userId: string;
+
     @Column({ type: 'json' })
     transactionData: Transaction;
 

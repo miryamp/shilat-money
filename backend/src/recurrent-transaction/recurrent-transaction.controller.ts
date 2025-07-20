@@ -5,6 +5,7 @@ import { AuthGuard } from '../common/auth/auth.guard';
 import { HouseholdId } from '../common/auth/household-id.decorator';
 import { RecurrentTransactionDto } from './dto/recurrent-transaction.dto';
 import { plainToInstance } from 'class-transformer';
+import { UserId } from '../common/auth/user-id.decorator';
 
 @UseGuards(AuthGuard)
 @Controller('recurrent-transaction')
@@ -14,12 +15,13 @@ export class RecurrentTransactionController {
     @Post()
     async create(
         @Body() entity: RecurrentTransactionDto,
-        @HouseholdId() householdId: string
+        @HouseholdId() householdId: string,
+        @UserId() userId: string
     ): Promise<RecurrentTransaction> {
         if (!entity.transactionData || !entity.type || !entity.startDate) {
             throw new NotFoundException('Missing required fields: transactionData, type, startDate');
         }
-        return await this.service.create(plainToInstance(RecurrentTransaction, { ...entity, householdId }));
+        return await this.service.create(plainToInstance(RecurrentTransaction, { ...entity, householdId, userId }));
     }
 
     @Get()

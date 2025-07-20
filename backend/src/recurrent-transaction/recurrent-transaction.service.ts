@@ -18,6 +18,9 @@ export class RecurrentTransactionService {
     ) { }
 
     async create(entity: RecurrentTransaction): Promise<RecurrentTransaction> {
+        entity.transactionData.householdId = entity.householdId;
+        entity.transactionData.userId = entity.userId;
+
         return await this.dataSource.transaction(async manager => {
             const created = await this.repo.create(entity, manager);
             // After creating the recurrent transaction, create all past instances up to today
@@ -28,7 +31,7 @@ export class RecurrentTransactionService {
                     await this.transactionRepo.createMany(pastInstances, manager);
 
                     const latestTimestamp = pastInstances.reduce((max, tx) => tx.timestamp > max ? tx.timestamp : max, pastInstances[0].timestamp);
-                    await this.repo.update(created.id, { lastOperated: latestTimestamp }, manager);
+                    await this.repo.update(created.id, { lastOperated: latestTimestamp }, created.householdId, manager);
                     created.lastOperated = latestTimestamp;
                 }
             }

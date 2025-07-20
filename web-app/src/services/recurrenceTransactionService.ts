@@ -4,17 +4,21 @@ import { format } from 'date-fns';
 const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:3000';
 
 export const addRecurrenceTransaction = async (recurrence: Omit<IRecurrentTransaction, 'id'>): Promise<IRecurrentTransaction> => {
-  delete recurrence.transactionData.category;
-  delete recurrence.transactionData.type;
-  
   const payload = {
-    ...recurrence,
+    type: recurrence.type,
+    frequency: recurrence.frequency,
+    isActive: recurrence.isActive,
+    shiftToValidDate: recurrence.shiftToValidDate,
     startDate: recurrence.startDate instanceof Date
       ? format(recurrence.startDate, 'yyyy-MM-dd')
       : (typeof recurrence.startDate === 'string' ? (recurrence.startDate as string).slice(0, 10) : undefined),
     endDate: recurrence.endDate instanceof Date
       ?  format(recurrence.endDate, 'yyyy-MM-dd')
       : (typeof recurrence.endDate === 'string' && recurrence.endDate ? (recurrence.endDate as string).slice(0, 10) : undefined),
+    transactionData: {
+      categoryId: recurrence.transactionData.categoryId,
+      amount: recurrence.transactionData.amount
+    }
   };
   const res = await fetch(`${API_BASE}/recurrent-transaction`, {
     method: 'POST',
