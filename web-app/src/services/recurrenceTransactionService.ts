@@ -27,7 +27,7 @@ export const addRecurrenceTransaction = async (recurrence: Omit<IRecurrentTransa
 };
 
 export const deleteRecurrenceTransaction = async (id: string): Promise<IRecurrentTransaction> => {
-  const res = await fetch(`${API_BASE}/recurrent-transaction/${id}`, {
+  const res = await fetch(`${API_BASE}/recurrent-transaction/${id}?removeTransactions=true`, {
     method: 'DELETE',
   });
   if (!res.ok) throw new Error('Failed to delete recurrence transaction');
