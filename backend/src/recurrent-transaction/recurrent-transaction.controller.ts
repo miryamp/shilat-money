@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Put, Delete, Param, Body, NotFoundException, UseGuards, Query, ParseBoolPipe } from '@nestjs/common';
+import { Controller, Get, Post, Put, Delete, Param, Body, NotFoundException, UseGuards, Query, ParseBoolPipe, Patch } from '@nestjs/common';
 import { RecurrentTransactionService } from './recurrent-transaction.service';
 import { RecurrentTransaction } from '../common/data-entities/recurrent-transaction';
 import { AuthGuard } from '../common/auth/auth.guard';
@@ -62,7 +62,7 @@ export class RecurrentTransactionController {
         return deleted;
     }
 
-    @Put(':id/update-dates')
+    @Patch(':id/dates')
     async updateDatesNotInclude(
         @Param('id') id: string,
         @Body() body: { startDate?: string; endDate?: string },
