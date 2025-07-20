@@ -17,7 +17,8 @@ export const addRecurrenceTransaction = async (recurrence: Omit<IRecurrentTransa
       : (typeof recurrence.endDate === 'string' && recurrence.endDate ? (recurrence.endDate as string).slice(0, 10) : undefined),
     transactionData: {
       categoryId: recurrence.transactionData.categoryId,
-      amount: recurrence.transactionData.amount
+      amount: recurrence.transactionData.amount,
+      comment: recurrence.transactionData.comment,
     }
   };
   const res = await fetch(`${API_BASE}/recurrent-transaction`, {

@@ -30,10 +30,17 @@ export const fetchTransactions = async (filter?: TransactionFilterParams): Promi
 };
 
 export const addTransaction = async (transaction: Omit<Transaction, 'id'>): Promise<Transaction> => {
+  const payload = {
+    categoryId: transaction.categoryId,
+    amount: transaction.amount,
+    timestamp: transaction.timestamp,
+    comment: transaction.comment,
+  }
+
   const res = await fetch(`${API_BASE}/transaction`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(transaction),
+    body: JSON.stringify(payload),
   });
   if (!res.ok) throw new Error('Failed to add transaction');
   return res.json();
