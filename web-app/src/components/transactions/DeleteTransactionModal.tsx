@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Transaction } from '@/types/Transaction';
+import { Transaction } from '@/types/transaction';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -36,7 +36,7 @@ const DeleteTransactionModal: React.FC<DeleteTransactionModalProps> = ({
     onConfirm(option);
   };
 
-  if (!transaction.isRecurring) {
+  if (!transaction.recurrenceId) {
     return (
       <AlertDialog open={isOpen} onOpenChange={onClose}>
         <AlertDialogContent>
@@ -62,63 +62,75 @@ const DeleteTransactionModal: React.FC<DeleteTransactionModalProps> = ({
 
   return (
     <AlertDialog open={isOpen} onOpenChange={onClose}>
-      <AlertDialogContent className="max-w-md">
+      <AlertDialogContent className="min-w-[520px] max-w-xl">
         <AlertDialogHeader>
           <AlertDialogTitle>Delete Recurring Transaction</AlertDialogTitle>
           <AlertDialogDescription>
-            This is a recurring transaction. What would you like to delete?
+            This transaction is part of a recurring series.<br />
+            <span className="font-semibold">What would you like to delete?</span>
           </AlertDialogDescription>
         </AlertDialogHeader>
-        
-        <div className="space-y-2 py-4">
-          <Button
-            variant="outline"
-            className="w-full justify-start text-left"
-            onClick={() => handleRecurringDelete('this')}
-          >
-            <div>
-              <div className="font-medium">Delete only this occurrence</div>
-              <div className="text-sm text-gray-500">Keep all other recurring transactions</div>
+        <div className="flex flex-col items-center py-4">
+          <div className="mb-4 text-center">
+            <span className="inline-block px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-xs font-medium">
+              {transaction.category?.name} &middot; {transaction.amount} &middot; {transaction.timestamp && (new Date(transaction.timestamp)).toLocaleDateString()}
+            </span>
+          </div>
+          <div className="w-full flex flex-row gap-2 justify-center items-center">
+            <div className="relative group">
+              <Button
+                size="sm"
+                className="bg-red-600 hover:bg-red-700 text-white px-2 min-w-[90px] h-8"
+                onClick={() => handleRecurringDelete('all')}
+              >
+                <span className="font-medium">Delete All</span>
+              </Button>
+              <div className="pointer-events-none absolute left-1/2 top-full mt-1 -translate-x-1/2 z-10 hidden group-hover:block bg-gray-800 text-white text-xs rounded px-2 py-1 whitespace-nowrap shadow-lg">
+                All past and future occurrences will be deleted
+              </div>
             </div>
-          </Button>
-          
-          <Button
-            variant="outline"
-            className="w-full justify-start text-left"
-            onClick={() => handleRecurringDelete('all')}
-          >
-            <div>
-              <div className="font-medium">Delete all occurrences</div>
-              <div className="text-sm text-gray-500">Remove the entire recurring transaction</div>
+            <div className="relative group">
+              <Button
+                size="sm"
+                className="px-2 min-w-[90px] h-8"
+                variant="outline"
+                onClick={() => handleRecurringDelete('this')}
+              >
+                <span className="font-medium">Only This One</span>
+              </Button>
+              <div className="pointer-events-none absolute left-1/2 top-full mt-1 -translate-x-1/2 z-10 hidden group-hover:block bg-gray-800 text-white text-xs rounded px-2 py-1 whitespace-nowrap shadow-lg">
+                This specific transaction will be deleted
+              </div>
             </div>
-          </Button>
-          
-          <Button
-            variant="outline"
-            className="w-full justify-start text-left"
-            onClick={() => handleRecurringDelete('up-to')}
-          >
-            <div>
-              <div className="font-medium">Delete up to this occurrence</div>
-              <div className="text-sm text-gray-500">Keep future occurrences only</div>
+            <div className="relative group">
+              <Button
+                size="sm"
+                className="px-2 min-w-[90px] h-8"
+                variant="outline"
+                onClick={() => handleRecurringDelete('up-to')}
+              >
+                <span className="font-medium">This & Past</span>
+              </Button>
+              <div className="pointer-events-none absolute left-1/2 top-full mt-1 -translate-x-1/2 z-10 hidden group-hover:block bg-gray-800 text-white text-xs rounded px-2 py-1 whitespace-nowrap shadow-lg">
+                All occurrences up to and including this one will be deleted
+              </div>
             </div>
-          </Button>
-          
-          <Button
-            variant="outline"
-            className="w-full justify-start text-left"
-            onClick={() => handleRecurringDelete('from')}
-          >
-            <div>
-              <div className="font-medium">Delete from this occurrence forward</div>
-              <div className="text-sm text-gray-500">Keep past occurrences only</div>
+            <div className="relative group">
+              <Button
+                size="sm"
+                className="px-2 min-w-[90px] h-8"
+                variant="outline"
+                onClick={() => handleRecurringDelete('from')}
+              >
+                <span className="font-medium">This & Future</span>
+              </Button>
+              <div className="pointer-events-none absolute left-1/2 top-full mt-1 -translate-x-1/2 z-10 hidden group-hover:block bg-gray-800 text-white text-xs rounded px-2 py-1 whitespace-nowrap shadow-lg">
+                This occurrence and all future ones will be deleted
+              </div>
             </div>
-          </Button>
+            <AlertDialogCancel onClick={onClose} className="h-8 px-3">Cancel</AlertDialogCancel>
+          </div>
         </div>
-
-        <AlertDialogFooter>
-          <AlertDialogCancel onClick={onClose}>Cancel</AlertDialogCancel>
-        </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>
   );
