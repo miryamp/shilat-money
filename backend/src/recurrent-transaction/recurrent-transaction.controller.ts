@@ -21,7 +21,7 @@ export class RecurrentTransactionController {
         if (!entity.transactionData || !entity.type || !entity.startDate) {
             throw new NotFoundException('Missing required fields: transactionData, type, startDate');
         }
-        return await this.service.create(plainToInstance(RecurrentTransaction, { ...entity, householdId, userId }));
+        return await this.service.create(plainToInstance(RecurrentTransaction, { ...entity, userId }), householdId);
     }
 
     @Get()

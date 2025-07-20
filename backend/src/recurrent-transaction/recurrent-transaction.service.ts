@@ -17,8 +17,8 @@ export class RecurrentTransactionService {
         private readonly dataSource: TransactionalDataSource,
     ) { }
 
-    async create(entity: RecurrentTransaction): Promise<RecurrentTransaction> {
-        entity.transactionData.householdId = entity.householdId;
+    async create(entity: RecurrentTransaction, householdId: string): Promise<RecurrentTransaction> {
+        entity.transactionData.householdId = householdId;
         entity.transactionData.userId = entity.userId;
 
         return await this.dataSource.transaction(async manager => {
