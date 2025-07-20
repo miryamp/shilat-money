@@ -41,7 +41,7 @@ const Transactions = () => {
   // Fetch transactions from backend on mount and when filter changes
   useEffect(() => {
     fetchAndSetTransactions();
-  }, [filter]);
+  }, [fetchAndSetTransactions]);
 
   const balance = calculateTransactionsBalance(transactions);
 
@@ -53,15 +53,8 @@ const Transactions = () => {
   };
 
   const handleAddTransaction = async (transaction: Omit<Transaction, 'id'>) => {
-    const newTransaction: Transaction = {
-      ...transaction,
-      id: Date.now().toString()
-    };
-    if (matchesCurrentFilter(newTransaction)) {
-      setTransactions(prev => [...prev, newTransaction]);
-    }
-    await addTransaction(newTransaction);
-
+    await addTransaction(transaction);
+    await fetchAndSetTransactions();
     toast({
       title: "Transaction added",
       description: `${transaction.type === TransactionType.Income ? 'Income' : 'Expense'} of $${transaction.amount} has been added.`,

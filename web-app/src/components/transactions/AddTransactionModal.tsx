@@ -172,7 +172,7 @@ const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
         };
         await addRecurrenceTransaction(recurrencePayload);
       } else {
-        await addTransaction(transactionData);
+        onSubmit(transactionData);
       }
       resetForm();
       onClose();
