@@ -53,6 +53,7 @@ export class MysqlTransactionRepository implements TransactionRepository {
             from?: Date;
             to?: Date;
             recurrenceId?: string;
+            isDeleted?: boolean;
         }
     ): Promise<Transaction[]> {
         const query = this.transactionRepo.createQueryBuilder('transaction')
@@ -75,12 +76,15 @@ export class MysqlTransactionRepository implements TransactionRepository {
 
         if (options?.from) query.andWhere('transaction.timestamp >= :from', { from: options.from });
         if (options?.to) query.andWhere('transaction.timestamp <= :to', { to: options.to });
+        if (options?.isDeleted !== undefined) {
+            query.andWhere('transaction.isDeleted = :isDeleted', { isDeleted: options.isDeleted });
+        }
 
         return await query.getMany();
     }
 
-    async findOne(id: string, householdId: string): Promise<Transaction | null> {
-        return await this.transactionRepo.findOne({ where: { id, householdId } });
+    async findOne(id: string, householdId: string, options?: {isDeleted?: boolean}): Promise<Transaction | null> {
+        return await this.transactionRepo.findOne({ where: { id, householdId, ...options } });
     }
 
     async update(id: string, update: Partial<Transaction>, householdId: string, tx?: any): Promise<Transaction | null> {

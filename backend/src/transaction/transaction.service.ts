@@ -29,11 +29,11 @@ export class TransactionService {
             to?: Date;
         }
     ): Promise<Transaction[]> {
-        return await this.transactionRepository.findAll(householdId, options);
+        return await this.transactionRepository.findAll(householdId, {...options, isDeleted: false});
     }
 
     async findOne(id: string, householdId: string): Promise<Transaction | null> {
-        return await this.transactionRepository.findOne(id, householdId);
+        return await this.transactionRepository.findOne(id, householdId, { isDeleted: false });
     }
 
     async update(id: string, update: Partial<Transaction>, householdId: string): Promise<Transaction | null> {
