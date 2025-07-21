@@ -18,6 +18,7 @@ export class RecurrentTransactionService {
     ) { }
 
     async create(entity: RecurrentTransaction, householdId: string): Promise<RecurrentTransaction> {
+        entity.householdId = householdId;
         entity.transactionData.householdId = householdId;
         entity.transactionData.userId = entity.userId;
 
@@ -80,53 +81,30 @@ export class RecurrentTransactionService {
             const prevStart = current.startDate;
             const prevEnd = current.endDate;
 
-            const startMovedForward = startDateChanged && newStart > prevStart && newStart <= today;
-            const endMovedBackward = endDateChanged && prevEnd && newEnd && newEnd < prevEnd && newEnd <= today;
+            const startMovedForward = !!startDateChanged && newStart > prevStart && newStart <= today;
+            const endMovedBackward = !!endDateChanged && prevEnd && newEnd && newEnd < prevEnd && newEnd <= today;
 
-            const startMovedBackward = startDateChanged && newStart < prevStart && newStart <= today;
-            const endMovedForward = endDateChanged && newEnd && (!prevEnd || newEnd > prevEnd) && newEnd <= today;
+            const startMovedBackward = !!startDateChanged && newStart < prevStart && newStart <= today;
+            const endMovedForward = !!endDateChanged && newEnd && (!prevEnd || newEnd > prevEnd) && newEnd <= today;
 
-            if (startMovedForward || endMovedBackward) {
-                // Find transactions to remove
-                const findConditions: any = { recurrenceId: id, householdId };
-                if (startMovedForward) {
-                    findConditions.timestamp = { $lt: newStart };
-                }
-                if (endMovedBackward) {
-                    findConditions.timestamp = findConditions.timestamp
-                        ? { ...findConditions.timestamp, $gt: newEnd }
-                        : { $gt: newEnd };
-                }
-                // Query transactions to delete
-                let toRemove: string[] = [];
-                if (findConditions.timestamp) {
-                    // If both conditions, need to merge
-                    if (findConditions.timestamp.$lt && findConditions.timestamp.$gt) {
-                        // Remove transactions < newStart OR > newEnd
-                        const lessThan = await this.transactionRepo.findAll(householdId, { from: undefined, to: newStart, recurrenceId: id });
-                        const greaterThan = await this.transactionRepo.findAll(householdId, { from: newEnd, to: undefined, recurrenceId: id });
-                        toRemove = [...lessThan.map(t => t.id), ...greaterThan.map(t => t.id)];
-                    } else if (findConditions.timestamp.$lt) {
-                        toRemove = (await this.transactionRepo.findAll(householdId, { from: undefined, to: newStart, recurrenceId: id })).map(t => t.id);
-                    } else if (findConditions.timestamp.$gt) {
-                        toRemove = (await this.transactionRepo.findAll(householdId, { from: newEnd, to: undefined, recurrenceId: id })).map(t => t.id);
-                    }
-                }
-                if (toRemove.length > 0) {
-                    await this.transactionRepo.removeMany(toRemove, manager, false);
-                }
+
+            let toRemove: string[] = [];
+            if (startMovedForward) {
+                toRemove = (await this.transactionRepo.findAll(householdId, { excludeFrom: undefined, excludeTo: newStart, recurrenceId: id })).map(t => t.id);
+            }
+
+            if (endMovedBackward) {
+                toRemove = [...toRemove, ...(await this.transactionRepo.findAll(householdId, { excludeFrom: newEnd, excludeTo: undefined, recurrenceId: id })).map(t => t.id)];
+            }
+
+            if (toRemove.length > 0) {
+                await this.transactionRepo.removeMany(toRemove, householdId, false, manager);
             }
 
             // Add transactions if startDate moved backward or endDate moved forward
             if (startMovedBackward || endMovedForward) {
-                let gapFrom = prevStart;
-                let gapTo = prevEnd || today;
-                if (startMovedBackward) {
-                    gapFrom = newStart;
-                }
-                if (endMovedForward) {
-                    gapTo = newEnd;
-                }
+                let gapFrom = startMovedBackward ? newStart : prevStart;
+                let gapTo = endMovedForward ? newEnd : (prevEnd || today);
 
                 const gapInstances = await this.getInstancesInRange(current, gapFrom, gapTo);
                 if (gapInstances && gapInstances.length > 0) {
@@ -153,13 +131,13 @@ export class RecurrentTransactionService {
         }
 
         if (newEndDate && (!current.endDate || newEndDate.getTime() !== current.endDate.getTime())) {
-            const actualStartDate = RecurrenceStrategiesUtils.getPreviousDate(newEndDate, current);
-            if (!actualStartDate) {
+            const actualEndDate = RecurrenceStrategiesUtils.getPreviousDate(newEndDate, current);
+            if (!actualEndDate) {
                 await this.remove(id, householdId, true);
                 return null;
             }
 
-            update.endDate = actualStartDate;
+            update.endDate = actualEndDate;
         }
 
         return await this.update(id, update, householdId);
