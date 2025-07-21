@@ -11,6 +11,8 @@ export interface TransactionRepository {
         amount?: { gt?: number; gte?: number; lt?: number; lte?: number; eq?: number };
         from?: Date;
         to?: Date;
+        excludeFrom?: Date;
+        excludeTo?: Date;
         recurrenceId?: string;
         isDeleted?: boolean;
     }): Promise<Transaction[]>;

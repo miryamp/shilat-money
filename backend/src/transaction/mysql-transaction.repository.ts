@@ -52,6 +52,8 @@ export class MysqlTransactionRepository implements TransactionRepository {
             amount?: { gt?: number; gte?: number; lt?: number; lte?: number; eq?: number };
             from?: Date;
             to?: Date;
+            excludeFrom?: Date;
+            excludeTo?: Date;
             recurrenceId?: string;
             isDeleted?: boolean;
         }
@@ -76,6 +78,8 @@ export class MysqlTransactionRepository implements TransactionRepository {
 
         if (options?.from) query.andWhere('transaction.timestamp >= :from', { from: options.from });
         if (options?.to) query.andWhere('transaction.timestamp <= :to', { to: options.to });
+        if (options?.excludeFrom) query.andWhere('transaction.timestamp > :excludeFrom', { excludeFrom: options.excludeFrom });
+        if (options?.excludeTo) query.andWhere('transaction.timestamp < :excludeTo', { excludeTo: options.excludeTo });
         if (options?.isDeleted !== undefined) {
             query.andWhere('transaction.isDeleted = :isDeleted', { isDeleted: options.isDeleted });
         }
