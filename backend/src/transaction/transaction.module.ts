@@ -24,6 +24,9 @@ import { MysqlCategoryRepository } from '../category/mysql-category.repository';
             useClass: MysqlCategoryRepository
         }
     ],
-    exports: [TransactionService]
+    exports: [
+        TransactionService,
+        'TransactionRepo'
+    ]
 })
 export class TransactionModule { }

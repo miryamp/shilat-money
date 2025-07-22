@@ -11,9 +11,7 @@ import { Category } from '../common/data-entities/category';
 
 @Module({
     imports: [
-        TypeOrmModule.forFeature([RecurrentTransaction]),
-        TypeOrmModule.forFeature([Transaction]),
-        TypeOrmModule.forFeature([Category]), 
+        TypeOrmModule.forFeature([RecurrentTransaction, Transaction, Category]),
         TypeOrmModule
     ],
     providers: [
@@ -33,6 +31,10 @@ import { Category } from '../common/data-entities/category';
         RecurrentTransactionService
     ],
     controllers: [RecurrentTransactionController],
-    exports: [RecurrentTransactionService]
+    exports: [
+        RecurrentTransactionService,
+        'RecurrentTransactionRepo',
+        'TransactionalDataSource'
+    ]
 })
 export class RecurrentTransactionModule { }

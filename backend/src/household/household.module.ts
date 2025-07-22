@@ -17,5 +17,9 @@ TypeOrmModule.forFeature([User])],
     HouseholdService,
   ],
   controllers: [HouseholdController],
+  exports: [
+    HouseholdService,
+    'HouseholdRepo'
+  ]
 })
 export class HouseholdModule {}
