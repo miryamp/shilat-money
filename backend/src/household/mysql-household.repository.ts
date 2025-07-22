@@ -19,6 +19,10 @@ export class MysqlHouseholdRepository implements HouseholdRepository {
     return this.householdRepo.findOne({ where: { id } });
   }
 
+    findAll(): Promise<Household[]> {
+    return this.householdRepo.find();
+  }
+
   async update(id: string, update: Partial<Household>): Promise<Household | null> {
     await this.householdRepo.update(id, update);
     return this.householdRepo.findOne({ where: { id } });
