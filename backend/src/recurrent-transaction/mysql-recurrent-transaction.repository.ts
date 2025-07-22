@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { EntityManager, Repository } from 'typeorm';
+import { EntityManager, LessThan, MoreThan, Repository } from 'typeorm';
 import { RecurrentTransaction } from '../common/data-entities/recurrent-transaction';
 import { RecurrentTransactionRepository } from './recurrent-transaction-repository.interface';
 
@@ -18,8 +18,17 @@ export class MysqlRecurrentTransactionRepository implements RecurrentTransaction
         return await this.repo.save(entity);
     }
 
-    async findAll(householdId: string, options?: {isActive?: boolean}): Promise<RecurrentTransaction[]> {
+    async findAll(householdId: string, options?: {isActive?: boolean, startedBefore?: Date,
+        endsAfter?: Date}): Promise<RecurrentTransaction[]> {
         const where: any = { householdId, ...(options?.isActive && { isActive: options.isActive }) };
+
+        if (options?.startedBefore) {
+            where.startDate = LessThan(options.startedBefore);
+        }
+
+        if (options?.endsAfter) {
+            where.endDate = MoreThan(options.endsAfter);
+        }
 
         return await this.repo.find({ where });
     }
