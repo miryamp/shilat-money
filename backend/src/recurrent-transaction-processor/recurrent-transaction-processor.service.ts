@@ -5,7 +5,7 @@ import { startOfDay } from 'date-fns';
 import { RecurrentTransactionRepository } from '../recurrent-transaction/recurrent-transaction-repository.interface';
 import { TransactionRepository } from '../transaction/transaction-repository.interface';
 import { HouseholdRepository } from '../household/household-repository.interface';
-import { RecurrentTransaction } from '@/common/data-entities/recurrent-transaction';
+import { RecurrentTransaction } from '../common/data-entities/recurrent-transaction';
 import { TransactionalDataSource } from '../recurrent-transaction/transactional-data-source.interface';
 
 @Injectable()
@@ -19,21 +19,22 @@ export class RecurrentTransactionProcessorService {
     private readonly householdRepo: HouseholdRepository,
     @Inject('TransactionalDataSource')
     private readonly dataSource: TransactionalDataSource,
-  ) {}
- 
+  ) { }
+
   @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT)
   async processRecurrentTransactions() {
+    console.log('Starting daily recurrent transactions processing...');
     const today = startOfDay(new Date());
-    
+
     const households = await this.householdRepo.findAll();
-    
+
     for (const household of households) {
       const recurrentTransactions = await this.recurrentTransactionRepo.findAll(household.id, {
         isActive: true,
         startedBefore: today,
         endsAfter: today
       });
-      
+
       for (const recurrentTx of recurrentTransactions) {
         try {
           await this.processRecurrentTransaction(recurrentTx, today);
@@ -54,7 +55,7 @@ export class RecurrentTransactionProcessorService {
           ...recurrentTx.transactionData,
           timestamp: nextDate,
           recurrenceId: recurrentTx.id
-        }, manager);
+        }, { skipIfExists: true }, manager);
 
         await this.recurrentTransactionRepo.update(
           recurrentTx.id,
