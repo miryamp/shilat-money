@@ -2,6 +2,7 @@ import { IsOptional, IsBoolean, IsInt, ValidateNested, IsEnum, Min, IsDate, IsSt
 import { Type } from 'class-transformer';
 import { RecurrentTransactionType } from 'shared/entities/recurrent-transaction-type.enum';
 import { TransactionDto } from '../../transaction/dto/transaction.dto';
+import { NormalizeDate } from '../../common/transformers/normalize-date.transformer';
 
 export class RecurrentTransactionDto {
     @IsOptional()
@@ -21,11 +22,13 @@ export class RecurrentTransactionDto {
 
     @IsOptional()
     @Type(() => Date)
+    @NormalizeDate()
     @IsDate()
     startDate?: Date;
 
     @IsOptional()
     @Type(() => Date)
+    @NormalizeDate()
     @IsDate()
     endDate?: Date;
 
