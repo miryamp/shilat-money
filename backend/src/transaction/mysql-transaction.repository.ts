@@ -15,7 +15,7 @@ export class MysqlTransactionRepository implements TransactionRepository {
         private readonly categoryRepo: Repository<Category>
     ) { }
 
-    async create(transaction: Transaction, options?: { skipIfExists?: boolean }, tx?: EntityManager): Promise<Transaction | null> {
+    async create(transaction: Transaction, options?: { skipIfExists?: boolean }, tx?: EntityManager): Promise<Transaction> {
         if (transaction.categoryId) {
             const category = await this.categoryRepo.findOne({ where: { id: transaction.categoryId, householdId: transaction.householdId, isDeleted: false } });
             if (!category) throw new Error('Category does not exist or is deleted');
@@ -32,14 +32,18 @@ export class MysqlTransactionRepository implements TransactionRepository {
                 .orIgnore()
                 .execute();
                 
-            // Return the transaction if it was inserted, or find the existing one
-            return await repo.findOne({
+            const existingTransaction = await repo.findOne({
                 where: {
                     recurrenceId: transaction.recurrenceId,
                     timestamp: transaction.timestamp,
                     householdId: transaction.householdId
                 }
             });
+            
+            if (!existingTransaction) {
+                throw new Error('Failed to retrieve transaction after insert');
+            }
+            return existingTransaction;
         }
 
         // Default behavior - regular save
