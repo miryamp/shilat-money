@@ -19,7 +19,8 @@ export class MysqlRecurrentTransactionRepository implements RecurrentTransaction
     }
 
     async findAll(householdId: string, options?: {isActive?: boolean, startedBefore?: Date,
-        endsAfter?: Date}): Promise<RecurrentTransaction[]> {
+        endsAfter?: Date}, tx?: EntityManager): Promise<RecurrentTransaction[]> {
+        const repo = tx ? tx.getRepository(RecurrentTransaction) : this.repo;
         const where: any = { householdId, ...(options?.isActive && { isActive: options.isActive }) };
 
         if (options?.startedBefore) {
@@ -30,15 +31,17 @@ export class MysqlRecurrentTransactionRepository implements RecurrentTransaction
             where.endDate = MoreThan(options.endsAfter);
         }
 
-        return await this.repo.find({ where });
+        return await repo.find({ where });
     }
 
-    async findOne(id: string, householdId: string): Promise<RecurrentTransaction | null> {
-        return await this.repo.findOne({ where: { id, householdId, isActive:true } });
+    async findOne(id: string, householdId: string, tx?: EntityManager): Promise<RecurrentTransaction | null> {
+        const repo = tx ? tx.getRepository(RecurrentTransaction) : this.repo;
+        return await repo.findOne({ where: { id, householdId, isActive:true } });
     }
 
     async update(id: string, update: Partial<RecurrentTransaction>, householdId: string, tx?: EntityManager): Promise<RecurrentTransaction | null> {
-        const entity = await this.repo.findOne({ where: { id, householdId } });
+        const repo = tx ? tx.getRepository(RecurrentTransaction) : this.repo;
+        const entity = await repo.findOne({ where: { id, householdId } });
         if (!entity) return null;
         Object.assign(entity, update);
         if (tx) {
@@ -48,7 +51,8 @@ export class MysqlRecurrentTransactionRepository implements RecurrentTransaction
     }
 
     async remove(id: string, householdId: string, tx?: EntityManager): Promise<RecurrentTransaction | null> {
-        const entity = await this.repo.findOne({ where: { id, householdId } });
+        const repo = tx ? tx.getRepository(RecurrentTransaction) : this.repo;
+        const entity = await repo.findOne({ where: { id, householdId } });
         if (!entity) return null;
 
         if (tx) {
