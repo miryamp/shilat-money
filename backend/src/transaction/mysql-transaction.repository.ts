@@ -15,15 +15,38 @@ export class MysqlTransactionRepository implements TransactionRepository {
         private readonly categoryRepo: Repository<Category>
     ) { }
 
-    async create(transaction: Transaction, tx?: EntityManager): Promise<Transaction> {
+    async create(transaction: Transaction, options?: { skipIfExists?: boolean }, tx?: EntityManager): Promise<Transaction | null> {
         if (transaction.categoryId) {
             const category = await this.categoryRepo.findOne({ where: { id: transaction.categoryId, householdId: transaction.householdId, isDeleted: false } });
             if (!category) throw new Error('Category does not exist or is deleted');
         }
-        if (tx) {
-            return await tx.save(Transaction, { ...transaction, lastUpdated: new Date() });
+
+        const repo = tx ? tx.getRepository(Transaction) : this.transactionRepo;
+        const transactionWithTimestamp = { ...transaction, lastUpdated: new Date() };
+
+        if (options?.skipIfExists) {
+            await repo.createQueryBuilder()
+                .insert()
+                .into(Transaction)
+                .values(transactionWithTimestamp)
+                .orIgnore()
+                .execute();
+                
+            // Return the transaction if it was inserted, or find the existing one
+            return await repo.findOne({
+                where: {
+                    recurrenceId: transaction.recurrenceId,
+                    timestamp: transaction.timestamp,
+                    householdId: transaction.householdId
+                }
+            });
         }
-        return await this.transactionRepo.save({ ...transaction, lastUpdated: new Date() });
+
+        // Default behavior - regular save
+        if (tx) {
+            return await tx.save(Transaction, transactionWithTimestamp);
+        }
+        return await this.transactionRepo.save(transactionWithTimestamp);
     }
 
     async createMany(bulk: Transaction[], tx?: EntityManager): Promise<void> {
