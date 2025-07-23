@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { EntityManager, LessThan, MoreThan, Repository } from 'typeorm';
+import { EntityManager, LessThan, MoreThan, IsNull, Raw, Repository } from 'typeorm';
 import { RecurrentTransaction } from '../common/data-entities/recurrent-transaction';
 import { RecurrentTransactionRepository } from './recurrent-transaction-repository.interface';
 
@@ -21,17 +21,24 @@ export class MysqlRecurrentTransactionRepository implements RecurrentTransaction
     async findAll(householdId: string, options?: {isActive?: boolean, startedBefore?: Date,
         endsAfter?: Date}, tx?: EntityManager): Promise<RecurrentTransaction[]> {
         const repo = tx ? tx.getRepository(RecurrentTransaction) : this.repo;
-        const where: any = { householdId, ...(options?.isActive && { isActive: options.isActive }) };
+        
+        const query = repo.createQueryBuilder('recurrentTransaction')
+            .where('recurrentTransaction.householdId = :householdId', { householdId });
+
+        if (options?.isActive !== undefined) {
+            query.andWhere('recurrentTransaction.isActive = :isActive', { isActive: options.isActive });
+        }
 
         if (options?.startedBefore) {
-            where.startDate = LessThan(options.startedBefore);
+            query.andWhere('recurrentTransaction.startDate < :startedBefore', { startedBefore: options.startedBefore });
         }
 
         if (options?.endsAfter) {
-            where.endDate = MoreThan(options.endsAfter);
+            query.andWhere('(recurrentTransaction.endDate IS NULL OR recurrentTransaction.endDate > :endsAfter)', 
+                { endsAfter: options.endsAfter });
         }
 
-        return await repo.find({ where });
+        return await query.getMany();
     }
 
     async findOne(id: string, householdId: string, tx?: EntityManager): Promise<RecurrentTransaction | null> {
