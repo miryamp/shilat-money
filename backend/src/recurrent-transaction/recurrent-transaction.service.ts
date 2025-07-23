@@ -168,7 +168,7 @@ export class RecurrentTransactionService {
             (recurrence.startDate && recurrence.startDate > to))
             return [];
 
-        let current = new Date(recurrence.startDate < from ? from : recurrence.startDate);
+        let current = startOfDay(new Date(recurrence.startDate < from ? from : recurrence.startDate));
         const results: Transaction[] = [];
 
         if (RecurrenceStrategiesUtils.includesDate(current, recurrence)) {
