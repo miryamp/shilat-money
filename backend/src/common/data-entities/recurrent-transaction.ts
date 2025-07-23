@@ -2,6 +2,7 @@ import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
 import { RecurrentTransactionType } from 'shared/entities/recurrent-transaction-type.enum';
 import { Transaction } from './transaction';
 import { IRecurrentTransaction } from 'shared/entities/recurrent-transaction.interface';
+import { NormalizeDate } from '../transformers/normalize-date.transformer';
 
 
 @Entity()
@@ -24,13 +25,16 @@ export class RecurrentTransaction implements IRecurrentTransaction {
     @Column({ type: 'int', nullable: true })
     frequency?: number; 
 
-    @Column({ type: 'timestamp' })
+    @Column({ type: 'date' })
+    @NormalizeDate()
     startDate: Date;
 
-    @Column({ type: 'timestamp', nullable: true })
+    @Column({ type: 'date', nullable: true })
+    @NormalizeDate()
     endDate?: Date;
 
-    @Column({ type: 'timestamp', nullable: true, default: null })
+    @Column({ type: 'date', nullable: true, default: null })
+    @NormalizeDate()
     lastOperated?: Date;
 
     @Column({ default: false })
