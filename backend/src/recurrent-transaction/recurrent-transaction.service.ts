@@ -5,6 +5,7 @@ import { TransactionalDataSource } from './transactional-data-source.interface';
 import { Transaction } from '../common/data-entities/transaction';
 import { TransactionRepository } from '../transaction/transaction-repository.interface';
 import { RecurrenceStrategiesUtils } from './recurrence-strategy/recurrence-strategies.utils';
+import { startOfDay } from 'date-fns';
 
 @Injectable()
 export class RecurrentTransactionService {
@@ -27,11 +28,11 @@ export class RecurrentTransactionService {
             // After creating the recurrent transaction, create all past instances up to today
             const today = new Date();
             if (entity.startDate && entity.startDate <= today) {
-                const pastInstances = await this.getInstancesInRange(created, new Date(entity.startDate), today);
+                const pastInstances = this.getInstancesInRange(created, new Date(entity.startDate), today);
                 if (pastInstances.length > 0) {
                     await this.transactionRepo.createMany(pastInstances, manager);
 
-                    const latestTimestamp = pastInstances.reduce((max, tx) => tx.timestamp > max ? tx.timestamp : max, pastInstances[0].timestamp);
+                    const latestTimestamp = startOfDay(pastInstances.reduce((max, tx) => tx.timestamp > max ? tx.timestamp : max, pastInstances[0].timestamp));
                     await this.repo.update(created.id, { lastOperated: latestTimestamp }, created.householdId, manager);
                     created.lastOperated = latestTimestamp;
                 }
@@ -162,7 +163,7 @@ export class RecurrentTransactionService {
         });
     }
 
-    async getInstancesInRange(recurrence: RecurrentTransaction, from: Date, to: Date): Promise<Transaction[]> {
+    getInstancesInRange(recurrence: RecurrentTransaction, from: Date, to: Date): Transaction[] {
         if ((recurrence.endDate && recurrence.endDate < from) ||
             (recurrence.startDate && recurrence.startDate > to))
             return [];
