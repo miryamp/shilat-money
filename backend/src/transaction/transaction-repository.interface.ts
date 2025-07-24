@@ -3,7 +3,7 @@ import { Transaction } from '../common/data-entities/transaction';
 
 export interface TransactionRepository {
     create(transaction: Transaction, options?: { skipIfExists?: boolean }, tx?: any): Promise<Transaction>;
-    createMany(bulk: Transaction[], tx?: any): Promise<void>;
+    createMany(transactions: Transaction[], options?: { skipIfExists?: boolean },  tx?: any): Promise<Transaction[]>;
     findAll(householdId: string, options?: {
         userId?: string;
         categoryId?: string | string[];

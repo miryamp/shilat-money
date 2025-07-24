@@ -25,12 +25,7 @@ export class MysqlTransactionRepository implements TransactionRepository {
         const transactionWithTimestamp = { ...transaction, lastUpdated: new Date() };
 
         if (options?.skipIfExists) {
-            await repo.createQueryBuilder()
-                .insert()
-                .into(Transaction)
-                .values(transactionWithTimestamp)
-                .orIgnore()
-                .execute();
+            await repo.upsert(transactionWithTimestamp, ['recurrenceId', 'householdId', 'timestamp']);
                 
             const existingTransaction = await repo.findOne({
                 where: {
@@ -46,14 +41,10 @@ export class MysqlTransactionRepository implements TransactionRepository {
             return existingTransaction;
         }
 
-        // Default behavior - regular save
-        if (tx) {
-            return await tx.save(Transaction, transactionWithTimestamp);
-        }
-        return await this.transactionRepo.save(transactionWithTimestamp);
+        return await repo.save(transactionWithTimestamp);
     }
 
-    async createMany(bulk: Transaction[], tx?: EntityManager): Promise<void> {
+    async createMany(bulk: Transaction[], options?: { skipIfExists?: boolean },  tx?: EntityManager): Promise<Transaction[]> {
         const checkedCategories = new Set<string>();
         for (const transaction of bulk) {
             if (transaction.categoryId && checkedCategories.has(transaction.categoryId)) continue; // Skip if already checked
@@ -61,13 +52,30 @@ export class MysqlTransactionRepository implements TransactionRepository {
             if (!category) throw new Error(`Category does not exist or is deleted for transaction ${transaction.id}`);
             checkedCategories.add(transaction.categoryId);
         }
-        const transactionsWithTimestamp = bulk.map(t => ({ ...t, lastUpdated: new Date() }));
+        
+        const now = new Date();
+        const transactionsWithTimestamp = bulk.map(t => ({ ...t, lastUpdated: now }));
+        const repo = tx ? tx.getRepository(Transaction) : this.transactionRepo;
+        let result;
+        if (options?.skipIfExists) {
+            result = await repo.createQueryBuilder()
+                .insert()
+                .into(Transaction)
+                .values(transactionsWithTimestamp)
+                .orIgnore()
+                .execute();
+            
+            // We can get the IDs of newly inserted records from the result
+            const insertedIds = result.identifiers.map(id => id.id);
+            if (insertedIds.length === bulk.length) {
+                // All records were new, we can use IDs directly
+                return await repo.findBy({ id: In(insertedIds) });
+            }
 
-        if (tx) {
-            await tx.save(Transaction, transactionsWithTimestamp);
         } else {
-            await this.transactionRepo.save(transactionsWithTimestamp);
+            result = await repo.insert(transactionsWithTimestamp);
         }
+         return await repo.findBy({ id: In(result.identifiers.map(id => id.id)) });
     }
 
     async findAll(

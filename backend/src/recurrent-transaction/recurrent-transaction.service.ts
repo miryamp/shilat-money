@@ -30,7 +30,7 @@ export class RecurrentTransactionService {
             if (entity.startDate && entity.startDate <= today) {
                 const pastInstances = this.getInstancesInRange(created, new Date(entity.startDate), today);
                 if (pastInstances.length > 0) {
-                    await this.transactionRepo.createMany(pastInstances, manager);
+                    await this.transactionRepo.createMany(pastInstances, { skipIfExists: true }, manager);
 
                     const latestTimestamp = startOfDay(pastInstances.reduce((max, tx) => tx.timestamp > max ? tx.timestamp : max, pastInstances[0].timestamp));
                     await this.repo.update(created.id, { lastOperated: latestTimestamp }, created.householdId, manager);
