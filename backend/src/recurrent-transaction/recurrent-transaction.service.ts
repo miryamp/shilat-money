@@ -175,7 +175,9 @@ export class RecurrentTransactionService {
             results.push({
                 ...recurrence.transactionData,
                 timestamp: current,
-                recurrenceId: recurrence.id
+                recurrenceId: recurrence.id,
+                lastUpdated: new Date(),
+                isDeleted: false
             });
         }
 
@@ -183,7 +185,7 @@ export class RecurrentTransactionService {
             const nextDate = RecurrenceStrategiesUtils.getNextDate(current, recurrence);
             if (!nextDate || nextDate > to) break;
 
-            results.push({ ...recurrence.transactionData, timestamp: new Date(nextDate), recurrenceId: recurrence.id });
+            results.push({ ...recurrence.transactionData, timestamp: new Date(nextDate), recurrenceId: recurrence.id, lastUpdated: new Date(), isDeleted: false });
             current = new Date(nextDate);
         }
 

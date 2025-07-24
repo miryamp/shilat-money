@@ -7,7 +7,9 @@ import { TransactionRepository } from '../transaction/transaction-repository.int
 import { HouseholdRepository } from '../household/household-repository.interface';
 import { RecurrentTransaction } from '../common/data-entities/recurrent-transaction';
 import { TransactionalDataSource } from '../recurrent-transaction/transactional-data-source.interface';
-import { Household } from '@/common/data-entities/household';
+import { Household } from '../common/data-entities/household';
+import { plainToClass } from 'class-transformer';
+import { Transaction } from '../common/data-entities/transaction';
 
 interface ProcessingOptions {
   householdId?: string;
@@ -122,11 +124,11 @@ export class RecurrentTransactionProcessorService {
     this.logger.debug(`Saving ${dates.length} transactions for recurrent transaction ${recurrentTx.id}`);
     
     await this.dataSource.transaction(async manager => {
-      const transactions = dates.map(date => ({
+      const transactions = dates.map(date => (plainToClass(Transaction, {
         ...recurrentTx.transactionData,
         timestamp: date,
         recurrenceId: recurrentTx.id
-      }));
+      })));
 
       if (dates.length == 1) { // more efficeint to use create for single transaction
         await this.transactionRepo.create(transactions[0], { skipIfExists: true }, manager);
