@@ -4,8 +4,6 @@ import { Household } from './household';
 import { User } from './user';
 import { ITransactionData } from 'shared/entities/transaction-data.interface';
 import { Currency } from 'shared/entities/currency.enum';
-import { TransactionType } from 'shared/entities/transaction-type.enum';
-import { transformDate } from '../transformers/normalize-date.transformer';
 
 export abstract class BaseTransactionData implements ITransactionData {
     @PrimaryGeneratedColumn('uuid')
