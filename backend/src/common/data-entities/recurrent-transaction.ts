@@ -3,20 +3,12 @@ import { RecurrentTransactionType } from 'shared/entities/recurrent-transaction-
 import { RecurrentTransactionData } from './recurrent-transaction-data';
 import { IRecurrentTransaction } from 'shared/entities/recurrent-transaction.interface';
 import { NormalizeDate, transformDate } from '../transformers/normalize-date.transformer';
+import { BaseTransactionData } from './base-transaction-data';
 
 
 @Entity()
-export class RecurrentTransaction implements IRecurrentTransaction {
-    @PrimaryGeneratedColumn('uuid')
-    id: string;
-
-    @Column()
-    householdId: string;
-
-    @Column()
-    userId: string;
-
-    @OneToOne(() => RecurrentTransactionData, {
+export class RecurrentTransaction extends BaseTransactionData implements IRecurrentTransaction {
+    @OneToOne(() => RecurrentTransactionData, recurrentTransactionData => recurrentTransactionData.recurrentTransaction, {
         cascade: true,
         eager: true,
     })
@@ -38,7 +30,7 @@ export class RecurrentTransaction implements IRecurrentTransaction {
     @Column({ type: 'date', nullable: true, default: null, transformer: { to: (date: Date) => date, from: (value: string) => transformDate(value) } })
     lastOperated?: Date;
 
-    @Column({ default: false })
+    @Column({ default: true })
     shiftToValidDate: boolean;
 
     @Column({ default: true })

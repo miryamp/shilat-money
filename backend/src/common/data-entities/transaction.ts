@@ -1,7 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn, Unique } from 'typeorm';
-import { Category } from './category';
-import { Household } from './household';
-import { User } from './user';
+import { Column, Entity, Unique } from 'typeorm';
 import { ITransaction } from 'shared/entities/transaction.interface';
 import { BaseTransactionData } from './base-transaction-data';
 

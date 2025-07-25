@@ -1,4 +1,4 @@
-import { PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn, TableInheritance } from 'typeorm';
 import { Category } from './category';
 import { Household } from './household';
 import { User } from './user';
