@@ -44,11 +44,14 @@ const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
   useEffect(() => {
     if (isOpen) {
       loadCategories();
-      if (transaction) {
-        populateFormWithTransaction(transaction);
-      }
     }
-  }, [isOpen, transaction]);
+  }, [isOpen]);
+
+  useEffect(() => {
+    if (transaction && categories.length > 0) {
+      populateFormWithTransaction(transaction);
+    }
+  }, [transaction, categories]);
 
   const populateFormWithTransaction = (trans: Transaction) => {
     setAmount(trans.amount.toString());
