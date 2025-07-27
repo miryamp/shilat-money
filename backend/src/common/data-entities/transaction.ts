@@ -11,9 +11,9 @@ export class Transaction extends BaseTransactionData implements ITransaction {
     @Column({ nullable: true })
     recurrenceId?: string;
 
-    @Column({ type: 'timestamp' })
+    @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
     timestamp: Date;
 
-    @Column({ type: 'timestamp', nullable: false })
+    @Column({ type: 'timestamp', nullable: false, default: () => 'CURRENT_TIMESTAMP' })
     lastUpdated: Date;
 }
