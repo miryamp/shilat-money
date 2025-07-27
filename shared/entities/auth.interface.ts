@@ -35,3 +35,18 @@ export interface HouseholdInviteResponse {
   inviteToken: string;
   expiresAt: Date;
 }
+
+export interface ShareHouseholdByEmailRequest {
+  email: string;
+}
+
+export interface AcceptHouseholdInviteRequest {
+  inviteToken: string;
+}
+
+export interface HouseholdInviteStatus {
+  isValid: boolean;
+  householdName?: string;
+  inviterEmail?: string;
+  expired?: boolean;
+}

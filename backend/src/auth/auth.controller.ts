@@ -2,7 +2,7 @@ import { Controller, Post, Body, UseGuards, Request, Get } from '@nestjs/common'
 import { AuthService } from './auth.service';
 import { LocalAuthGuard } from './guards/local-auth.guard';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
-import { RegisterDto, LoginDto, AuthResponse, HouseholdInviteResponse } from 'shared/entities/auth.interface';
+import { RegisterDto, LoginDto, AuthResponse, HouseholdInviteResponse, ShareHouseholdByEmailRequest } from 'shared/entities/auth.interface';
 
 @Controller('auth')
 export class AuthController {
@@ -23,5 +23,14 @@ export class AuthController {
   @Post('household/invite')
   async generateHouseholdInvite(@Request() req): Promise<HouseholdInviteResponse> {
     return this.authService.generateHouseholdInvite(req.user.id);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post('household/share')
+  async shareHouseholdByEmail(
+    @Request() req,
+    @Body() shareRequest: ShareHouseholdByEmailRequest
+  ): Promise<void> {
+    await this.authService.shareHouseholdByEmail(req.user.id, shareRequest.email);
   }
 }
