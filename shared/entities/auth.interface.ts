@@ -1,8 +1,18 @@
+import { Currency } from "./currency.enum";
+import { Language } from "./language.enum";
+
+export interface NewHouseholdData {
+  name: string;
+  currency: Currency;
+}
+
 export interface RegisterDto {
   email: string;
   password: string;
-  firstName: string;
-  lastName: string;
+  username: string;
+  language: Language;
+  newHousehold?: NewHouseholdData;
+  householdToken?: string;
 }
 
 export interface LoginDto {
@@ -19,4 +29,9 @@ export interface AuthResponse {
     lastName: string;
     householdId: string;
   };
+}
+
+export interface HouseholdInviteResponse {
+  inviteToken: string;
+  expiresAt: Date;
 }

@@ -13,7 +13,7 @@ export class User implements IUser {
 
   @ManyToOne(() => Household, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'householdId' })
-  household: Household;
+  household: Household | Omit<Household, 'id'>;
 
   @Column({ unique: true })
   username: string;
