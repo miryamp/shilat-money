@@ -53,9 +53,14 @@ export class RecurrentTransactionService {
         const current = await this.repo.findOne(id, householdId);
         if (!current) return null;
 
-        // Check if any recurrence-related fields are present in the update
-        const hasRecurrenceChanges = (!!update.startDate && !!current.startDate && update.startDate.getTime() !== current.startDate.getTime()) || 
-                                   (!!update.endDate && !!current.endDate && update.endDate.getTime() !== current.endDate.getTime()) || (!update.endDate && current.endDate);
+        const hasRecurrenceChanges = 
+            (!!update.startDate && !!current.startDate && 
+                update.startDate.getTime() !== current.startDate.getTime()) ||
+            (update.endDate && current.endDate && update.endDate.getTime() !== current.endDate.getTime()) || 
+            (update.endDate === undefined && current.endDate !== null) ||
+            (update.endDate === null && current.endDate !== null) ||
+            (update.frequency !== undefined && update.frequency !== current.frequency) ||
+            (update.type !== undefined && update.type !== current.type);
 
         return await this.dataSource.transaction(async manager => {
             // Update the recurrence
