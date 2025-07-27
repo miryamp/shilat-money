@@ -1,12 +1,12 @@
 import { Controller, Get, Post, Put, Delete, Param, Body, UseGuards, Req, UnauthorizedException, NotFoundException, Query, ParseBoolPipe, DefaultValuePipe } from '@nestjs/common';
-import { AuthGuard } from '../common/auth/auth.guard';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { Category } from '../common/data-entities/category';
 import { CategoryService } from './category.service';
 import { HouseholdId } from '../common/auth/household-id.decorator';
 import { AllowSameOrigin } from '../common/auth/allow-same-origin.decorator';
 import { TransactionType } from 'shared/entities/transaction-type.enum';
 
-@UseGuards(AuthGuard)
+@UseGuards(JwtAuthGuard)
 @AllowSameOrigin()
 @Controller('category')
 export class CategoryController {

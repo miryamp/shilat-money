@@ -1,5 +1,5 @@
 import { Controller, Get, Post, Put, Delete, Param, Body, UseGuards, NotFoundException, UnauthorizedException, Query, ParseDatePipe } from '@nestjs/common';
-import { AuthGuard } from '../common/auth/auth.guard';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { Transaction } from '../common/data-entities/transaction';
 import { TransactionService } from './transaction.service';
 import { HouseholdId } from '../common/auth/household-id.decorator';
@@ -8,7 +8,7 @@ import { TransactionType } from 'shared/entities/transaction-type.enum';
 import { TransactionDto } from './dto/transaction.dto';
 import { plainToInstance } from 'class-transformer';
 
-@UseGuards(AuthGuard)
+@UseGuards(JwtAuthGuard)
 @Controller('transaction')
 export class TransactionController {
     constructor(private readonly transactionService: TransactionService) { }

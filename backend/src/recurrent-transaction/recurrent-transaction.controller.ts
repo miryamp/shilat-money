@@ -1,13 +1,13 @@
 import { Controller, Get, Post, Put, Delete, Param, Body, NotFoundException, UseGuards, Query, ParseBoolPipe, Patch } from '@nestjs/common';
 import { RecurrentTransactionService } from './recurrent-transaction.service';
 import { RecurrentTransaction } from '../common/data-entities/recurrent-transaction';
-import { AuthGuard } from '../common/auth/auth.guard';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { HouseholdId } from '../common/auth/household-id.decorator';
 import { RecurrentTransactionDto } from './dto/recurrent-transaction.dto';
 import { plainToInstance } from 'class-transformer';
 import { UserId } from '../common/auth/user-id.decorator';
 
-@UseGuards(AuthGuard)
+@UseGuards(JwtAuthGuard)
 @Controller('recurrent-transaction')
 export class RecurrentTransactionController {
     constructor(private readonly service: RecurrentTransactionService) { }
