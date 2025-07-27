@@ -8,10 +8,11 @@ import { MysqlTransactionRepository } from '../transaction/mysql-transaction.rep
 import { RecurrentTransactionService } from './recurrent-transaction.service';
 import { RecurrentTransactionController } from './recurrent-transaction.controller';
 import { Category } from '../common/data-entities/category';
+import { RecurrentTransactionData } from '../common/data-entities/recurrent-transaction-data';
 
 @Module({
     imports: [
-        TypeOrmModule.forFeature([RecurrentTransaction, Transaction, Category]),
+        TypeOrmModule.forFeature([RecurrentTransaction, RecurrentTransactionData, Transaction, Category]),
         TypeOrmModule
     ],
     providers: [

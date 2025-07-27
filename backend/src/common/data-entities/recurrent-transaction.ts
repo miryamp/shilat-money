@@ -1,6 +1,6 @@
-import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, OneToOne, JoinColumn } from 'typeorm';
 import { RecurrentTransactionType } from 'shared/entities/recurrent-transaction-type.enum';
-import { Transaction } from './transaction';
+import { RecurrentTransactionData } from './recurrent-transaction-data';
 import { IRecurrentTransaction } from 'shared/entities/recurrent-transaction.interface';
 import { NormalizeDate, transformDate } from '../transformers/normalize-date.transformer';
 
@@ -11,13 +11,17 @@ export class RecurrentTransaction implements IRecurrentTransaction {
     id: string;
 
     @Column()
-    householdId: string;
-
-    @Column()
     userId: string;
 
-    @Column({ type: 'json' })
-    transactionData: Transaction;
+    @Column()
+    householdId: string;
+
+    @OneToOne(() => RecurrentTransactionData, recurrentTransactionData => recurrentTransactionData.recurrentTransaction, {
+        cascade: true,
+        eager: true,
+    })
+    @JoinColumn()
+    transactionData: RecurrentTransactionData;
 
     @Column({ type: 'enum', enum: RecurrentTransactionType })
     type: RecurrentTransactionType;
@@ -34,11 +38,14 @@ export class RecurrentTransaction implements IRecurrentTransaction {
     @Column({ type: 'date', nullable: true, default: null, transformer: { to: (date: Date) => date, from: (value: string) => transformDate(value) } })
     lastOperated?: Date;
 
-    @Column({ default: false })
+    @Column({ default: true })
     shiftToValidDate: boolean;
 
     @Column({ default: true })
     isActive: boolean;
+
+    @Column({ type: 'timestamp', nullable: false, default: () => 'CURRENT_TIMESTAMP' })
+    lastUpdated: Date;
 
     get isFixed(): boolean {
         return this.type !== RecurrentTransactionType.Daily;

@@ -140,13 +140,35 @@ const Transactions = () => {
         {/* Header with Balance */}
         <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
           {/* Balance Display */}
-          <div className="text-center mb-6">
-            <div className="text-sm text-gray-500 mb-1">Current Balance</div>
-            <div className={cn(
-              "text-3xl font-bold",
-              balance >= 0 ? "text-green-600" : "text-red-600"
-            )}>
-              ${Math.abs(balance).toFixed(2)}
+          <div className="flex justify-between items-center mb-6">
+            <div className="text-center">
+              <div className="text-sm text-gray-500 mb-1">Current Balance</div>
+              <div className={cn(
+                "text-3xl font-bold",
+                balance >= 0 ? "text-green-600" : "text-red-600"
+              )}>
+                ${Math.abs(balance).toFixed(2)}
+              </div>
+            </div>
+            <div className="flex gap-2">
+              <Button
+                onClick={() => {
+                  setModalType(TransactionType.Income);
+                  setIsModalOpen(true);
+                }}
+                className="bg-green-600 hover:bg-green-700"
+              >
+                + Income
+              </Button>
+              <Button
+                onClick={() => {
+                  setModalType(TransactionType.Expense);
+                  setIsModalOpen(true);
+                }}
+                className="bg-red-600 hover:bg-red-700"
+              >
+                - Expense
+              </Button>
             </div>
           </div>
 
@@ -159,10 +181,6 @@ const Transactions = () => {
           transactions={transactions}
           onEditTransaction={handleEditTransaction}
           onDeleteTransaction={handleDeleteTransaction}
-          onAddTransaction={(type) => {
-            setModalType(type);
-            setIsModalOpen(true);
-          }}
         />
 
         {/* Add/Edit Transaction Modal */}

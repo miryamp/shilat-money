@@ -1,60 +1,19 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn, Unique } from 'typeorm';
-import { Category } from './category';
-import { Household } from './household';
-import { User } from './user';
+import { Column, Entity, Unique } from 'typeorm';
 import { ITransaction } from 'shared/entities/transaction.interface';
+import { BaseTransactionData } from './base-transaction-data';
 
 @Entity()
 @Unique(['recurrenceId', 'householdId', 'timestamp'])
-export class Transaction implements ITransaction {
-    @PrimaryGeneratedColumn('uuid')
-    id: string;
-
-    @Column()
-    householdId: string;
-
-    @ManyToOne(() => Household, { onDelete: 'CASCADE' })
-    @JoinColumn({ name: 'householdId' })
-    household: Household;
-
-    @Column()
-    userId: string;
-
-    @ManyToOne(() => User, { onDelete: 'CASCADE' })
-    @JoinColumn({ name: 'userId' })
-    user: User;
-
-    @Column()
-    categoryId: string;
-
+export class Transaction extends BaseTransactionData implements ITransaction {
     @Column({ default: false })
     isDeleted: boolean;
     
     @Column({ nullable: true })
     recurrenceId?: string;
 
-    @ManyToOne(() => Category, { onDelete: 'CASCADE' })
-    @JoinColumn({ name: 'categoryId' })
-    category: Category;
-
-    @Column('decimal', { 
-        precision: 12, 
-        scale: 2,
-        transformer: {
-            to: (value: number) => value?.toString(),
-            from: (value: string) => value !== null && value !== undefined ? Number(value) : value
-        }
-    })
-    amount: number;
-
-    @Column({ type: 'timestamp' })
+    @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
     timestamp: Date;
 
-    @Column({ nullable: true })
-    comment?: string;
-
-    @Column({ type: 'timestamp', nullable: false })
+    @Column({ type: 'timestamp', nullable: false, default: () => 'CURRENT_TIMESTAMP' })
     lastUpdated: Date;
 }
-
-
