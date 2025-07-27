@@ -14,7 +14,11 @@ async function bootstrap() {
   );
   
   app.enableCors({
-    origin: 'http://192.168.1.105:8080', // or use a function to dynamically check the origin
+    origin: [
+      /^http:\/\/localhost(:\d+)?$/,
+      /^http:\/\/127\.0\.0\.1(:\d+)?$/,
+      /^http:\/\/192\.168\.\d{1,3}\.\d{1,3}(:\d+)?$/
+    ],
     credentials: true,
   });
 
