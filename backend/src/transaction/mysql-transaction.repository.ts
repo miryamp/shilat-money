@@ -95,6 +95,7 @@ export class MysqlTransactionRepository implements TransactionRepository {
     ): Promise<Transaction[]> {
         const query = this.transactionRepo.createQueryBuilder('transaction')
             .leftJoinAndSelect('transaction.category', 'category')
+            .leftJoinAndSelect('transaction.recurrentTransaction', 'recurrentTransaction')
             .where('transaction.householdId = :householdId', { householdId });
 
         if (options?.userId) query.andWhere('transaction.userId = :userId', { userId: options.userId });
@@ -123,11 +124,17 @@ export class MysqlTransactionRepository implements TransactionRepository {
     }
 
     async findOne(id: string, householdId: string, options?: {isDeleted?: boolean}): Promise<Transaction | null> {
-        return await this.transactionRepo.findOne({ where: { id, householdId, ...options } });
+        return await this.transactionRepo.findOne({ 
+            where: { id, householdId, ...options },
+            relations: ['category', 'recurrentTransaction']
+        });
     }
 
     async update(id: string, householdId: string, update: Partial<Transaction>, tx?: any): Promise<Transaction | null> {
-        const transaction = await this.transactionRepo.findOne({ where: { id, householdId }, relations: ['category'] });
+        const transaction = await this.transactionRepo.findOne({ 
+            where: { id, householdId }, 
+            relations: ['category', 'recurrentTransaction']
+        });
         if (!transaction) return null;
         if (update.categoryId && update.categoryId !== transaction.categoryId) {
             const category = await this.categoryRepo.findOne({ where: { id: update.categoryId, householdId, isDeleted: false } });

@@ -9,6 +9,13 @@ export class Transaction implements ITransaction{
     categoryId: string;
     category: ICategory;
     recurrenceId?: string;
+    recurrentTransaction?: {
+        id: string;
+        startDate: Date;
+        endDate?: Date;
+        frequency: number; // in days
+        type: 'daily' | 'weekly' | 'monthly' | 'yearly';
+    };
     amount: number;
     timestamp: Date;
     comment?: string;

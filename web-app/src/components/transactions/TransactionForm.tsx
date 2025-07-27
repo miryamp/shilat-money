@@ -24,19 +24,21 @@ interface TransactionFormProps {
   date: Date;
   loading: boolean;
   isRecurring: boolean;
-  recurringType: 'daily' | 'weekly' | 'monthly' | 'yearly';
-  recurringInterval: number;
-  recurringDate: string;
+  recurrenceType: 'daily' | 'weekly' | 'monthly' | 'yearly';
+  recurrenceInterval: number;
+  recurrenceEndDate?: Date;
+  recurrenceEndCondition?: 'never' | 'after' | 'on';
+  recurrenceEndCount?: number;
   onCategorySelect: (category: ICategory) => void;
   onSubcategorySelect: (subcategory: ICategory) => void;
   onToggleExpansion: (categoryId: string) => void;
   onAmountChange: (amount: string) => void;
   onCommentChange: (comment: string) => void;
   onDateChange: (date: Date) => void;
-  onRecurringChange: (isRecurring: boolean) => void;
-  onRecurringTypeChange: (type: 'daily' | 'weekly' | 'monthly' | 'yearly') => void;
-  onRecurringIntervalChange: (interval: number) => void;
-  onRecurringDateChange: (date: string) => void;
+  onRecurrenceChange: (isRecurring: boolean) => void;
+  onRecurrenceTypeChange: (type: 'daily' | 'weekly' | 'monthly' | 'yearly') => void;
+  onRecurrenceIntervalChange: (interval: number) => void;
+  onRecurrenceDateChange: (date: string) => void;
   onSubmit: (e: React.FormEvent) => void;
   onCancel: () => void;
   getSelectedCategoryInfo: () => ICategory | null;
@@ -54,6 +56,12 @@ const TransactionForm: React.FC<TransactionFormProps> = ({
   amount,
   comment,
   date,
+  isRecurring,
+  recurrenceType,
+  recurrenceInterval,
+  recurrenceEndDate,
+  recurrenceEndCondition,
+  recurrenceEndCount,
   loading,
   onCategorySelect,
   onSubcategorySelect,
@@ -61,22 +69,20 @@ const TransactionForm: React.FC<TransactionFormProps> = ({
   onAmountChange,
   onCommentChange,
   onDateChange,
-  onRecurringChange,
-  onRecurringTypeChange,
-  onRecurringIntervalChange,
+  onRecurrenceChange,
+  onRecurrenceTypeChange,
+  onRecurrenceIntervalChange,
   onSubmit,
   onCancel,
   getSelectedCategoryInfo,
   submitLabel,
   onRecurrencePanelChange
 }) => {
-  const [isRecurrent, setIsRecurrent] = useState(false);
-
   const handleRecurrenceSave = (recurrenceData: RecurrenceData) => {
-    onRecurringChange(true);
-    onRecurringTypeChange(recurrenceData.type);
+    onRecurrenceChange(true);
+    onRecurrenceTypeChange(recurrenceData.recurrenceType);
     if (recurrenceData.interval) {
-      onRecurringIntervalChange(recurrenceData.interval);
+      onRecurrenceIntervalChange(recurrenceData.interval);
     }
     if (onRecurrencePanelChange) {
       onRecurrencePanelChange(recurrenceData);
@@ -139,30 +145,36 @@ const TransactionForm: React.FC<TransactionFormProps> = ({
         <div className="flex flex-col justify-end min-w-[110px] relative">
           <Button
             type="button"
-            variant={isRecurrent ? "secondary" : "outline"}
-            onClick={() => setIsRecurrent(!isRecurrent)}
+            variant={isRecurring ? "secondary" : "outline"}
+            onClick={() => onRecurrenceChange(!isRecurring)}
             className={cn(
               "w-full justify-start",
-              isRecurrent && "border-blue-600 text-blue-700 bg-blue-50 hover:bg-blue-100"
+              isRecurring && "border-blue-600 text-blue-700 bg-blue-50 hover:bg-blue-100"
             )}
           >
-            <Repeat className={cn("mr-2 h-4 w-4", isRecurrent && "text-blue-700")}/>
+            <Repeat className={cn("mr-2 h-4 w-4", isRecurring && "text-blue-700")}/>
             Repeat
           </Button>
         </div>
       </div>
       {/* Recurrence Panel */}
-      {isRecurrent && (
+      {isRecurring && (
         <div className="z-10 mt-2 w-full absolute left-0">
           <RecurrencePanel
-            isOpen={isRecurrent}
+            isOpen={isRecurring}
             startDate={date}
+            recurrenceType={recurrenceType}
+            recurrenceInterval={recurrenceInterval}
             onStartDateChange={onDateChange}
+            onRecurrenceTypeChange={onRecurrenceTypeChange}
             onSave={handleRecurrenceSave}
+            initialEndDate={recurrenceEndDate}
+            initialEndCondition={recurrenceEndCondition}
+            initialEndCount={recurrenceEndCount}
           />
         </div>
       )}
-      <div className={isRecurrent ? "pt-[420px]" : ""}>
+      <div className={isRecurring ? "pt-[420px]" : ""}>
         {/* Comment */}
         <div className="space-y-2">
           <Label htmlFor="comment">Comment (optional)</Label>

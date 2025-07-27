@@ -36,9 +36,9 @@ const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
   const [date, setDate] = useState<Date>(new Date());
   const [loading, setLoading] = useState(false);
   const [isRecurring, setIsRecurring] = useState(false);
-  const [recurringType, setRecurringType] = useState<'daily' | 'weekly' | 'monthly' | 'yearly'>('monthly');
-  const [recurringInterval, setRecurringInterval] = useState<number>(1);
-  const [recurringDate, setRecurringDate] = useState<string>('');
+  const [recurrenceType, setRecurrenceType] = useState<'daily' | 'weekly' | 'monthly' | 'yearly'>('monthly');
+  const [recurrenceInterval, setRecurrenceInterval] = useState<number>(1);
+  const [recurrenceDate, setRecurrenceDate] = useState<string>('');
   const [recurrenceData, setRecurrenceData] = useState<any>(null); // Store RecurrencePanel data
 
   useEffect(() => {
@@ -167,7 +167,7 @@ const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
           householdId: householdId,
           transactionData,
           type: recurrenceData.type,
-          frequency: recurrenceData.type === 'daily'? recurringInterval : undefined,
+          frequency: recurrenceData.type === 'daily'? recurrenceInterval : undefined,
           startDate: date,
           endDate: recurrenceData.endDate,
           shiftToValidDate: false, // or true if you want to shift
@@ -193,9 +193,9 @@ const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
     setComment('');
     setDate(new Date());
     setIsRecurring(false);
-    setRecurringType('monthly');
-    setRecurringInterval(1);
-    setRecurringDate('');
+    setRecurrenceType('monthly');
+    setRecurrenceInterval(1);
+    setRecurrenceDate('');
   };
 
   const handleClose = () => {
@@ -224,19 +224,18 @@ const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
           date={date}
           loading={loading}
           isRecurring={isRecurring}
-          recurringType={recurringType}
-          recurringInterval={recurringInterval}
-          recurringDate={recurringDate}
+          recurrenceType={transaction?.recurrentTransaction?.type || "monthly"}
+          recurrenceInterval={transaction?.recurrentTransaction?.frequency || 1}
           onCategorySelect={handleCategorySelect}
           onSubcategorySelect={handleSubcategorySelect}
           onToggleExpansion={toggleCategoryExpansion}
           onAmountChange={setAmount}
           onCommentChange={setComment}
           onDateChange={setDate}
-          onRecurringChange={setIsRecurring}
-          onRecurringTypeChange={setRecurringType}
-          onRecurringIntervalChange={setRecurringInterval}
-          onRecurringDateChange={setRecurringDate}
+          onRecurrenceChange={setIsRecurring}
+          onRecurrenceTypeChange={setRecurrenceType}
+          onRecurrenceIntervalChange={setRecurrenceInterval}
+          onRecurrenceDateChange={setRecurrenceDate}
           onSubmit={handleSubmit}
           onCancel={handleClose}
           getSelectedCategoryInfo={getSelectedCategoryInfo}

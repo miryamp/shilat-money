@@ -40,12 +40,18 @@ function calculateEndDateFromCount({
 interface RecurrencePanelProps {
   isOpen: boolean;
   startDate: Date;
+  recurrenceType?: 'daily' | 'weekly' | 'monthly' | 'yearly';
+  recurrenceInterval?: number;
   onStartDateChange: (date: Date) => void;
+  onRecurrenceTypeChange: (type: 'daily' | 'weekly' | 'monthly' | 'yearly') => void;
   onSave: (recurrence: RecurrenceData) => void;
+  initialEndDate?: Date;
+  initialEndCondition?: 'never' | 'after' | 'on';
+  initialEndCount?: number;
 }
 
 export interface RecurrenceData {
-  type: 'daily' | 'weekly' | 'monthly' | 'yearly';
+  recurrenceType: 'daily' | 'weekly' | 'monthly' | 'yearly';
   interval?: number;
   endCondition: 'never' | 'after' | 'on';
   endCount?: number;
@@ -55,20 +61,35 @@ export interface RecurrenceData {
 const RecurrencePanel: React.FC<RecurrencePanelProps> = ({
   isOpen,
   startDate,
+  recurrenceType,
+  recurrenceInterval: initialRecurrenceInterval = 1,
   onStartDateChange,
-  onSave
+  onRecurrenceTypeChange,
+  onSave,
+  initialEndDate,
+  initialEndCondition = 'never',
+  initialEndCount = 12
 }) => {
-  const [recurrenceType, setRecurrenceType] = useState<'daily' | 'weekly' | 'monthly' | 'yearly'>('monthly');
-  const [dailyInterval, setDailyInterval] = useState(1);
   const [monthlyDay, setMonthlyDay] = useState(getDate(startDate));
   const [yearlyMonth, setYearlyMonth] = useState(getMonth(startDate) + 1);
   const [yearlyDay, setYearlyDay] = useState(getDate(startDate));
-  const [endCondition, setEndCondition] = useState<'never' | 'after' | 'on'>('never');
-  const [endCount, setEndCount] = useState(12);
-  const [endDate, setEndDate] = useState<Date>(addMonths(startDate, 12));
+  
+  const [currentRecurrenceType, setCurrentRecurrenceType] = useState<'daily' | 'weekly' | 'monthly' | 'yearly'>(recurrenceType || 'monthly');
+  const [recurrenceInterval, setRecurrenceInterval] = useState(initialRecurrenceInterval);
+  const [endCondition, setEndCondition] = useState<'never' | 'after' | 'on'>(initialEndCondition);
+  const [endCount, setEndCount] = useState(initialEndCount);
+  const [endDate, setEndDate] = useState<Date>(initialEndDate || addMonths(startDate, 12));
   const [endConditionOpen, setEndConditionOpen] = useState(false);
   const [userMessage, setUserMessage] = useState<string | null>(null);
 
+  // Sync with props
+  useEffect(() => {
+    setCurrentRecurrenceType(recurrenceType || 'monthly');
+  }, [recurrenceType]);
+
+  useEffect(() => {
+    setRecurrenceInterval(initialRecurrenceInterval);
+  }, [initialRecurrenceInterval]);
   // When startDate changes, set default endDate according to rules
   useEffect(() => {
     let newEndDate: Date | null = null;
@@ -83,7 +104,7 @@ const RecurrencePanel: React.FC<RecurrencePanelProps> = ({
     }
     if (newEndDate) setEndDate(newEndDate);
     setUserMessage(null);
-  }, [startDate, recurrenceType, dailyInterval]);
+  }, [startDate, recurrenceType, recurrenceInterval]);
 
   // When user picks an end date, validate and correct if needed
   const handleEndDateChange = (date: Date) => {
@@ -91,8 +112,8 @@ const RecurrencePanel: React.FC<RecurrencePanelProps> = ({
     let message = null;
     if (recurrenceType === 'daily') {
       const diff = Math.floor((date.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
-      if (diff % dailyInterval !== 0) {
-        validDate = getLastValidDailyDate(startDate, date, dailyInterval);
+      if (diff % recurrenceInterval !== 0) {
+        validDate = getLastValidDailyDate(startDate, date, recurrenceInterval);
         message = 'End date adjusted to last valid occurrence.';
       }
     } else if (recurrenceType === 'monthly') {
@@ -125,35 +146,40 @@ const RecurrencePanel: React.FC<RecurrencePanelProps> = ({
 
   // Propagate recurrence data on any relevant state change
   useEffect(() => {
-    let type = recurrenceType;
-    let interval = dailyInterval;
+    let type = currentRecurrenceType;
+    let interval = recurrenceInterval;
     let calculatedEndDate = endDate;
-    if (recurrenceType === 'weekly') {
+    if (currentRecurrenceType === 'weekly') {
       type = 'daily';
       interval = 7;
     }
     if (endCondition === 'after' && endCount) {
       calculatedEndDate = calculateEndDateFromCount({
         startDate,
-        recurrenceType,
+        recurrenceType: currentRecurrenceType,
         interval,
         count: endCount,
       });
     }
     const recurrenceData: RecurrenceData = {
-      type: type,
+      recurrenceType: type,
       interval: type === 'daily' ? interval : undefined,
       endCondition,
       endCount: endCondition === 'after' ? endCount : undefined,
       endDate: endCondition === 'on' || endCondition === 'after' ? calculatedEndDate : undefined,
     };
     onSave(recurrenceData);
-    // eslint-disable-next-line
-  }, [recurrenceType, dailyInterval, monthlyDay, yearlyMonth, yearlyDay, endCondition, endCount, endDate, startDate]);
+  }, [currentRecurrenceType, recurrenceInterval, monthlyDay, yearlyMonth, yearlyDay, endCondition, endCount, endDate, startDate, onSave]);
 
   // Update start date when recurrence settings change
   const handleRecurrenceChange = (type: 'daily' | 'weekly' | 'monthly' | 'yearly') => {
-    setRecurrenceType(type);
+    // Update local state
+    setCurrentRecurrenceType(type);
+    
+    // Update parent's type
+    onRecurrenceTypeChange(type);
+
+    // Then update the date based on the new type
     if (type === 'monthly') {
       const newDay = monthlyDay;
       const newDate = setDateFns(startDate, newDay);
@@ -170,6 +196,9 @@ const RecurrencePanel: React.FC<RecurrencePanelProps> = ({
         onStartDateChange(newDate);
       }
     }
+
+    // Finally, save the complete recurrence data
+    handleSave();
   };
 
   const handleMonthlyDayChange = (day: number) => {
@@ -198,7 +227,7 @@ const RecurrencePanel: React.FC<RecurrencePanelProps> = ({
 
     switch (recurrenceType) {
       case 'daily':
-        preview += `every ${dailyInterval} day${dailyInterval > 1 ? 's' : ''}`;
+        preview += `every ${recurrenceInterval} day${recurrenceInterval > 1 ? 's' : ''}`;
         break;
       case 'weekly':
         preview += `every week`;
@@ -233,19 +262,19 @@ const RecurrencePanel: React.FC<RecurrencePanelProps> = ({
   };
 
   const handleSave = () => {
-    let type = recurrenceType;
-    let interval = dailyInterval;
+    let type = currentRecurrenceType;
+    let interval = recurrenceInterval;
 
-    if (recurrenceType === 'weekly') {
+    if (currentRecurrenceType === 'weekly') {
       type = 'daily';
       interval = 7; 
     }
     const recurrenceData: RecurrenceData = {
-      type: type,
+      recurrenceType: type,
       interval: type === 'daily' ? interval : undefined,
       endCondition,
       endCount: endCondition === 'after' ? endCount : undefined,
-      endDate: endCondition === 'on' ? endDate : undefined,
+      endDate: endCondition === 'on' || endCondition === 'after' ? endDate : undefined,
     };
     onSave(recurrenceData);
   };
@@ -257,7 +286,7 @@ const RecurrencePanel: React.FC<RecurrencePanelProps> = ({
       {/* Recurrence Type Selection */}
       <div className="space-y-3">
         <Label className="text-base font-medium">Recurrence Pattern</Label>
-        <RadioGroup value={recurrenceType} onValueChange={handleRecurrenceChange}>
+        <RadioGroup value={currentRecurrenceType} onValueChange={handleRecurrenceChange}>
           <div className="flex items-center space-x-2">
             <RadioGroupItem value="daily" id="daily" />
             <Label htmlFor="daily" className="flex items-center gap-2 cursor-pointer">
@@ -265,13 +294,11 @@ const RecurrencePanel: React.FC<RecurrencePanelProps> = ({
               <Input
                 type="number"
                 min="1"
-                max="365"
-                value={dailyInterval}
+                value={recurrenceInterval}
                 onChange={(e) => {
-                  setDailyInterval(parseInt(e.target.value) || 1);
+                  setRecurrenceInterval(parseInt(e.target.value) || 1);
                   handleSave();
-                }
-                }
+                }}
                 className="w-16 h-8"
               />
               days
