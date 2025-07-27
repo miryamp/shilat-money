@@ -2,8 +2,8 @@ import { TransactionType } from 'shared/entities/transaction-type.enum';
 import { Transaction } from '../common/data-entities/transaction';
 
 export interface TransactionRepository {
-    create(transaction: Transaction, options?: { skipIfExists?: boolean }, tx?: any): Promise<Transaction>;
-    createMany(transactions: Transaction[], options?: { skipIfExists?: boolean },  tx?: any): Promise<Transaction[]>;
+    create(transaction: Transaction | Omit<Transaction, "id">, options?: { skipIfExists?: boolean }, tx?: any): Promise<Transaction>;
+    createMany(transactions: Transaction[] | Omit<Transaction, "id">[], options?: { skipIfExists?: boolean },  tx?: any): Promise<Transaction[]>;
     findAll(householdId: string, options?: {
         userId?: string;
         categoryId?: string | string[];

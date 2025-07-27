@@ -166,8 +166,8 @@ const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
         const recurrencePayload: Omit<IRecurrentTransaction, 'id'> = {
           householdId: householdId,
           transactionData,
-          type: recurrenceData.type,
-          frequency: recurrenceData.type === 'daily'? recurrenceInterval : undefined,
+          type: recurrenceData.recurrenceType,
+          frequency: recurrenceData.recurrenceType === 'daily'? recurrenceInterval : undefined,
           startDate: date,
           endDate: recurrenceData.endDate,
           shiftToValidDate: false, // or true if you want to shift

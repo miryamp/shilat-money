@@ -53,15 +53,13 @@ export class MysqlTransactionRepository implements TransactionRepository {
             checkedCategories.add(transaction.categoryId);
         }
         
-        const now = new Date();
-        const transactionsWithTimestamp = bulk.map(t => ({ ...t, lastUpdated: now }));
         const repo = tx ? tx.getRepository(Transaction) : this.transactionRepo;
         let result;
         if (options?.skipIfExists) {
             result = await repo.createQueryBuilder()
                 .insert()
                 .into(Transaction)
-                .values(transactionsWithTimestamp)
+                .values(bulk)
                 .orIgnore()
                 .execute();
             
@@ -73,7 +71,7 @@ export class MysqlTransactionRepository implements TransactionRepository {
             }
 
         } else {
-            result = await repo.insert(transactionsWithTimestamp);
+            await repo.insert(bulk);
         }
          return await repo.findBy({ id: In(result.identifiers.map(id => id.id)) });
     }

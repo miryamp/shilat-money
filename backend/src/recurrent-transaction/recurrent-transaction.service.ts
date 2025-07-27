@@ -53,13 +53,14 @@ export class RecurrentTransactionService {
         const current = await this.repo.findOne(id, householdId);
         if (!current) return null;
 
-        const hasRecurrenceChanges = 
-            (!!update.startDate && !!current.startDate && 
+        const hasRecurrenceChanges =
+            (!!update.startDate && !!current.startDate &&
                 update.startDate.getTime() !== current.startDate.getTime()) ||
-            (update.endDate && current.endDate && update.endDate.getTime() !== current.endDate.getTime()) || 
+            (update.endDate && current.endDate && update.endDate.getTime() !== current.endDate.getTime()) ||
             (update.endDate === undefined && current.endDate !== null) ||
             (update.endDate === null && current.endDate !== null) ||
             (update.frequency !== undefined && update.frequency !== current.frequency) ||
+            // Type changes
             (update.type !== undefined && update.type !== current.type);
 
         return await this.dataSource.transaction(async manager => {
@@ -72,7 +73,7 @@ export class RecurrentTransactionService {
 
                 const today = new Date();
                 const endDate = updated.endDate && updated.endDate <= today ? updated.endDate : today;
-                
+
                 if (updated.startDate <= today) {
                     const newInstances = this.getInstancesInRange(updated, updated.startDate, endDate);
                     if (newInstances.length > 0) {
@@ -135,17 +136,18 @@ export class RecurrentTransactionService {
         });
     }
 
-    getInstancesInRange(recurrence: RecurrentTransaction, from: Date, to: Date): Transaction[] {
+    getInstancesInRange(recurrence: RecurrentTransaction, from: Date, to: Date): Omit<Transaction, "id">[] {
         if ((recurrence.endDate && recurrence.endDate < from) ||
             (recurrence.startDate && recurrence.startDate > to))
             return [];
 
         let current = startOfDay(new Date(recurrence.startDate < from ? from : recurrence.startDate));
-        const results: Transaction[] = [];
+        const results: Omit<Transaction, "id">[] = [];
 
         if (RecurrenceStrategiesUtils.includesDate(current, recurrence)) {
+            const { id: _, ...transactionDataWithoutId } = recurrence.transactionData;
             results.push({
-                ...recurrence.transactionData,
+                ...transactionDataWithoutId,
                 timestamp: current,
                 recurrenceId: recurrence.id,
                 lastUpdated: new Date(),
@@ -157,7 +159,14 @@ export class RecurrentTransactionService {
             const nextDate = RecurrenceStrategiesUtils.getNextDate(current, recurrence);
             if (!nextDate || nextDate > to) break;
 
-            results.push({ ...recurrence.transactionData, timestamp: new Date(nextDate), recurrenceId: recurrence.id, lastUpdated: new Date(), isDeleted: false });
+            const { id: _, ...transactionDataWithoutId } = recurrence.transactionData;
+            results.push({
+                ...transactionDataWithoutId,
+                timestamp: new Date(nextDate),
+                recurrenceId: recurrence.id,
+                lastUpdated: new Date(),
+                isDeleted: false
+            });
             current = new Date(nextDate);
         }
 
