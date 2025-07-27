@@ -67,7 +67,7 @@ export class TransactionController {
         @HouseholdId() householdId: string,
         @UserId() userId: string
     ): Promise<Transaction> {
-        const updated = await this.transactionService.update(id, { ...update, userId }, householdId);
+        const updated = await this.transactionService.update(id, householdId, { ...update, userId });
         if (!updated) {
             throw new NotFoundException('Transaction not found');
         }

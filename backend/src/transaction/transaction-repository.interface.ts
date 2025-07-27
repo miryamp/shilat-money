@@ -17,7 +17,7 @@ export interface TransactionRepository {
         isDeleted?: boolean;
     }): Promise<Transaction[]>;
     findOne(id: string, householdId: string, options?: {isDeleted?: boolean}): Promise<Transaction | null>;
-    update(id: string, update: Partial<Transaction>, householdId: string, tx?: any): Promise<Transaction | null>;
+    update(id: string, householdId: string, update: Partial<Transaction>, tx?: any): Promise<Transaction | null>;
     upsertMany(transactions: Transaction[], tx?: any): Promise<void>;
     remove(id: string, householdId: string, logicalDelete?: boolean, tx?: any): Promise<Transaction | null>;
     removeMany(ids: string[], householdId: string, logicalDelete?: boolean, tx?: any): Promise<void>;

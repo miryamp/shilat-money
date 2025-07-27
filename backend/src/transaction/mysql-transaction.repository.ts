@@ -126,7 +126,7 @@ export class MysqlTransactionRepository implements TransactionRepository {
         return await this.transactionRepo.findOne({ where: { id, householdId, ...options } });
     }
 
-    async update(id: string, update: Partial<Transaction>, householdId: string, tx?: any): Promise<Transaction | null> {
+    async update(id: string, householdId: string, update: Partial<Transaction>, tx?: any): Promise<Transaction | null> {
         const transaction = await this.transactionRepo.findOne({ where: { id, householdId }, relations: ['category'] });
         if (!transaction) return null;
         if (update.categoryId && update.categoryId !== transaction.categoryId) {

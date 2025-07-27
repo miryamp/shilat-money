@@ -36,8 +36,8 @@ export class TransactionService {
         return await this.transactionRepository.findOne(id, householdId, { isDeleted: false });
     }
 
-    async update(id: string, update: Partial<Transaction>, householdId: string): Promise<Transaction | null> {
-        return await this.transactionRepository.update(id, update, householdId);
+    async update(id: string, householdId: string, update: Partial<Transaction>): Promise<Transaction | null> {
+        return await this.transactionRepository.update(id, householdId, update);
     }
 
     async remove(id: string, householdId: string): Promise<Transaction | null> {
