@@ -6,6 +6,7 @@ import { TransactionModule } from './transaction/transaction.module';
 import { RecurrentTransactionModule } from './recurrent-transaction/recurrent-transaction.module';
 import { HouseholdModule } from './household/household.module';
 import { RecurrentTransactionProcessorModule } from './recurrent-transaction-processor/recurrent-transaction-processor.module';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
@@ -24,7 +25,8 @@ import { RecurrentTransactionProcessorModule } from './recurrent-transaction-pro
     TransactionModule,
     RecurrentTransactionModule,
     HouseholdModule,
-    RecurrentTransactionProcessorModule
+    RecurrentTransactionProcessorModule,
+    AuthModule
   ],
   controllers: [],
   providers: [],
