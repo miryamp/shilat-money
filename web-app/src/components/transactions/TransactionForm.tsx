@@ -14,6 +14,7 @@ import { TransactionType } from 'shared/entities/transaction-type.enum';
 
 interface TransactionFormProps {
   type: TransactionType;
+  isEditMode?: boolean;
   categories: ICategory[];
   subcategoriesMap: Record<string, ICategory[]>;
   selectedCategory: ICategory | null;
@@ -48,6 +49,7 @@ interface TransactionFormProps {
 
 const TransactionForm: React.FC<TransactionFormProps> = ({
   type,
+  isEditMode = false,
   categories,
   subcategoriesMap,
   selectedCategory,
@@ -142,23 +144,27 @@ const TransactionForm: React.FC<TransactionFormProps> = ({
             </PopoverContent>
           </Popover>
         </div>
-        <div className="flex flex-col justify-end min-w-[110px] relative">
-          <Button
-            type="button"
-            variant={isRecurring ? "secondary" : "outline"}
-            onClick={() => onRecurrenceChange(!isRecurring)}
-            className={cn(
-              "w-full justify-start",
-              isRecurring && "border-blue-600 text-blue-700 bg-blue-50 hover:bg-blue-100"
-            )}
-          >
-            <Repeat className={cn("mr-2 h-4 w-4", isRecurring && "text-blue-700")}/>
-            Repeat
-          </Button>
-        </div>
+        {(!isEditMode || (isEditMode && isRecurring)) && (
+          <div className="flex flex-col justify-end min-w-[110px] relative">
+            <Button
+              type="button"
+              variant={isRecurring ? "secondary" : "outline"}
+              onClick={() => onRecurrenceChange(!isRecurring)}
+              disabled={isEditMode}
+              className={cn(
+                "w-full justify-start",
+                isRecurring && "border-blue-600 text-blue-700 bg-blue-50 hover:bg-blue-100",
+                isEditMode && "opacity-50 cursor-not-allowed"
+              )}
+            >
+              <Repeat className={cn("mr-2 h-4 w-4", isRecurring && "text-blue-700")}/>
+              Repeat
+            </Button>
+          </div>
+        )}
       </div>
       {/* Recurrence Panel */}
-      {isRecurring && (
+      {isRecurring && (!isEditMode || (isEditMode && isRecurring)) && (
         <div className="z-10 mt-2 w-full absolute left-0">
           <RecurrencePanel
             isOpen={isRecurring}

@@ -32,7 +32,9 @@ const TransactionList: React.FC<TransactionListProps> = ({
 
   const handleEditClick = (transaction: Transaction, e: React.MouseEvent) => {
     e.stopPropagation();
-    onEditTransaction?.(transaction);
+    if (onEditTransaction) {
+      onEditTransaction(transaction);
+    }
   };
 
   const handleDeleteConfirm = (deleteOption: 'this' | 'all' | 'up-to' | 'from') => {

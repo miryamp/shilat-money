@@ -214,6 +214,7 @@ const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
 
         <TransactionForm
           type={type}
+          isEditMode={!!transaction}
           categories={categories}
           subcategoriesMap={subCategoriesMap}
           selectedCategory={selectedCategory}
