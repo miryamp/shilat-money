@@ -53,64 +53,29 @@ export class RecurrentTransactionService {
         const current = await this.repo.findOne(id, householdId);
         if (!current) return null;
 
-        // Determine if startDate or endDate changed
-        const startDateChanged = update.startDate && update.startDate.getTime() !== current.startDate.getTime();
-        const endDateChanged = update.endDate && (
-            (!current.endDate && update.endDate) ||
-            (current.endDate && update.endDate.getTime() !== current.endDate.getTime())
-        );
-
-        // If neither changed, just update as usual
-        if (!startDateChanged && !endDateChanged) {
-            return await this.repo.update(id, update, householdId);
-        }
+        // Check if any recurrence-related fields are present in the update
+        const hasRecurrenceChanges = (!!update.startDate && !!current.startDate && update.startDate.getTime() !== current.startDate.getTime()) || 
+                                   (!!update.endDate && !!current.endDate && update.endDate.getTime() !== current.endDate.getTime()) || (!update.endDate && current.endDate);
 
         return await this.dataSource.transaction(async manager => {
             // Update the recurrence
             const updated = await this.repo.update(id, update, householdId, manager);
             if (!updated) return null;
 
-            // Update all associated transactions with new recurrence data
-            if (update.transactionData && Object.keys(update.transactionData).length > 0) {
-                await this.transactionRepo.update(id, update.transactionData, householdId, manager);
-            }
+            if (hasRecurrenceChanges) {
+                await this.transactionRepo.removeByRecurrenceId(id, householdId, manager);
 
-            // Only operate if new date is <= today
-            const today = new Date();
-            const newStart = update.startDate || current.startDate;
-            const newEnd = update.endDate || current.endDate;
-            const prevStart = current.startDate;
-            const prevEnd = current.endDate;
-
-            const startMovedForward = !!startDateChanged && newStart > prevStart && newStart <= today;
-            const endMovedBackward = !!endDateChanged && prevEnd && newEnd && newEnd < prevEnd && newEnd <= today;
-
-            const startMovedBackward = !!startDateChanged && newStart < prevStart && newStart <= today;
-            const endMovedForward = !!endDateChanged && newEnd && (!prevEnd || newEnd > prevEnd) && newEnd <= today;
-
-
-            let toRemove: string[] = [];
-            if (startMovedForward) {
-                toRemove = (await this.transactionRepo.findAll(householdId, { excludeFrom: undefined, excludeTo: newStart, recurrenceId: id })).map(t => t.id);
-            }
-
-            if (endMovedBackward) {
-                toRemove = [...toRemove, ...(await this.transactionRepo.findAll(householdId, { excludeFrom: newEnd, excludeTo: undefined, recurrenceId: id })).map(t => t.id)];
-            }
-
-            if (toRemove.length > 0) {
-                await this.transactionRepo.removeMany(toRemove, householdId, false, manager);
-            }
-
-            // Add transactions if startDate moved backward or endDate moved forward
-            if (startMovedBackward || endMovedForward) {
-                let gapFrom = startMovedBackward ? newStart : prevStart;
-                let gapTo = endMovedForward ? newEnd : (prevEnd || today);
-
-                const gapInstances = await this.getInstancesInRange(current, gapFrom, gapTo);
-                if (gapInstances && gapInstances.length > 0) {
-                    await this.transactionRepo.upsertMany(gapInstances, manager);
+                const today = new Date();
+                const endDate = updated.endDate && updated.endDate <= today ? updated.endDate : today;
+                
+                if (updated.startDate <= today) {
+                    const newInstances = this.getInstancesInRange(updated, updated.startDate, endDate);
+                    if (newInstances.length > 0) {
+                        await this.transactionRepo.createMany(newInstances, { skipIfExists: true }, manager);
+                    }
                 }
+            } else if (update.transactionData && Object.keys(update.transactionData).length > 0) {
+                await this.transactionRepo.updateByRecurrenceId(id, householdId, update.transactionData, manager);
             }
 
             return updated;

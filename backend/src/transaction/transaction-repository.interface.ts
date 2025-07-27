@@ -21,4 +21,6 @@ export interface TransactionRepository {
     upsertMany(transactions: Transaction[], tx?: any): Promise<void>;
     remove(id: string, householdId: string, logicalDelete?: boolean, tx?: any): Promise<Transaction | null>;
     removeMany(ids: string[], householdId: string, logicalDelete?: boolean, tx?: any): Promise<void>;
+    removeByRecurrenceId(recurrenceId: string, householdId: string, tx?: any): Promise<void>;
+    updateByRecurrenceId(recurrenceId: string, householdId: string, update: Partial<Transaction>, tx?: any): Promise<void>;
 }

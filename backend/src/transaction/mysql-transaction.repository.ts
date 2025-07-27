@@ -192,5 +192,42 @@ export class MysqlTransactionRepository implements TransactionRepository {
             await this.transactionRepo.remove(transactions);
         }
     }
+
+    async removeByRecurrenceId(recurrenceId: string, householdId: string, tx?: EntityManager): Promise<void> {
+        const queryBuilder = tx
+            ? tx.createQueryBuilder()
+            : this.transactionRepo.createQueryBuilder();
+
+        await queryBuilder
+            .delete()
+            .from(Transaction)
+            .where('recurrenceId = :recurrenceId', { recurrenceId })
+            .andWhere('householdId = :householdId', { householdId })
+            .execute();
+    }
+
+    async updateByRecurrenceId(recurrenceId: string, householdId: string, update: Partial<Transaction>, tx?: EntityManager): Promise<void> {
+        if (update.categoryId) {
+            const category = await this.categoryRepo.findOne({ 
+                where: { 
+                    id: update.categoryId, 
+                    householdId: householdId, 
+                    isDeleted: false 
+                } 
+            });
+            if (!category) throw new Error('Category does not exist or is deleted');
+        }
+
+        const queryBuilder = tx
+            ? tx.createQueryBuilder()
+            : this.transactionRepo.createQueryBuilder();
+
+        await queryBuilder
+            .update(Transaction)
+            .set({ ...update, lastUpdated: new Date() })
+            .where('recurrenceId = :recurrenceId', { recurrenceId })
+            .andWhere('householdId = :householdId', { householdId })
+            .execute();
+    }
 }
 
