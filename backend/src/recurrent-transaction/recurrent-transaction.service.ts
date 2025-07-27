@@ -73,6 +73,8 @@ export class RecurrentTransactionService {
                     if (newInstances.length > 0) {
                         await this.transactionRepo.createMany(newInstances, { skipIfExists: true }, manager);
                     }
+                    const lastOperated = startOfDay(newInstances.reduce((max, tx) => tx.timestamp > max ? tx.timestamp : max, newInstances[0].timestamp));
+                    await this.repo.update(updated.id, { lastOperated }, updated.householdId, manager);
                 }
             } else if (update.transactionData && Object.keys(update.transactionData).length > 0) {
                 await this.transactionRepo.updateByRecurrenceId(id, householdId, update.transactionData, manager);
