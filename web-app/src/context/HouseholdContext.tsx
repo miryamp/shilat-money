@@ -1,14 +1,15 @@
 import React, { createContext, useContext } from 'react';
+import { useAuth } from './AuthContext';
 
 interface HouseholdContextType {
-  householdId: string;
+  householdId: string | null;
 }
 
-const HouseholdContext = createContext<HouseholdContextType>({ householdId: 'mainhousehold' });
+const HouseholdContext = createContext<HouseholdContextType>({ householdId: null });
 
 export const HouseholdProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  // In the future, householdId can be set from login/session
-  const value = { householdId: 'mainhousehold' };
+  const { user } = useAuth();
+  const value = { householdId: user?.householdId || null };
   return <HouseholdContext.Provider value={value}>{children}</HouseholdContext.Provider>;
 };
 
