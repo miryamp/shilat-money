@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ScheduleModule } from '@nestjs/schedule';
+import { ConfigModule } from '@nestjs/config';
 import { CategoryModule } from './category/category.module';
 import { TransactionModule } from './transaction/transaction.module';
 import { RecurrentTransactionModule } from './recurrent-transaction/recurrent-transaction.module';
@@ -10,6 +11,10 @@ import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
+    ConfigModule.forRoot({
+      isGlobal: true,
+      envFilePath: ['.env'],
+    }),
     ScheduleModule.forRoot(),
     TypeOrmModule.forRoot({
       type: 'mysql',

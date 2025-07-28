@@ -23,7 +23,6 @@ import { CategoryModule } from '../category/category.module';
       secret: process.env.JWT_SECRET || 'your-secret-key', // Use environment variable in production
       signOptions: { expiresIn: '1d' },
     }),
-    ConfigModule,
     HouseholdModule,
     CategoryModule,
   ],

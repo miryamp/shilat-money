@@ -6,3 +6,4 @@ shared/dist/
 
 # Ignore environment variable files
 web-app/.env
+.env

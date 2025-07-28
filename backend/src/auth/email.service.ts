@@ -1,22 +1,17 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import * as nodemailer from 'nodemailer';
+import { Resend } from 'resend';
 
 @Injectable()
 export class EmailService {
-    private transporter: nodemailer.Transporter;
+    private resend: Resend;
 
     constructor(private configService: ConfigService) {
-        // In production, use your actual SMTP configuration
-        this.transporter = nodemailer.createTransport({
-            host: this.configService.get('SMTP_HOST'),
-            port: this.configService.get('SMTP_PORT'),
-            secure: true,
-            auth: {
-                user: this.configService.get('SMTP_USER'),
-                pass: this.configService.get('SMTP_PASS'),
-            },
-        });
+        const apiKey = this.configService.get<string>('RESEND_API_KEY');
+        if (!apiKey) {
+            throw new Error('RESEND_API_KEY is not configured in environment variables. Please check your .env file in the backend folder.');
+        }
+        this.resend = new Resend(apiKey);
     }
 
     async sendHouseholdInvite(
@@ -28,8 +23,8 @@ export class EmailService {
         const baseUrl = this.configService.get('FRONTEND_URL');
         const inviteUrl = `${baseUrl}/join-household?token=${inviteToken}`;
 
-        await this.transporter.sendMail({
-            from: `"Shilat Money" <${this.configService.get('SMTP_FROM')}>`,
+        await this.resend.emails.send({
+            from: 'ShilatMoney <noreply@shilat-money.com>',
             to: toEmail,
             subject: `You're invited to join ${householdName} on Shilat Money`,
             text: `
