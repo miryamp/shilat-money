@@ -1,5 +1,6 @@
 import { IRecurrentTransaction } from 'shared/entities/recurrent-transaction.interface';
 import { format } from 'date-fns';
+import { getAuthHeaders } from '@/utils/auth';
 
 const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:3000';
 
@@ -23,7 +24,7 @@ export const addRecurrenceTransaction = async (recurrence: Omit<IRecurrentTransa
   };
   const res = await fetch(`${API_BASE}/recurrent-transaction`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: { ...getAuthHeaders(), 'Content-Type': 'application/json' },
     body: JSON.stringify(payload),
   });
   if (!res.ok) throw new Error('Failed to add recurrence transaction');
@@ -34,6 +35,7 @@ export const addRecurrenceTransaction = async (recurrence: Omit<IRecurrentTransa
 export const deleteRecurrenceTransaction = async (id: string): Promise<IRecurrentTransaction> => {
   const res = await fetch(`${API_BASE}/recurrent-transaction/${id}?removeTransactions=true`, {
     method: 'DELETE',
+    headers: getAuthHeaders(),
   });
   if (!res.ok) throw new Error('Failed to delete recurrence transaction');
   return res.json();
@@ -42,7 +44,7 @@ export const deleteRecurrenceTransaction = async (id: string): Promise<IRecurren
 export const updateRecurrenceTransaction = async (id: string, update: Partial<IRecurrentTransaction>): Promise<IRecurrentTransaction> => {
   const res = await fetch(`${API_BASE}/recurrent-transaction/${id}`, {
     method: 'PUT',
-    headers: { 'Content-Type': 'application/json' },
+    headers: { ...getAuthHeaders(), 'Content-Type': 'application/json' },
     body: JSON.stringify(update),
   });
   if (!res.ok) throw new Error('Failed to update recurrence transaction');
@@ -67,7 +69,7 @@ export const patchRecurrenceTransactionDates = async (
   }
   const res = await fetch(`${API_BASE}/recurrent-transaction/${id}/dates`, {
     method: 'PATCH',
-    headers: { 'Content-Type': 'application/json' },
+    headers: { ...getAuthHeaders(), 'Content-Type': 'application/json' },
     body: JSON.stringify(payload),
   });
   if (!res.ok) throw new Error('Failed to patch recurrence transaction dates');

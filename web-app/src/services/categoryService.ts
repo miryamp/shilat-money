@@ -1,5 +1,6 @@
 import { ICategory } from 'shared/entities/category.interface';
 import { TransactionType } from 'shared/entities/transaction-type.enum.js';
+import { getAuthHeaders } from '@/utils/auth';
 
 const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:3000';
 
@@ -11,6 +12,7 @@ export const fetchCategories = async (categoryType?: TransactionType): Promise<
     url += `?type=${encodeURIComponent(categoryType)}`;
   }
   const res = await fetch(url, {
+    headers: getAuthHeaders()
   });
   if (!res.ok) throw new Error('Failed to fetch categories');
   const categories: ICategory[] = await res.json();
@@ -29,9 +31,7 @@ export const fetchCategories = async (categoryType?: TransactionType): Promise<
 export const addCategory = async (category: Omit<ICategory, 'id'>): Promise<ICategory> => {
   const res = await fetch(`${API_BASE}/category`, {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
+    headers: getAuthHeaders(),
     body: JSON.stringify(category),
   });
   if (!res.ok) throw new Error('Failed to add category');
@@ -41,9 +41,7 @@ export const addCategory = async (category: Omit<ICategory, 'id'>): Promise<ICat
 export const updateCategory = async (id: string, update: Partial<ICategory>): Promise<ICategory> => {
   const res = await fetch(`${API_BASE}/category/${id}`, {
     method: 'PUT',
-    headers: {
-      'Content-Type': 'application/json',
-    },
+    headers: getAuthHeaders(),
     body: JSON.stringify(update),
   });
   if (!res.ok) throw new Error('Failed to update category');
@@ -53,6 +51,7 @@ export const updateCategory = async (id: string, update: Partial<ICategory>): Pr
 export const deleteCategory = async (id: string, logical = true): Promise<ICategory> => {
   const res = await fetch(`${API_BASE}/category/${id}?logical=${logical}`, {
     method: 'DELETE',
+    headers: getAuthHeaders(),
   });
   if (!res.ok) throw new Error('Failed to delete category');
   return res.json();
