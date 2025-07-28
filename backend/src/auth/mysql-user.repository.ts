@@ -11,12 +11,25 @@ export class MysqlUserRepository implements UserRepository {
         private readonly repository: Repository<User>,
     ) {}
 
-    async findByEmail(email: string): Promise<User | null> {
-        return await this.repository.findOne({ where: { email } });
+    async findByEmail(email: string, entityManager?: EntityManager): Promise<User | null> {
+        const repo = entityManager ? entityManager.getRepository(User) : this.repository;
+        return await repo.findOne({ 
+            where: { email },
+            relations: ['household']
+        });
     }
 
-    async findOne(id: string): Promise<User | null> {
-        return await this.repository.findOne({ where: { id } });
+    async findByHouseholdId(householdId: string, entityManager?: EntityManager): Promise<User[]> {
+        const repo = entityManager ? entityManager.getRepository(User) : this.repository;
+        return await repo.find({ where: { householdId } });
+    }
+
+    async findOne(id: string, entityManager?: EntityManager): Promise<User | null> {
+        const repo = entityManager ? entityManager.getRepository(User) : this.repository;
+        return await repo.findOne({ 
+            where: { id },
+            relations: ['household']
+        });
     }
 
     async create(user: Partial<User>, entityManager?: EntityManager): Promise<User> {
