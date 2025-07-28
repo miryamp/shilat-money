@@ -2,9 +2,9 @@ import { Controller, Get, Post, Body, Param, Patch, Delete, UseGuards } from '@n
 import { HouseholdService } from './household.service';
 import { Household } from '../common/data-entities/household';
 import { HouseholdId } from '../common/auth/household-id.decorator';
-import { AuthGuard } from '../common/auth/auth.guard';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 
-@UseGuards(AuthGuard)
+@UseGuards(JwtAuthGuard)
 @Controller('households')
 export class HouseholdController {
   constructor(private readonly householdService: HouseholdService) {}
