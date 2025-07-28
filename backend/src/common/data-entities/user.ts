@@ -15,14 +15,17 @@ export class User implements IUser {
   @JoinColumn({ name: 'householdId' })
   household: Household | Omit<Household, 'id'>;
 
-  @Column({ unique: true })
-  username: string;
+  @Column()
+  firstName: string;
+
+  @Column()
+  lastName: string;
 
   @Column()
   password: string;
 
-  @Column({ nullable: true })
-  email?: string;
+  @Column({ unique: true })
+  email: string;
 
   @Column({ type: 'enum', enum: Language, default: Language.EN })
   language: Language;

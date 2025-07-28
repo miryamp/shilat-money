@@ -45,7 +45,8 @@ export class AuthService {
                 }
                 newUser = await this.userRepository.create({
                     email: registerDto.email,
-                    username: registerDto.username,
+                    firstName: registerDto.firstName,
+                    lastName: registerDto.lastName,
                     language: registerDto.language,
                     password: hashedPassword,
                     householdId: decodedHouseholdId
@@ -57,7 +58,8 @@ export class AuthService {
         } else if (registerDto.newHousehold) {
             newUser = await this.userRepository.create({
                 email: registerDto.email,
-                username: registerDto.username,
+                firstName: registerDto.firstName,
+                lastName: registerDto.lastName,
                 language: registerDto.language,
                 password: hashedPassword,
                 household: registerDto.newHousehold

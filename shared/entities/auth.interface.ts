@@ -9,7 +9,8 @@ export interface NewHouseholdData {
 export interface RegisterDto {
   email: string;
   password: string;
-  username: string;
+  firstName: string;
+  lastName: string;
   language: Language;
   newHousehold?: NewHouseholdData;
   householdToken?: string;
