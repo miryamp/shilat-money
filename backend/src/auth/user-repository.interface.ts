@@ -8,5 +8,4 @@ export interface UserRepository {
     findByHouseholdId(householdId: string, tx?: any): Promise<User[]>;
     create(user: Partial<User>, tx?: any): Promise<User>;
     update(id: string, user: Partial<User>, tx?: any): Promise<User | null>;
-    save(user: User, tx?: any): Promise<User>;
 }

@@ -214,8 +214,7 @@ export class AuthService {
                     }
                 }
 
-                user.householdId = householdId;
-                await this.userRepository.save(user, manager);
+                await this.userRepository.update(user.id, { householdId }, manager);
             });
         } catch (error) {
             throw new Error('Failed to join household');
