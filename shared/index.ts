@@ -6,3 +6,5 @@ export * from './entities/user.interface';
 export * from './entities/transaction-type.enum';
 
 export * from './utils/transactionBalance';
+
+export * from './dto/household-details.dto';

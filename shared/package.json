@@ -45,6 +45,10 @@
     "./utils/transactionBalance": {
       "require": "./dist/utils/transactionBalance.js",
       "import": "./dist/utils/transactionBalance.mjs"
+    },
+    "./dto/household-details.dto": {
+      "require": "./dist/dto/household-details.dto.js",
+      "import": "./dist/dto/household-details.dto.mjs"
     }
   }
 }

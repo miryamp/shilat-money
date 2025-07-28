@@ -4,6 +4,7 @@ export default defineConfig({
   entry: [
     'entities/**/*.ts',
     'utils/**/*.ts',
+    'dto/**/*.ts',
     'index.ts'
   ],
   format: ['cjs', 'esm'],
