@@ -4,9 +4,11 @@ import { Language } from 'shared/entities/language.enum';
 import { RegisterDto, NewHouseholdData } from 'shared/entities/auth.interface';
 import { authService } from '../services/auth.service';
 import { useAuth } from '../context/AuthContext';
+import { useNavigate } from 'react-router-dom';
 
 export const RegisterForm: React.FC = () => {
   const { login } = useAuth();
+  const navigate = useNavigate();
   const [step, setStep] = useState(1);
   const [formData, setFormData] = useState<Partial<RegisterDto>>({
     language: Language.EN,
@@ -27,6 +29,7 @@ export const RegisterForm: React.FC = () => {
     try {
       const response = await authService.register(formData as RegisterDto);
       login(response);
+      navigate('/transactions');
     } catch (err) {
       setError('Registration failed. Please try again.');
     }
