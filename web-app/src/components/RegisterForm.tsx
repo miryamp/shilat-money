@@ -10,8 +10,10 @@ export const RegisterForm: React.FC = () => {
   const { login } = useAuth();
   const navigate = useNavigate();
   const [step, setStep] = useState(1);
+  const [isJoining, setIsJoining] = useState(false);
   const [formData, setFormData] = useState<Partial<RegisterDto>>({
     language: Language.EN,
+    newHousehold: { name: '', currency: Currency.USD }
   });
   const [error, setError] = useState<string | null>(null);
 
@@ -153,22 +155,38 @@ export const RegisterForm: React.FC = () => {
         )}
         <div className="flex space-x-4 mb-8">
           <button
-            onClick={() => setFormData(prev => ({ ...prev, householdToken: undefined }))}
+            type="button"
+            onClick={() => {
+              setIsJoining(false);
+              setFormData(prev => ({ 
+                ...prev, 
+                householdToken: undefined,
+                newHousehold: { name: '', currency: Currency.USD }
+              }));
+            }}
             className={`flex-1 py-2 px-4 text-sm font-medium rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 
-              ${!formData.householdToken ? 'bg-indigo-600 text-white' : 'bg-gray-100 text-gray-900 hover:bg-gray-200'}`}
+              ${!isJoining ? 'bg-indigo-600 text-white' : 'bg-gray-100 text-gray-900 hover:bg-gray-200'}`}
           >
             Create New Household
           </button>
           <button
-            onClick={() => setFormData(prev => ({ ...prev, newHousehold: undefined }))}
+            type="button"
+            onClick={() => {
+              setIsJoining(true);
+              setFormData(prev => ({ 
+                ...prev, 
+                newHousehold: undefined,
+                householdToken: ''
+              }));
+            }}
             className={`flex-1 py-2 px-4 text-sm font-medium rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500
-              ${formData.householdToken ? 'bg-indigo-600 text-white' : 'bg-gray-100 text-gray-900 hover:bg-gray-200'}`}
+              ${isJoining ? 'bg-indigo-600 text-white' : 'bg-gray-100 text-gray-900 hover:bg-gray-200'}`}
           >
             Join Existing Household
           </button>
         </div>
 
-        {!formData.householdToken ? (
+        {!isJoining ? (
           <form onSubmit={handleHouseholdSubmit} className="space-y-6">
             <div>
               <label className="block text-sm font-medium text-gray-700">
