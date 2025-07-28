@@ -4,7 +4,9 @@ export const USER_REPOSITORY = 'USER_REPOSITORY';
 
 export interface UserRepository {
     findByEmail(email: string, tx?: any): Promise<User | null>;
-    findById(id: string, tx?: any): Promise<User | null>;
+    findOne(id: string, tx?: any): Promise<User | null>;
+    findByHouseholdId(householdId: string, tx?: any): Promise<User[]>;
     create(user: Partial<User>, tx?: any): Promise<User>;
     update(id: string, user: Partial<User>, tx?: any): Promise<User | null>;
+    save(user: User, tx?: any): Promise<User>;
 }

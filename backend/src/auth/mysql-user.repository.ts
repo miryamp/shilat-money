@@ -15,7 +15,7 @@ export class MysqlUserRepository implements UserRepository {
         return await this.repository.findOne({ where: { email } });
     }
 
-    async findById(id: string): Promise<User | null> {
+    async findOne(id: string): Promise<User | null> {
         return await this.repository.findOne({ where: { id } });
     }
 
@@ -27,6 +27,6 @@ export class MysqlUserRepository implements UserRepository {
 
     async update(id: string, user: Partial<User>): Promise<User | null> {
         await this.repository.update(id, user);
-        return await this.findById(id);
+        return await this.findOne(id);
     }
 }
