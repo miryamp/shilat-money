@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Currency } from 'shared/entities/currency.enum';
 import { Language } from 'shared/entities/language.enum';
 import { RegisterDto, NewHouseholdData } from 'shared/entities/auth.interface';
@@ -6,15 +6,21 @@ import { authService } from '../services/auth.service';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 
-export const RegisterForm: React.FC = () => {
+interface RegisterFormProps {
+  prefilledToken?: string;
+}
+
+export const RegisterForm: React.FC<RegisterFormProps> = ({ prefilledToken }) => {
   const { login } = useAuth();
   const navigate = useNavigate();
   const [step, setStep] = useState(1);
-  const [isJoining, setIsJoining] = useState(false);
+  const [isJoining, setIsJoining] = useState(!!prefilledToken);
   const [formData, setFormData] = useState<Partial<RegisterDto>>({
     language: Language.EN,
-    newHousehold: { name: '', currency: Currency.USD }
-  });
+    ...(prefilledToken 
+      ? { householdToken: prefilledToken }
+      : { newHousehold: { name: '', currency: Currency.USD } }
+  )});
   const [error, setError] = useState<string | null>(null);
 
   const handleUserDetailsSubmit = (e: React.FormEvent) => {
@@ -31,7 +37,11 @@ export const RegisterForm: React.FC = () => {
     try {
       const response = await authService.register(formData as RegisterDto);
       login(response);
-      navigate('/transactions');
+      if (prefilledToken) {
+        navigate(`/join-household?token=${prefilledToken}`);
+      } else {
+        navigate('/transactions');
+      }
     } catch (err) {
       setError('Registration failed. Please try again.');
     }

@@ -1,9 +1,10 @@
-import { Inject, Injectable, UnauthorizedException, BadRequestException } from '@nestjs/common';
+import { Injectable, Inject } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { EmailService } from './email.service';
 import { DataSource } from 'typeorm';
 import { RegisterDto, AuthResponse, HouseholdInviteResponse, NewHouseholdData } from 'shared/entities/auth.interface';
+import { HouseholdDetailsDto } from 'shared/dto/household-details.dto';
 import { UserRepository, USER_REPOSITORY } from './user-repository.interface';
 import { TokenService } from './token.service';
 import { HouseholdRepository, HOUSEHOLD_REPOSITORY } from '../household/household-repository.interface';
@@ -96,23 +97,23 @@ export class AuthService {
     }
 
     async shareHouseholdByEmail(userId: string, email: string): Promise<void> {
-        const user = await this.userRepository.findById(userId);
+        const user = await this.userRepository.findOne(userId);
         if (!user) {
-            throw new UnauthorizedException('User not found');
+            throw new Error('User not found');
         }
 
         if (!user.householdId) {
-            throw new BadRequestException('User does not belong to a household');
+            throw new Error('User does not belong to a household');
         }
 
         if (!user.household) {
-            throw new BadRequestException('Household not found');
+            throw new Error('Household not found');
         }
 
         const inviteToken = this.createHouseholdInviteToken(user.householdId);
         
         if (!user.email) {
-            throw new BadRequestException('User email not found');
+            throw new Error('User email not found');
         }
         
         await this.emailService.sendHouseholdInvite(
@@ -124,9 +125,9 @@ export class AuthService {
     }
 
     async generateHouseholdInvite(userId: string): Promise<HouseholdInviteResponse> {
-        const user = await this.userRepository.findById(userId);
+        const user = await this.userRepository.findOne(userId);
         if (!user) {
-            throw new UnauthorizedException('User not found');
+            throw new Error('User not found');
         }
 
         return this.createHouseholdInviteToken(user.householdId);
@@ -162,5 +163,62 @@ export class AuthService {
             inviteToken: token,
             expiresAt: new Date(expiresAt)
         };
+    }
+
+    async getHouseholdDetailsByToken(token: string): Promise<HouseholdDetailsDto> {
+        try {
+            const { householdId } = this.tokenService.decodeHouseholdToken(token);
+            const household = await this.householdRepository.findOne(householdId);
+            
+            if (!household) {
+                throw new Error('Household not found');
+            }
+
+            const users = await this.userRepository.findByHouseholdId(householdId);
+            
+            return {
+                id: household.id,
+                name: household.name,
+                currency: household.currency,
+                users: users.map(user => ({
+                    id: user.id,
+                    firstName: user.firstName,
+                    lastName: user.lastName,
+                    email: user.email
+                }))
+            };
+        } catch (error) {
+            throw new Error('Invalid or expired token');
+        }
+    }
+
+    async joinHousehold(userId: string, token: string): Promise<void> {
+        try {
+            await this.dataSource.transaction(async (manager) => {
+                const { householdId } = this.tokenService.decodeHouseholdToken(token);
+                const user = await this.userRepository.findOne(userId, manager);
+                
+                if (!user) {
+                    throw new Error('User not found');
+                }
+
+                const household = await this.householdRepository.findOne(householdId, manager);
+                if (!household) {
+                    throw new Error('Household not found');
+                }
+
+                if (user.householdId) {
+                    const usersInHousehold = await this.userRepository.findByHouseholdId(user.householdId, manager);
+                    if (usersInHousehold.length === 1) {
+                        await this.householdRepository.remove(user.householdId, manager);
+                    }
+                }
+
+                user.householdId = householdId;
+                await this.userRepository.save(user, manager);
+            });
+        } catch (error) {
+            throw new Error('Failed to join household');
+        }
     }
 }

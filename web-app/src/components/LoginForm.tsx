@@ -4,7 +4,11 @@ import { authService } from '../services/auth.service';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 
-const LoginForm: React.FC = () => {
+interface LoginFormProps {
+  redirectWithToken?: string;
+}
+
+const LoginForm: React.FC<LoginFormProps> = ({ redirectWithToken }) => {
   const { login } = useAuth();
   const navigate = useNavigate();
   const [formData, setFormData] = useState<LoginDto>({
@@ -18,7 +22,11 @@ const LoginForm: React.FC = () => {
     try {
       const response = await authService.login(formData);
       login(response);
-      navigate('/'); // Redirect to home page after successful login
+      if (redirectWithToken) {
+        navigate(`/join-household?token=${redirectWithToken}`);
+      } else {
+        navigate('/transactions');
+      }
     } catch (err) {
       setError('Login failed. Please check your credentials.');
     }
