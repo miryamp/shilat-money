@@ -4,6 +4,7 @@ import { LocalAuthGuard } from './guards/local-auth.guard';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { RegisterDto, LoginDto, AuthResponse, HouseholdInviteResponse, ShareHouseholdByEmailRequest } from 'shared/entities/auth.interface';
 import { HouseholdDetailsDto } from 'shared/dto/household-details.dto';
+import { UserId } from '../common/auth/user-id.decorator';
 
 @Controller('auth')
 export class AuthController {
@@ -22,17 +23,18 @@ export class AuthController {
 
   @UseGuards(JwtAuthGuard)
   @Post('household/invite')
-  async generateHouseholdInvite(@Request() req): Promise<HouseholdInviteResponse> {
-    return this.authService.generateHouseholdInvite(req.user.id);
+  async generateHouseholdInvite(@UserId() userId: string): Promise<HouseholdInviteResponse> {
+    return this.authService.generateHouseholdInvite(userId);
   }
 
   @UseGuards(JwtAuthGuard)
   @Post('household/share')
   async shareHouseholdByEmail(
     @Request() req,
+    @UserId() userId: string,
     @Body() shareRequest: ShareHouseholdByEmailRequest
   ): Promise<void> {
-    await this.authService.shareHouseholdByEmail(req.user.id, shareRequest.email);
+    await this.authService.shareHouseholdByEmail(userId, shareRequest.email);
   }
 
   @Get('household/details/:token')
