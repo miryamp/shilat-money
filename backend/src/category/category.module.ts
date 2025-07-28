@@ -4,6 +4,7 @@ import { Category } from '../common/data-entities/category';
 import { MysqlCategoryRepository } from './mysql-category.repository';
 import { CategoryService } from './category.service';
 import { CategoryController } from './category.controller';
+import { CATEGORY_REPOSITORY } from './category-repository.interface';
 
 @Module({
     imports: [
@@ -13,10 +14,10 @@ import { CategoryController } from './category.controller';
     providers: [
         CategoryService,
         {
-            provide: 'CategoryRepo',
+            provide: CATEGORY_REPOSITORY,
             useClass: MysqlCategoryRepository
         }
     ],
-    exports: [CategoryService]
+    exports: [CategoryService, CATEGORY_REPOSITORY]
 })
 export class CategoryModule {}

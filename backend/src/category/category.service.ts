@@ -10,11 +10,11 @@ export class CategoryService {
         private readonly categoryRepository: CategoryRepository
     ) { }
 
-    async create(category: Category): Promise<Category> {
+    async create(category: Partial<Category>, householdId: string): Promise<Category> {
         if (category.fatherId && category.fatherId === category.id) {
             throw new Error('Category cannot be its own father');
         }
-        return await this.categoryRepository.create(category);
+        return await this.categoryRepository.create(category, householdId);
     }
 
     async findAll(

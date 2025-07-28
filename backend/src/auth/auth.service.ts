@@ -7,7 +7,11 @@ import { RegisterDto, AuthResponse, HouseholdInviteResponse, NewHouseholdData } 
 import { UserRepository, USER_REPOSITORY } from './user-repository.interface';
 import { TokenService } from './token.service';
 import { HouseholdRepository, HOUSEHOLD_REPOSITORY } from '../household/household-repository.interface';
-import { User } from '@/common/data-entities/user';
+import { CategoryRepository } from '../category/category-repository.interface';
+import { User } from '../common/data-entities/user';
+import { Category } from '../common/data-entities/category';
+import { defaultCategories } from '../category/default-categories';
+import { plainToInstance } from 'class-transformer';
 
 @Injectable()
 export class AuthService {
@@ -16,6 +20,7 @@ export class AuthService {
         @Inject(USER_REPOSITORY) private readonly userRepository: UserRepository,
         private readonly tokenService: TokenService,
         @Inject(HOUSEHOLD_REPOSITORY) private readonly householdRepository: HouseholdRepository,
+        @Inject('CategoryRepo') private readonly categoryRepository: CategoryRepository,
         private readonly emailService: EmailService,
         private readonly dataSource: DataSource
     ) { }
@@ -64,6 +69,12 @@ export class AuthService {
                         name: registerDto.newHousehold!.name,
                         currency: registerDto.newHousehold!.currency
                     }, manager);
+
+                    // Create default categories using repository
+                    await Promise.all(defaultCategories.map(async defaultCategory => {
+                        const category = plainToInstance(Category, defaultCategory);
+                        await this.categoryRepository.create(category, household.id, manager);
+                    }));
                     
                     return await this.userRepository.create({
                         email: registerDto.email,

@@ -13,6 +13,7 @@ import { USER_REPOSITORY } from './user-repository.interface';
 import { TokenService } from './token.service';
 import { HouseholdModule } from '../household/household.module';
 import { EmailService } from './email.service';
+import { CategoryModule } from '../category/category.module';
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import { EmailService } from './email.service';
     }),
     ConfigModule,
     HouseholdModule,
+    CategoryModule,
   ],
   controllers: [AuthController],
   providers: [
@@ -34,6 +36,7 @@ import { EmailService } from './email.service';
       provide: USER_REPOSITORY,
       useClass: MysqlUserRepository,
     },
+
     TokenService,
     EmailService,
   ],

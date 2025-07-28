@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, EntityManager } from 'typeorm';
 import { Category } from '../common/data-entities/category';
 import { CategoryRepository } from './category-repository.interface';
 import { TransactionType } from 'shared/entities/transaction-type.enum';
@@ -12,8 +12,17 @@ export class MysqlCategoryRepository implements CategoryRepository {
         private readonly categoryRepo: Repository<Category>
     ) { }
 
-    async create(category: Category): Promise<Category> {
-        return await this.categoryRepo.save(category);
+    async create(category: Partial<Category>, householdId: string, entityManager?: EntityManager): Promise<Category> {
+        const newCategory = {
+            ...category,
+            householdId,
+            isDeleted: false
+        };
+        
+        if (entityManager) {
+            return await entityManager.save(Category, newCategory);
+        }
+        return await this.categoryRepo.save(newCategory);
     }
 
     async findAll(
