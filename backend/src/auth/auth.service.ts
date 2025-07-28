@@ -2,10 +2,11 @@ import { Inject, Injectable, UnauthorizedException, BadRequestException } from '
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { EmailService } from './email.service';
+import { DataSource } from 'typeorm';
 import { RegisterDto, AuthResponse, HouseholdInviteResponse, NewHouseholdData } from 'shared/entities/auth.interface';
 import { UserRepository, USER_REPOSITORY } from './user-repository.interface';
 import { TokenService } from './token.service';
-import { HouseholdService } from '../household/household.service';
+import { HouseholdRepository, HOUSEHOLD_REPOSITORY } from '../household/household-repository.interface';
 import { User } from '@/common/data-entities/user';
 
 @Injectable()
@@ -14,8 +15,9 @@ export class AuthService {
         private readonly jwtService: JwtService,
         @Inject(USER_REPOSITORY) private readonly userRepository: UserRepository,
         private readonly tokenService: TokenService,
-        private readonly householdService: HouseholdService,
-        private readonly emailService: EmailService
+        @Inject(HOUSEHOLD_REPOSITORY) private readonly householdRepository: HouseholdRepository,
+        private readonly emailService: EmailService,
+        private readonly dataSource: DataSource
     ) { }
 
     async validateUser(email: string, password: string): Promise<any> {
@@ -39,7 +41,7 @@ export class AuthService {
         if (registerDto.householdToken) {
             try {
                 const { householdId: decodedHouseholdId } = this.tokenService.decodeHouseholdToken(registerDto.householdToken);
-                const household = await this.householdService.findOne(decodedHouseholdId);
+                const household = await this.householdRepository.findOne(decodedHouseholdId);
                 if (!household) {
                     throw new Error('Invalid household token');
                 }
@@ -56,15 +58,25 @@ export class AuthService {
                 throw new Error('Invalid or expired household token');
             }
         } else if (registerDto.newHousehold) {
-            newUser = await this.userRepository.create({
-                email: registerDto.email,
-                firstName: registerDto.firstName,
-                lastName: registerDto.lastName,
-                language: registerDto.language,
-                password: hashedPassword,
-                household: registerDto.newHousehold
-            });
-
+            try {
+                newUser = await this.dataSource.transaction(async (manager) => {
+                    const household = await this.householdRepository.create({
+                        name: registerDto.newHousehold!.name,
+                        currency: registerDto.newHousehold!.currency
+                    }, manager);
+                    
+                    return await this.userRepository.create({
+                        email: registerDto.email,
+                        firstName: registerDto.firstName,
+                        lastName: registerDto.lastName,
+                        language: registerDto.language,
+                        password: hashedPassword,
+                        householdId: household.id
+                    }, manager);
+                });
+            } catch (error) {
+                throw new Error('Failed to create user and household');
+            }
         } else {
             throw new Error('Must either provide a household token or new household data');
         }

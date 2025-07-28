@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, EntityManager } from 'typeorm';
 import { User } from '../common/data-entities/user';
 import { UserRepository } from './user-repository.interface';
 
@@ -19,9 +19,10 @@ export class MysqlUserRepository implements UserRepository {
         return await this.repository.findOne({ where: { id } });
     }
 
-    async create(user: Partial<User>): Promise<User> {
-        const newUser = this.repository.create(user);
-        return await this.repository.save(newUser);
+    async create(user: Partial<User>, entityManager?: EntityManager): Promise<User> {
+        const repo = entityManager ? entityManager.getRepository(User) : this.repository;
+        const newUser = repo.create(user);
+        return await repo.save(newUser);
     }
 
     async update(id: string, user: Partial<User>): Promise<User | null> {

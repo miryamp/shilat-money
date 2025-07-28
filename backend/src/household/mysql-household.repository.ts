@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, EntityManager } from 'typeorm';
 import { Household } from '../common/data-entities/household';
 import { HouseholdRepository } from './household-repository.interface';
 
@@ -11,8 +11,9 @@ export class MysqlHouseholdRepository implements HouseholdRepository {
     private readonly householdRepo: Repository<Household>,
   ) {}
 
-  async create(household: Partial<Household>): Promise<Household> {
-    return this.householdRepo.save(household);
+  async create(household: Partial<Household>, entityManager?: EntityManager): Promise<Household> {
+    const repo = entityManager ? entityManager.getRepository(Household) : this.householdRepo;
+    return repo.save(household);
   }
 
   async findOne(id: string): Promise<Household | null> {
