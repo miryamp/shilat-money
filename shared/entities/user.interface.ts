@@ -1,9 +1,8 @@
-export interface IUser {
+import { IBaseUser } from "./base-user.interface";
+
+export interface IUser extends IBaseUser {
   id: string;
   householdId: string;
-  firstName: string;
-  lastName: string;
   password: string;
-  email: string;
   language: string;
 }

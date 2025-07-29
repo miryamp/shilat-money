@@ -29,4 +29,7 @@ export class User implements IUser {
 
   @Column({ type: 'enum', enum: Language, default: Language.EN })
   language: Language;
+  
+  @Column({ nullable: true })
+  googleId: string;
 }

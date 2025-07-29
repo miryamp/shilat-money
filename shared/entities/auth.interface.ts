@@ -1,16 +1,15 @@
 import { Currency } from "./currency.enum";
 import { Language } from "./language.enum";
+import { IUser } from "./user.interface";
+import { IBaseUser } from "./base-user.interface";
 
 export interface NewHouseholdData {
   name: string;
   currency: Currency;
 }
 
-export interface RegisterDto {
-  email: string;
+export interface RegisterDto extends IBaseUser {
   password: string;
-  firstName: string;
-  lastName: string;
   language: Language;
   newHousehold?: NewHouseholdData;
   householdToken?: string;
@@ -23,13 +22,7 @@ export interface LoginDto {
 
 export interface AuthResponse {
   accessToken: string;
-  user: {
-    id: string;
-    email: string;
-    firstName: string;
-    lastName: string;
-    householdId: string;
-  };
+  user: IUser
 }
 
 export interface HouseholdInviteResponse {
@@ -43,6 +36,10 @@ export interface ShareHouseholdByEmailRequest {
 
 export interface AcceptHouseholdInviteRequest {
   inviteToken: string;
+}
+
+export interface GoogleUser extends IBaseUser {
+  googleId: string;
 }
 
 export interface HouseholdInviteStatus {

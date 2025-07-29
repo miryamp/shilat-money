@@ -7,6 +7,7 @@ import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { JwtStrategy } from './strategies/jwt.strategy';
 import { LocalStrategy } from './strategies/local.strategy';
+import { GoogleStrategy } from './strategies/google.strategy';
 import { User } from '../common/data-entities/user';
 import { MysqlUserRepository } from './mysql-user.repository';
 import { USER_REPOSITORY } from './user-repository.interface';
@@ -35,6 +36,7 @@ import { CategoryModule } from '../category/category.module';
     AuthService,
     LocalStrategy,
     JwtStrategy,
+    GoogleStrategy,
     {
       provide: USER_REPOSITORY,
       useClass: MysqlUserRepository,

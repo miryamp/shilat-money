@@ -3,7 +3,7 @@ import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { EmailService } from './email.service';
 import { DataSource } from 'typeorm';
-import { RegisterDto, AuthResponse, HouseholdInviteResponse, NewHouseholdData } from 'shared/entities/auth.interface';
+import { RegisterDto, AuthResponse, HouseholdInviteResponse, NewHouseholdData, GoogleUser } from 'shared/entities/auth.interface';
 import { HouseholdDetailsDto } from 'shared/dto/household-details.dto';
 import { UserRepository, USER_REPOSITORY } from './user-repository.interface';
 import { TokenService } from './token.service';
@@ -13,6 +13,7 @@ import { User } from '../common/data-entities/user';
 import { Category } from '../common/data-entities/category';
 import { defaultCategories } from '../category/default-categories';
 import { plainToInstance } from 'class-transformer';
+import { Language } from 'shared/entities/language.enum';
 
 @Injectable()
 export class AuthService {
@@ -52,10 +53,7 @@ export class AuthService {
                     throw new Error('Invalid household token');
                 }
                 newUser = await this.userRepository.create({
-                    email: registerDto.email,
-                    firstName: registerDto.firstName,
-                    lastName: registerDto.lastName,
-                    language: registerDto.language,
+                    ...registerDto,
                     password: hashedPassword,
                     householdId: decodedHouseholdId
                 });
@@ -137,21 +135,43 @@ export class AuthService {
         return this.createToken(user);
     }
 
+    async validateOrCreateGoogleUser(googleUser: GoogleUser): Promise<AuthResponse> {
+        let user = await this.userRepository.findByEmail(googleUser.email);
+        
+        if (!user) {
+            // Create a new user with Google profile data
+            user = await this.userRepository.create({
+                ...googleUser,
+                // For Google auth users, we don't store a password
+                // This is safe as Google users will never log in with password
+                password: '', 
+                language: Language.EN,
+            });
+        } else if (!user.googleId) {
+            // If user exists but doesn't have googleId (registered via email), link the accounts
+            await this.userRepository.update(user.id, {
+                googleId: googleUser.googleId
+            });
+        }
+
+        // Reload user after update if needed
+        if (!user.googleId) {
+            user = await this.userRepository.findOne(user.id) || user;
+        }
+
+        return this.createToken(user);
+    }
+
     private createToken(user: any): AuthResponse {
         const payload = {
             email: user.email,
             sub: user.id,
-            householdId: user.householdId
+            householdId: user.householdId,
+            language: user.language
         };
         return {
             accessToken: this.jwtService.sign(payload),
-            user: {
-                id: user.id,
-                email: user.email,
-                firstName: user.firstName,
-                lastName: user.lastName,
-                householdId: user.householdId
-            },
+            user,
         };
     }
 
