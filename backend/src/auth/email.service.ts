@@ -24,7 +24,7 @@ export class EmailService {
         const inviteUrl = `${baseUrl}/join-household?token=${inviteToken}`;
 
         await this.resend.emails.send({
-            from: 'ShilatMoney <noreply@shilat-money.com>',
+            from: 'onboarding@resend.dev',
             to: toEmail,
             subject: `You're invited to join ${householdName} on Shilat Money`,
             text: `
