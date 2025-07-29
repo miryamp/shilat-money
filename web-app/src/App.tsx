@@ -12,6 +12,7 @@ import { AuthProvider } from "./context/AuthContext";
 import { RegisterForm } from "./components/RegisterForm";
 import LoginForm from "./components/LoginForm";
 import JoinHousehold from "./pages/JoinHousehold";
+import HouseholdSettings from "./pages/HouseholdSettings";
 
 const queryClient = new QueryClient();
 
@@ -30,6 +31,7 @@ const AppContent = () => {
           <Route path="/transactions" element={<Transactions />} />
           <Route path="/categories" element={<Index />} />
           <Route path="/join-household" element={<JoinHousehold />} />
+          <Route path="/household-settings" element={<HouseholdSettings />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </div>
