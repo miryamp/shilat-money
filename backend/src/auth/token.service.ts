@@ -4,8 +4,13 @@ import * as crypto from 'crypto';
 @Injectable()
 export class TokenService {
     private readonly algorithm = 'aes-256-gcm';
-    private readonly secretKey = process.env.HOUSEHOLD_TOKEN_SECRET || 'your-secret-key-must-be-32-chars-long'; // 32 bytes for AES-256
     private readonly tokenTTL = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
+
+    private get secretKey(): Buffer {
+        const key = process.env.HOUSEHOLD_TOKEN_SECRET || 'default-secret-key-that-is-very-long-32';
+        // Use SHA256 to ensure we always have a 32-byte key
+        return crypto.createHash('sha256').update(key).digest();
+    }
 
     generateHouseholdToken(householdId: string): string {
         const expiresAt = Date.now() + this.tokenTTL;
