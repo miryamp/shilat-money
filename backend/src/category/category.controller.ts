@@ -17,7 +17,7 @@ export class CategoryController {
         if (category.householdId && category.householdId !== householdId) {
             throw new UnauthorizedException('Household ID mismatch');
         }
-        return await this.categoryService.create(category);
+        return await this.categoryService.create(category, householdId);
     }
 
     @Get()
