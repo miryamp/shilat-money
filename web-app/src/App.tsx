@@ -13,6 +13,7 @@ import { RegisterForm } from "./components/RegisterForm";
 import LoginForm from "./components/LoginForm";
 import JoinHousehold from "./pages/JoinHousehold";
 import HouseholdSettings from "./pages/HouseholdSettings";
+import GoogleCallback from "./components/GoogleCallback";
 
 const queryClient = new QueryClient();
 
@@ -32,6 +33,7 @@ const AppContent = () => {
           <Route path="/categories" element={<Index />} />
           <Route path="/join-household" element={<JoinHousehold />} />
           <Route path="/household-settings" element={<HouseholdSettings />} />
+          <Route path="/auth/google/callback" element={<GoogleCallback />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </div>

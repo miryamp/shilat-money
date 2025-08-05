@@ -2,6 +2,19 @@ import { AuthResponse, LoginDto, RegisterDto } from 'shared/entities/auth.interf
 import { HouseholdDetailsDto } from 'shared/dto/household-details.dto';
 import { getAuthHeaders } from '@/utils/auth';
 
+interface GoogleProfile {
+  email: string;
+  firstName: string;
+  lastName: string;
+  picture: string;
+  accessToken: string;
+  householdToken?: string;
+  newHousehold?: {
+    name: string;
+    currency: string;
+  };
+}
+
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 
 export const authService = {
