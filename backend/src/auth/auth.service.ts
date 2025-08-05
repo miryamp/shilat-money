@@ -4,6 +4,7 @@ import * as bcrypt from 'bcrypt';
 import { EmailService } from './email.service';
 import { DataSource } from 'typeorm';
 import { RegisterDto, AuthResponse, HouseholdInviteResponse, NewHouseholdData, GoogleUser, GoogleValidationResponse } from 'shared/entities/auth.interface';
+import { OAuthProfile } from './interfaces/oauth-profile.interface';
 import { HouseholdDetailsDto } from 'shared/dto/household-details.dto';
 import { UserRepository, USER_REPOSITORY } from './user-repository.interface';
 import { TokenService } from './token.service';
@@ -34,6 +35,31 @@ export class AuthService {
             return result;
         }
         return null;
+    }
+
+    async validateOAuthUser(profile: OAuthProfile): Promise<any> {
+        let user = await this.userRepository.findByEmail(profile.email);
+        
+        if (!user) {
+            // Create new user from OAuth profile
+            user = await this.userRepository.create({
+                email: profile.email,
+                firstName: profile.firstName,
+                lastName: profile.lastName,
+                isOAuthUser: true,
+                providerId: profile.providerId,
+                provider: profile.provider,
+                language: Language.EN // Default language
+            });
+        } else if (!user.providerId) {
+            // Link existing user with OAuth provider
+            user = await this.userRepository.update(user.id, {
+                providerId: profile.providerId,
+                provider: profile.provider,
+            });
+        }
+
+        return user;
     }
 
     async register(registerDto: RegisterDto): Promise<AuthResponse> {
@@ -145,17 +171,19 @@ export class AuthService {
                 firstName: googleUser.firstName,
                 lastName: googleUser.lastName,
                 language: Language.EN,
-                googleId: googleUser.googleId
+                isOAuthUser: true,
+                provider: "google",
+                providerId: googleUser.googleId
             };
             
             return {
                 user: partialUser,
                 isNewUser: true
             };
-        } else if (!user.googleId) {
-            // If user exists but doesn't have googleId (registered via email), link the accounts
+        } else if (!user.providerId) {
+            // If user exists but doesn't have providerId (registered via email), link the accounts
             await this.userRepository.update(user.id, {
-                googleId: googleUser.googleId
+                providerId: googleUser.googleId
             });
             // Reload user after update
             const updatedUser = await this.userRepository.findOne(user.id) || user;
