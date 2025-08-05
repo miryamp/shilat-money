@@ -9,10 +9,12 @@ export interface NewHouseholdData {
 }
 
 export interface RegisterDto extends IBaseUser {
-  password: string;
+  password?: string; // Optional for OAuth users
   language: Language;
   newHousehold?: NewHouseholdData;
   householdToken?: string;
+  isGoogleUser?: boolean;
+  googleAccessToken?: string;
 }
 
 export interface LoginDto {
@@ -22,7 +24,8 @@ export interface LoginDto {
 
 export interface AuthResponse {
   accessToken: string;
-  user: IUser
+  user: IUser;
+  isNewUser: boolean;
 }
 
 export interface HouseholdInviteResponse {
@@ -47,4 +50,10 @@ export interface HouseholdInviteStatus {
   householdName?: string;
   inviterEmail?: string;
   expired?: boolean;
+}
+
+export interface GoogleValidationResponse {
+  isNewUser: boolean;
+  user: Partial<IUser>;  
+  accessToken?: string;  // Present only for existing users
 }

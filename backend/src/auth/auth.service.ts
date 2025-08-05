@@ -3,7 +3,7 @@ import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { EmailService } from './email.service';
 import { DataSource } from 'typeorm';
-import { RegisterDto, AuthResponse, HouseholdInviteResponse, NewHouseholdData, GoogleUser } from 'shared/entities/auth.interface';
+import { RegisterDto, AuthResponse, HouseholdInviteResponse, NewHouseholdData, GoogleUser, GoogleValidationResponse } from 'shared/entities/auth.interface';
 import { HouseholdDetailsDto } from 'shared/dto/household-details.dto';
 import { UserRepository, USER_REPOSITORY } from './user-repository.interface';
 import { TokenService } from './token.service';
@@ -42,7 +42,7 @@ export class AuthService {
             throw new Error('Email already exists');
         }
 
-        const hashedPassword = await bcrypt.hash(registerDto.password, 10);
+        const hashedPassword = registerDto.password? await bcrypt.hash(registerDto.password, 10): "";
 
         let newUser: User;
         if (registerDto.householdToken) {
@@ -135,31 +135,45 @@ export class AuthService {
         return this.createToken(user);
     }
 
-    async validateOrCreateGoogleUser(googleUser: GoogleUser): Promise<AuthResponse> {
+    async validateOrCreateGoogleUser(googleUser: GoogleUser): Promise<GoogleValidationResponse> {
         let user = await this.userRepository.findByEmail(googleUser.email);
         
         if (!user) {
-            // Create a new user with Google profile data
-            user = await this.userRepository.create({
-                ...googleUser,
-                // For Google auth users, we don't store a password
-                // This is safe as Google users will never log in with password
-                password: '', 
+            // For new users, return the Google data to complete registration
+            const partialUser: Partial<User> = {
+                email: googleUser.email,
+                firstName: googleUser.firstName,
+                lastName: googleUser.lastName,
                 language: Language.EN,
-            });
+                googleId: googleUser.googleId
+            };
+            
+            return {
+                user: partialUser,
+                isNewUser: true
+            };
         } else if (!user.googleId) {
             // If user exists but doesn't have googleId (registered via email), link the accounts
             await this.userRepository.update(user.id, {
                 googleId: googleUser.googleId
             });
+            // Reload user after update
+            const updatedUser = await this.userRepository.findOne(user.id) || user;
+            const { accessToken } = this.createToken(updatedUser);
+            return {
+                user: updatedUser,
+                isNewUser: false,
+                accessToken
+            };
         }
 
-        // Reload user after update if needed
-        if (!user.googleId) {
-            user = await this.userRepository.findOne(user.id) || user;
-        }
-
-        return this.createToken(user);
+        // Existing Google user, proceed with login
+        const { accessToken } = this.createToken(user);
+        return {
+            user: user,
+            isNewUser: false,
+            accessToken
+        };
     }
 
     private createToken(user: any): AuthResponse {
@@ -172,6 +186,7 @@ export class AuthService {
         return {
             accessToken: this.jwtService.sign(payload),
             user,
+            isNewUser: false
         };
     }
 
