@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
+import ProtectedRoute from "@/components/ProtectedRoute";
 import Sidebar from "@/components/Sidebar";
 import Transactions from "./pages/Transactions";
 import { HouseholdProvider } from "./context/HouseholdContext";
@@ -28,12 +29,12 @@ const AppContent = () => {
         <Routes>
           <Route path="/register" element={<RegisterForm />} />
           <Route path="/login" element={<LoginForm />} />
-          <Route path="/" element={<Transactions />} />
-          <Route path="/transactions" element={<Transactions />} />
-          <Route path="/categories" element={<Index />} />
-          <Route path="/join-household" element={<JoinHousehold />} />
-          <Route path="/household-settings" element={<HouseholdSettings />} />
           <Route path="/auth/google/callback" element={<GoogleCallback />} />
+          <Route path="/" element={<ProtectedRoute><Transactions /></ProtectedRoute>} />
+          <Route path="/transactions" element={<ProtectedRoute><Transactions /></ProtectedRoute>} />
+          <Route path="/categories" element={<ProtectedRoute><Index /></ProtectedRoute>} />
+          <Route path="/join-household" element={<ProtectedRoute><JoinHousehold /></ProtectedRoute>} />
+          <Route path="/household-settings" element={<ProtectedRoute><HouseholdSettings /></ProtectedRoute>} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </div>
