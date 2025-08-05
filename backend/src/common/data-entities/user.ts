@@ -29,7 +29,13 @@ export class User implements IUser {
 
   @Column({ type: 'enum', enum: Language, default: Language.EN })
   language: Language;
-  
+
+  @Column({ default: false })
+  isOAuthUser: boolean;
+
   @Column({ nullable: true })
-  googleId: string;
+  providerId: string;
+
+  @Column({ nullable: true })
+  provider: string;
 }

@@ -13,8 +13,10 @@ export interface RegisterDto extends IBaseUser {
   language: Language;
   newHousehold?: NewHouseholdData;
   householdToken?: string;
-  isGoogleUser?: boolean;
-  googleAccessToken?: string;
+  isOAuthUser?: boolean;
+  provider?: string;
+  accessToken?: string;
+  picture?: string;
 }
 
 export interface LoginDto {

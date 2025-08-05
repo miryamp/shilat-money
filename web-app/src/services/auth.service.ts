@@ -1,19 +1,15 @@
 import { AuthResponse, LoginDto, RegisterDto } from 'shared/entities/auth.interface';
+
+interface OAuthProfile {
+    email: string;
+    firstName: string;
+    lastName: string;
+    accessToken: string;
+    provider: string;
+}
 import { HouseholdDetailsDto } from 'shared/dto/household-details.dto';
 import { getAuthHeaders } from '@/utils/auth';
 
-interface GoogleProfile {
-  email: string;
-  firstName: string;
-  lastName: string;
-  picture: string;
-  accessToken: string;
-  householdToken?: string;
-  newHousehold?: {
-    name: string;
-    currency: string;
-  };
-}
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 
@@ -41,6 +37,22 @@ export const authService = {
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify(data),
+        });
+
+        if (!response.ok) {
+            throw new Error('Registration failed');
+        }
+
+        return response.json();
+    },
+
+    async loginWithOAuth(profile: OAuthProfile): Promise<AuthResponse> {
+        const response = await fetch(`${API_URL}/auth/${profile.provider}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(profile),
         });
 
         if (!response.ok) {

@@ -52,34 +52,4 @@ export class AuthController {
   async joinHousehold(@Request() req, @Param('token') token: string): Promise<void> {
     await this.authService.joinHousehold(req.user.id, token);
   }
-
-  @Get('google')
-  @UseGuards(AuthGuard('google'))
-  async googleAuth() {
-    // Guard will handle the authentication
-  }
-
-  @Get('google/callback')
-  @UseGuards(AuthGuard('google'))
-  async googleAuthRedirect(@Request() req, @Res() res) {
-    const userData = req.user.profile;
-    const googleUser: GoogleUser = {
-      email: userData.emails[0].value,
-      firstName: userData.name.givenName || '',
-      lastName: userData.name.familyName || '',
-      googleId: userData.id
-    };
-
-    const response = await this.authService.validateOrCreateGoogleUser(googleUser);
-    
-    const frontendUrl = this.configService.get('FRONTEND_URL');
-    if (response.isNewUser) {
-      // For new users, redirect to registration with pre-filled Google data
-      const userDataParam = encodeURIComponent(JSON.stringify(response.user));
-      res.redirect(`${frontendUrl}/register?googleData=${userDataParam}`);
-    } else {
-      // For existing users, proceed with normal login flow
-      res.redirect(`${frontendUrl}/auth/google/callback?token=${response.accessToken}`);
-    }
-  }
 }
